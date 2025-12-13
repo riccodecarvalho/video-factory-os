@@ -1,6 +1,6 @@
 # Timeline 2025-12-13
 
-> **SHA Âncora:** Pendente (será atualizado no final da sessão)
+> **SHA Âncora:** `0103ed5` (Gate 0.5 - Arquitetura de Informação)
 
 ---
 

@@ -7,7 +7,8 @@
    
    Identidade: Fábrica de alta performance
    Vibe: Produção, pipeline, transformação
-   Dark Mode First
+   Light Mode First (suporta dark mode)
+   Inspirado no 4pice Studio
    ===================================================== */
 
 @layer base {
@@ -44,13 +45,40 @@
 
     --radius: 0.75rem;
 
-    /* Status Colors */
-    --status-success: 150 100% 39%;
-    --status-warning: 38 92% 50%;
-    --status-error: 0 94% 60%;
-    --status-running: 199 89% 48%;
-    --status-pending: 215 16% 47%;
-    --status-info: 217 91% 60%;
+    /* ================================================
+       PIPELINE STATUS COLORS (Complete - 8 states)
+       Light mode variants
+       ================================================ */
+
+    /* Success: Emerald - Completed, ready */
+    --status-success: 142.1 70.6% 45.3%;
+
+    /* Warning: Amber - Needs attention */
+    --status-warning: 47.9 95.8% 53.1%;
+
+    /* Error: Red - Failed, critical */
+    --status-error: 0 84.2% 60.2%;
+
+    /* Running: Violet - Processing, active */
+    --status-running: 262.1 83.3% 57.8%;
+
+    /* Retrying: Orange - Temporary issue, auto-fix */
+    --status-retrying: 24.6 95% 53.1%;
+
+    /* Pending: Slate - Waiting queue */
+    --status-pending: 215 20.2% 45%;
+
+    /* Skipped: Gray - Intentionally bypassed */
+    --status-skipped: 240 5% 64%;
+
+    /* Blocked: Amber - Needs intervention */
+    --status-blocked: 47.9 95.8% 53.1%;
+
+    /* Cancelled: Mid Gray - Stopped by user */
+    --status-cancelled: 0 0% 55%;
+
+    /* Info: Primary Blue */
+    --status-info: 217.2 91.2% 59.8%;
   }
 
   /* DARK MODE FIRST - O Padrão do Video Factory */
@@ -89,13 +117,39 @@
     --input: 220 13% 18%;
     --ring: 217.2 91.2% 59.8%;
 
-    /* Status Colors - Dark */
-    --status-success: 150 100% 39%;
-    --status-warning: 38 92% 50%;
-    --status-error: 0 84% 60%;
-    --status-running: 199 89% 48%;
-    --status-pending: 215 16% 47%;
-    --status-info: 217 91% 60%;
+    /* ================================================
+       PIPELINE STATUS COLORS (Complete - 8 states)
+       ================================================ */
+
+    /* Success: Emerald - Completed, ready */
+    --status-success: 142.1 70.6% 45.3%;
+
+    /* Warning: Amber - Needs attention */
+    --status-warning: 47.9 95.8% 53.1%;
+
+    /* Error: Red - Failed, critical */
+    --status-error: 0 84.2% 60.2%;
+
+    /* Running: Violet - Processing, active */
+    --status-running: 262.1 83.3% 57.8%;
+
+    /* Retrying: Orange - Temporary issue, auto-fix */
+    --status-retrying: 24.6 95% 53.1%;
+
+    /* Pending: Slate - Waiting queue */
+    --status-pending: 215 20.2% 65.1%;
+
+    /* Skipped: Dark Gray - Intentionally bypassed */
+    --status-skipped: 240 5% 40%;
+
+    /* Blocked: Amber - Needs intervention */
+    --status-blocked: 47.9 95.8% 53.1%;
+
+    /* Cancelled: Mid Gray - Stopped by user */
+    --status-cancelled: 0 0% 40%;
+
+    /* Info: Primary Blue */
+    --status-info: 217.2 91.2% 59.8%;
   }
 }
 

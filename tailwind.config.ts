@@ -50,13 +50,17 @@ const config: Config = {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
-                // Status colors do Video Factory
+                // Status colors do Video Factory (8 estados)
                 status: {
                     success: "hsl(var(--status-success))",
                     warning: "hsl(var(--status-warning))",
                     error: "hsl(var(--status-error))",
                     running: "hsl(var(--status-running))",
+                    retrying: "hsl(var(--status-retrying))",
                     pending: "hsl(var(--status-pending))",
+                    skipped: "hsl(var(--status-skipped))",
+                    blocked: "hsl(var(--status-blocked))",
+                    cancelled: "hsl(var(--status-cancelled))",
                     info: "hsl(var(--status-info))",
                 },
             },

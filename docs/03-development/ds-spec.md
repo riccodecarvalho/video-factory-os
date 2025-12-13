@@ -1,152 +1,136 @@
-# Video Factory OS - Design System Spec
+# Design System Spec — Video Factory OS
 
-## Identidade
-
-### Vibe
-- **É:** Produção, fábrica, pipeline, transformação, progresso
-- **Não é:** Dashboard corporativo, analytics frio, admin genérico
-
-### Inspiração
-- Ferramentas de criação (Figma, Linear, Vercel)
-- Pipelines de CI/CD (GitHub Actions, Railway)
-- Estúdios de produção (DaVinci, Premiere - mas simplificado)
-
-### Sensação desejada
-- "Estou produzindo algo"
-- "Posso ver o progresso claramente"
-- "É profissional mas não intimidador"
+> **Versão:** 1.0  
+> **Data:** 2025-12-13  
+> **Modo:** Light Mode First (suporta dark mode)  
+> **Benchmark:** 4pice Studio (inspiração, não port)
 
 ---
 
-## Requisitos Técnicos
+## 1. Paleta de Cores (HSL)
 
-### Stack
-- **Base:** shadcn/ui (primitivos)
-- **Styling:** Tailwind CSS
-- **Tokens:** CSS vars (HSL format)
-- **Framework:** Next.js 14 (App Router)
+### Primary (4pice Blue)
+- **Primary:** `217.2 91.2% 59.8%` (#3b82f6)
+- **Primary Foreground:** Light: `0 0% 100%` | Dark: `222.2 47.4% 11.2%`
 
-### Dark Mode
-- **Dark first** (padrão)
-- Light mode como opção secundária
+### Neutrals
+| Token | Light | Dark |
+|-------|-------|------|
+| Background | `224 71% 98%` | `224 71% 4%` |
+| Foreground | `224 71% 4%` | `210 40% 98%` |
+| Card | `0 0% 100%` | `224 71% 7%` |
+| Muted | `220 14% 96%` | `217 19% 15%` |
+| Border | `220 13% 91%` | `220 13% 18%` |
 
-### Acessibilidade
-- WCAG 2.1 AA (contraste mínimo)
-- Focus visible em todos interativos
-- Keyboard navigation
-- Screen reader friendly (aria labels)
-
----
-
-## Paleta de Cores (direção)
-
-### Direção desejada
-- Primária: Azul/Roxo (produção, tecnologia)
-- Accent: Verde/Cyan (sucesso, progresso)
-- Destruitva: Vermelho/Coral (erros, atenção)
-- Neutros: Cinzas com leve tom frio
-
-### Status colors
-- Success: Verde vibrante
-- Warning: Amarelo/Laranja
-- Error: Vermelho
-- Info: Azul claro
-- Pending: Cinza
-- Running: Azul pulsante (animação)
+### Pipeline Status (8 estados)
+| Status | HSL | Significado |
+|--------|-----|-------------|
+| **Success** | `142.1 70.6% 45.3%` | Completed, ready |
+| **Warning** | `47.9 95.8% 53.1%` | Needs attention |
+| **Error** | `0 84.2% 60.2%` | Failed, critical |
+| **Running** | `262.1 83.3% 57.8%` | Processing (violet) |
+| **Retrying** | `24.6 95% 53.1%` | Auto-fixing (orange) |
+| **Pending** | `215 20.2% 45%` | Waiting queue |
+| **Skipped** | `240 5% 64%` | Intentionally bypassed |
+| **Blocked** | `47.9 95.8% 53.1%` | Needs intervention |
+| **Cancelled** | `0 0% 55%` | Stopped by user |
+| **Info** | `217.2 91.2% 59.8%` | Informational |
 
 ---
 
-## Componentes VF Necessários
+## 2. Tokens
 
-### 1. JobCard
-- **Propósito:** Card de um job (vídeo) na lista
-- **Variantes:** compact, default, expanded
-- **Estados:** pending, running, success, failed
-- **Props:** title, status, progress, recipe, createdAt, actions
+### Typography
+- **Font Sans:** Inter
+- **Font Mono:** JetBrains Mono (logs, IDs, JSON)
 
-### 2. PipelineView
-- **Propósito:** Visualização horizontal do pipeline com steps
-- **Variantes:** horizontal, vertical (mobile)
-- **Estados:** cada step tem seu estado
-- **Props:** steps[], currentStep, onStepClick
+| Scale | Size | Line Height |
+|-------|------|-------------|
+| h1 | 24px | 32px |
+| h2 | 20px | 28px |
+| h3 | 16px | 24px |
+| body | 14px | 20px |
+| small | 12px | 16px |
+| tiny | 10px | 12px |
 
-### 3. StepIndicator
-- **Propósito:** Indicador visual de um step no pipeline
-- **Variantes:** icon, number, minimal
-- **Estados:** pending, running, success, failed, skipped
-- **Props:** step, status, isActive, onClick
+### Spacing (4px base)
+- XS: 4px
+- S: 8px
+- M: 16px
+- L: 24px
+- XL: 32px
 
-### 4. StatusBadge
-- **Propósito:** Badge colorido com status
-- **Variantes:** default, outline, subtle
-- **Estados:** pending, running, success, failed, warning
-- **Props:** status, size, showIcon
-
-### 5. QuickAction
-- **Propósito:** Botão de ação rápida (retry, preview, download)
-- **Variantes:** icon-only, with-label
-- **Estados:** default, hover, disabled, loading
-- **Props:** action, icon, label, onClick, disabled
-
-### 6. ProgressRing (opcional)
-- **Propósito:** Progresso circular para jobs
-- **Props:** value, max, size, showPercent
-
-### 7. MetricCard (opcional)
-- **Propósito:** Card de métrica (custo, tempo, tokens)
-- **Props:** label, value, unit, trend, icon
+### Radius
+- `--radius: 0.75rem` (12px)
 
 ---
 
-## Telas para Validar
+## 3. Componentes VF
 
-### 1. Dashboard
-- Lista de jobs recentes (JobCard)
-- Métricas resumidas (MetricCard)
-- Ações rápidas (criar novo, ver todos)
-- Status geral do sistema
+### StatusBadge
+- Props: `status` (8 tipos), `size` (sm/md/lg)
+- Style: `bg-status/10 text-status border-status/20`
+- Running: `animate-pulse` suave
 
-### 2. Nova Produção
-- Seletor de recipe (dropdown/cards)
-- Form de input (título, brief)
-- Preview de configurações
-- Botão de iniciar
+### StepIndicator
+- Props: `status`, `stepName`
+- Ícones: Lucide (FileText, Code, Mic, Video, Image)
+- Running: `Loader2` com animate-spin
 
-### 3. Job Detail
-- Header com título e status (StatusBadge)
-- Pipeline visual (PipelineView + StepIndicator)
-- Logs por step (expandable)
-- Previews de artefatos
-- Ações (retry, download, delete)
+### JobCard
+- Layout: Grid (ID | Title | StatusBadge | MiniPipeline | Actions)
+- Active: borda running com glow suave
 
----
+### PipelineView
+- Layout: Horizontal steps conectados por linha
+- Step Node: Ícone + Nome + Duração
+- Connector muda cor quando fluxo passa
 
-## Estados Obrigatórios
+### QuickAction
+- Variantes: ghost, outline, destructive
+- Tooltip obrigatório para icon-only
 
-Todo componente interativo deve ter:
-- `default`
-- `hover`
-- `focus` (visible ring)
-- `active/pressed`
-- `disabled`
-- `loading` (quando aplicável)
+### ProgressRing
+- SVG circle com stroke animado
+- Props: `percent`, `size`, `color`
 
----
-
-## Animações
-
-- **Transições:** 150-200ms ease-out
-- **Loading:** Pulse ou skeleton
-- **Progresso:** Animação suave de barra/ring
-- **Status running:** Pulse sutil ou shimmer
-- **Hover:** Scale sutil (1.02) ou shadow
+### MetricCard
+- Label (muted) + Value (h2) + Trend
+- Trend Up: success | Down: error
 
 ---
 
-## Qualidade Esperada
+## 4. Layout
 
-- **Premium:** Parecer ferramenta paga
-- **Moderno:** 2024-2025 aesthetic
-- **Consistente:** Mesmos tokens em tudo
-- **Responsivo:** Desktop-first, mas funciona em tablet
-- **Rápido:** Sem animações que atrasem uso
+```
++----------------+---------------------------------------------------+
+|  SIDEBAR (256) |  HEADER (h-14) Breadcrumbs / Actions              |
+|  bg-card       +---------------------------------------------------+
+|  border-r      |                                                   |
+|                |  MAIN CONTENT (p-6)                               |
+|  [Logo VF]     |  max-w-7xl mx-auto                                |
+|                |                                                   |
+|  - Dashboard   |  [Page Title + Actions]                           |
+|  - Produção    |                                                   |
+|  - Admin ▼     |  [Content: Table / Grid / Form]                   |
++----------------+---------------------------------------------------+
+```
+
+---
+
+## 5. Guia de Uso
+
+| Quando usar | Token |
+|-------------|-------|
+| Superfícies | `bg-background`, `bg-card` |
+| Labels/meta | `text-muted-foreground` |
+| Divisores | `border-border` |
+| Links/destaques | `text-primary` |
+| Em processamento | `text-status-running` |
+| Sucesso | `text-status-success` |
+| Erro | `text-status-error` |
+
+---
+
+**Arquivo CSS:** `app/globals.css`  
+**Tailwind Config:** `tailwind.config.ts`
