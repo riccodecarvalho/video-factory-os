@@ -16,6 +16,7 @@ build/
 
 # Jobs output (local artifacts)
 jobs/
+artifacts/
 
 # Environment
 .env

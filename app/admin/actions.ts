@@ -10,6 +10,7 @@ import { getDb, schema } from "@/lib/db";
 import { eq, like, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { v4 as uuid } from "uuid";
+import { auditCrud } from "@/lib/audit";
 
 // ============================================
 // PROMPTS
@@ -49,9 +50,19 @@ export async function getPromptCategories() {
 
 export async function updatePrompt(id: string, data: Partial<typeof schema.prompts.$inferInsert>) {
     const db = getDb();
+
+    // Get before state
+    const [before] = await db.select().from(schema.prompts).where(eq(schema.prompts.id, id));
+
     await db.update(schema.prompts)
         .set({ ...data, updatedAt: new Date().toISOString() })
         .where(eq(schema.prompts.id, id));
+
+    // Audit
+    if (before) {
+        await auditCrud('updated', 'prompt', id, before.name, before, data);
+    }
+
     revalidatePath("/admin/prompts");
 }
 

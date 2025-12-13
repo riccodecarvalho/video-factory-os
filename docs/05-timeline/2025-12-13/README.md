@@ -1,6 +1,6 @@
 # Timeline 2025-12-13
 
-> **SHA Âncora:** `9895db5` (Gate 1.25 - Governance + Traceability)
+> **SHA Âncora:** `eca083a` (Gate 1.25 - Governance + Traceability)
 
 ---
 
@@ -34,8 +34,8 @@ Dia focado em **foundational hardening** do Video Factory OS. Estabelecemos:
 - **Por que:** Sair de stubs para produção real. Validators bloqueiam execução quando falham.
 - **Mudanças:** lib/engine/providers.ts, runner phase 3, artifact storage.
 
-### Gate 1.25 — Governance + Traceability (em andamento)
-- **SHA:** TBD
+### Gate 1.25 — Governance + Traceability
+- **SHA:** `eca083a`
 - **O que:** audit_events, Timeline viva, GitHub oficial.
 - **Por que:** Rastreabilidade é pré-requisito para escalar. Sem fonte de verdade, não há produto.
 - **Mudanças:** lib/db/schema.ts (audit_events), lib/audit/index.ts, instrumented actions.
