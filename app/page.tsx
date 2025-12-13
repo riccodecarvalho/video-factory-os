@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { AppShell } from "@/components/layout";
 import {
     JobCard,
     JobCardSkeleton,
@@ -14,7 +15,7 @@ import Link from "next/link";
 /**
  * Dashboard - "Control Room"
  * 
- * Mostra: métricas, lista de jobs, ações rápidas
+ * Mostra: métricas, lista de jobs recentes, ações rápidas
  */
 
 // Dados de exemplo (em produção viriam do DB)
@@ -69,23 +70,18 @@ const mockJobs = [
 
 export default function DashboardPage() {
     return (
-        <div className="container py-8">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Production Floor</h1>
-                    <p className="text-muted-foreground mt-1">
-                        Gerencie sua fábrica de vídeos
-                    </p>
-                </div>
+        <AppShell
+            title="Dashboard"
+            description="Visão geral da fábrica de vídeos"
+            actions={
                 <Link href="/jobs/new">
-                    <Button size="lg" className="gap-2">
-                        <Plus className="h-5 w-5" />
+                    <Button size="sm" className="gap-2">
+                        <Plus className="h-4 w-4" />
                         Nova Produção
                     </Button>
                 </Link>
-            </div>
-
+            }
+        >
             {/* Metrics */}
             <div className="grid gap-4 md:grid-cols-3 mb-8">
                 <MetricCard
@@ -145,6 +141,6 @@ export default function DashboardPage() {
                     <JobCardSkeleton />
                 </div>
             </div>
-        </div>
+        </AppShell>
     );
 }
