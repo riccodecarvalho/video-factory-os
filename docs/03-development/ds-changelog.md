@@ -1,32 +1,39 @@
-# DS Changelog
+# DS Changelog — Video Factory OS
 
-## v0 - Spec Inicial (2025-12-13)
+## [1.1.0] - 2025-12-13 (Gate 0.65)
 
-- Criado `DS-SPEC.md` com requisitos completos
-- Decisão: DS novo inspirado no 4pice, não portado
-- Base: shadcn/ui + Tailwind CSS vars (HSL)
-- Dark mode first
-- 7 componentes VF especificados
+### Changed
+- **Baseline visual:** Alinhada com 4pice Studio (ADR-005)
+- **Light mode first:** Confirmado como default
+- **Glow budget:** Apenas running + focus (muito sutil)
 
-### Status
-Aguardando proposta do Gemini 3 Pro.
+### Deprecated
+- `.glass` → usar `border + shadow-sm`
+- `.card-hover-glow` → usar `.card-hover`
+- `.animate-pulse-glow` → usar `.animate-running`
+
+### Added
+- `.card-hover` (shadow ao invés de glow)
+- `.card-active` (borda colorida)
+- `.animate-running` (opacity pulse sutil)
+- `.focus-ring` (padrão acessibilidade)
+- `UI-REFERENCE.md` (patterns e Do/Don't)
 
 ---
 
-## Template para futuras entradas
+## [1.0.0] - 2025-12-13 (Gate 0.6)
 
-```markdown
-## vX.Y - Título (YYYY-MM-DD)
+### Added
+- 10 status colors (success, warning, error, running, retrying, pending, skipped, blocked, cancelled, info)
+- Light mode first (removido dark forçado)
+- `ds-spec.md` completo
 
-### Adicionado
-- ...
+---
 
-### Alterado
-- ...
+## [0.1.0] - 2025-12-13 (Gate 0.5)
 
-### Removido
-- ...
-
-### Notas
-- ...
-```
+### Added
+- Cores base (primary, secondary, muted, etc)
+- Status colors iniciais
+- Animações (pulse-glow, flow)
+- Tokens de tipografia e spacing

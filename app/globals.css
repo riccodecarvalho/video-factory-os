@@ -171,13 +171,16 @@
 
 /* =====================================================
    Utilitários do Video Factory
+   Gate 0.65: Baseline limpa (ADR-005)
+   Efeitos são exceção, não regra!
    ===================================================== */
 
 @layer components {
 
-  /* Glassmorphism */
-  .glass {
-    @apply bg-background/60 backdrop-blur-lg border border-white/5;
+  /* DEPRECATED: Glass effect - usar apenas se REALMENTE necessário */
+  /* Preferência: border + shadow-sm */
+  .glass-deprecated {
+    @apply bg-background/80 backdrop-blur-sm border;
   }
 
   /* Status backgrounds com opacity */
@@ -222,35 +225,43 @@
     color: hsl(var(--status-pending));
   }
 
-  /* Card hover glow */
-  .card-hover-glow {
-    @apply transition-shadow duration-300;
+  /* Card hover - SUTIL: usa shadow, não glow */
+  .card-hover {
+    @apply transition-shadow duration-200;
   }
 
-  .card-hover-glow:hover {
-    box-shadow: 0 0 20px -10px hsl(var(--primary) / 0.15);
+  .card-hover:hover {
+    @apply shadow-md;
+  }
+
+  /* Card active - borda colorida ao invés de glow */
+  .card-active {
+    @apply border-l-4 border-primary bg-primary/5;
   }
 }
 
 @layer utilities {
 
-  /* Animação de pulse glow para "running" */
-  .animate-pulse-glow {
-    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  /* Animação de running - MUITO SUTIL (Glow Budget: PERMITIDO) */
+  .animate-running {
+    animation: running-pulse 2s ease-in-out infinite;
   }
 
-  @keyframes pulse-glow {
+  @keyframes running-pulse {
 
     0%,
     100% {
       opacity: 1;
-      box-shadow: 0 0 10px 0 hsl(var(--primary) / 0.5);
     }
 
     50% {
-      opacity: 0.8;
-      box-shadow: 0 0 20px 5px hsl(var(--primary) / 0.2);
+      opacity: 0.7;
     }
+  }
+
+  /* Focus ring - padrão acessibilidade (Glow Budget: PERMITIDO) */
+  .focus-ring {
+    @apply ring-2 ring-primary/50 ring-offset-2 ring-offset-background;
   }
 
   /* Animação de flow para pipeline */
