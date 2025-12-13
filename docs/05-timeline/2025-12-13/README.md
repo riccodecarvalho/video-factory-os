@@ -1,6 +1,6 @@
 # Timeline 2025-12-13
 
-> **Timeline covers up to:** `81754ae`
+> **Timeline covers up to:** `153f4b1`
 
 ---
 
@@ -91,14 +91,29 @@ Dia focado em **foundational hardening** do Video Factory OS. Estabelecemos:
 **Gate 1.35 — Traceability Closure**
 - Timeline corrigida com SHAs reais
 - Audit events comprovados via UI
+
+---
+
+### Gate 1.4 — E2E Test Pack (Partial)
+- **SHA:** `8f7b404`
+- **O que:** Script E2E, Artifacts API, Admin Projects, Audit expandido.
+- **Por que:** Preparação para teste end-to-end com wiring real.
+- **Mudanças:** scripts/e2e.ts, /api/artifacts, /admin/projects, audit para providers/validators.
+
+### Gate 1.4.1 — Multi-Project UX Closure
+- **SHA:** `153f4b1`
+- **O que:** Project dropdown em /jobs/new, projectId em createJob, filter em getJobs.
+- **Por que:** Multi-projeto é primeira classe - operador escolhe projeto ao criar job.
+- **Mudanças:** /jobs/new, jobs/actions.ts, E2E stub mode validado.
+
 ---
 
 ## Próximo Gate
 
-**Gate 1.4.1 — Real E2E Execution**
-- Executar npm run vf:e2e com providers reais
-- Verificar artifacts gerados
-- Project filter em /jobs e /jobs/new
+**Gate 1.5 — Real E2E Execution**
+- Executar npm run vf:e2e com providers reais (Claude + Azure TTS)
+- Verificar artifacts gerados no disco
+- Tab Config com snapshot populado de verdade
 
 ---
 
@@ -106,7 +121,8 @@ Dia focado em **foundational hardening** do Video Factory OS. Estabelecemos:
 
 ### git log --oneline -n 10
 ```
-ecde316 (HEAD -> main, origin/main) feat: Gate 1.4 - E2E Test Pack (Partial)
+153f4b1 (HEAD -> main, origin/main) feat: Gate 1.4.1 - Multi-Project UX Closure
+8f7b404 feat: Gate 1.4 - E2E Test Pack (Partial)
 c12ba39 feat: Gate 1.35 - Traceability Closure
 81754ae feat: Gate 1.3 - UI Visibility
 b68973c chore: Gate 1.25 checkpoint
@@ -115,7 +131,6 @@ eca083a feat: Gate 1.25 - Governance + Traceability
 41575e1 feat: Gate 1.1 - Hardening + Effective Config
 e28e857 feat: Gate 1.0 - Admin Visibility + Project Context + Execution Map
 a2ba590 feat: Gate 0.9 - Engine Integration (Manifest-First)
-b09c9c8 feat: Gate 0.8 - Admin Baseline Completo (Config-First Real)
 ```
 
 ### git remote -v
@@ -123,3 +138,16 @@ b09c9c8 feat: Gate 0.8 - Admin Baseline Completo (Config-First Real)
 origin  https://github.com/riccodecarvalho/video-factory-os.git (fetch)
 origin  https://github.com/riccodecarvalho/video-factory-os.git (push)
 ```
+
+### E2E Stub Mode Output
+```
+npm run vf:e2e -- --stub
+
+Job ID:          2ec09f1b-b85a-484e-a668-f6cf0c65eba3
+Project:         Verdades de Graciela
+Status:          failed
+Manifest:        ✅
+Steps:           7
+RESULT:          ✅ ALL CHECKS PASSED
+```
+
