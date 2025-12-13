@@ -1,6 +1,6 @@
 # Timeline 2025-12-13
 
-> **SHA Âncora:** `6ab3c2b` (Gate 0.8 - Admin Baseline Completo)
+> **SHA Âncora:** `eac6623` (Gate 0.9 - Engine Integration)
 
 ---
 
