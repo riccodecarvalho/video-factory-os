@@ -15,7 +15,7 @@ import {
 
 type StepStatus = "pending" | "running" | "success" | "failed" | "skipped";
 
-interface Step {
+export interface PipelineStep {
     id: string;
     stepKey: string;
     stepOrder: number;
@@ -26,7 +26,7 @@ interface Step {
 }
 
 interface PipelineViewProps {
-    steps: Step[];
+    steps: PipelineStep[];
     currentStep?: string | null;
     onRetry?: (stepKey: string) => void;
     className?: string;

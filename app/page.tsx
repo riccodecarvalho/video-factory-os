@@ -2,13 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/layout";
-import {
-    JobCard,
-    JobCardSkeleton,
-    MetricCard,
-    StatusBadge,
-    type PipelineStep
-} from "@/components/vf";
+import { JobCard, JobCardSkeleton, MetricCard, StatusBadge } from "@/components/vf";
 import { Plus, Zap, Clock, DollarSign } from "lucide-react";
 import Link from "next/link";
 
@@ -26,119 +20,99 @@ const mockJobs = [
         recipe: "Graciela YouTube Long",
         status: "running" as const,
         progress: 45,
-        createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30min ago
-        steps: [
-            { key: "title", label: "Title", status: "success" as const },
-            { key: "brief", label: "Brief", status: "success" as const },
-            { key: "script", label: "Script", status: "running" as const },
-            { key: "ssml", label: "SSML", status: "pending" as const },
-            { key: "tts", label: "TTS", status: "pending" as const },
-            { key: "render", label: "Render", status: "pending" as const },
-        ] satisfies PipelineStep[],
+        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
     },
     {
         id: "job_02HXYZ456DEF",
         title: "La herencia que destruyó a mi familia",
         recipe: "Graciela YouTube Long",
-        status: "success" as const,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2h ago
-        steps: [
-            { key: "title", label: "Title", status: "success" as const },
-            { key: "brief", label: "Brief", status: "success" as const },
-            { key: "script", label: "Script", status: "success" as const },
-            { key: "ssml", label: "SSML", status: "success" as const },
-            { key: "tts", label: "TTS", status: "success" as const },
-            { key: "render", label: "Render", status: "success" as const },
-        ] satisfies PipelineStep[],
+        status: "completed" as const,
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
     },
     {
         id: "job_03HXYZ789GHI",
         title: "Cuando descubrí que mi esposo tenía otra vida",
         recipe: "Graciela YouTube Long",
         status: "failed" as const,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5), // 5h ago
-        steps: [
-            { key: "title", label: "Title", status: "success" as const },
-            { key: "brief", label: "Brief", status: "success" as const },
-            { key: "script", label: "Script", status: "failed" as const },
-            { key: "ssml", label: "SSML", status: "pending" as const },
-            { key: "tts", label: "TTS", status: "pending" as const },
-            { key: "render", label: "Render", status: "pending" as const },
-        ] satisfies PipelineStep[],
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
     },
 ];
 
 export default function DashboardPage() {
+    const isLoading = false;
+
     return (
-        <AppShell
-            title="Dashboard"
-            description="Visão geral da fábrica de vídeos"
-            actions={
-                <Link href="/jobs/new">
-                    <Button size="sm" className="gap-2">
-                        <Plus className="h-4 w-4" />
-                        Nova Produção
-                    </Button>
-                </Link>
-            }
-        >
-            {/* Metrics */}
-            <div className="grid gap-4 md:grid-cols-3 mb-8">
-                <MetricCard
-                    label="Jobs Hoje"
-                    value={12}
-                    icon={Zap}
-                    trend={{ value: 20, label: "vs ontem" }}
-                />
-                <MetricCard
-                    label="Tempo Médio"
-                    value="32"
-                    unit="min"
-                    icon={Clock}
-                    trend={{ value: -8, label: "mais rápido" }}
-                />
-                <MetricCard
-                    label="Custo Estimado"
-                    value="$4.50"
-                    icon={DollarSign}
-                    trend={{ value: 5 }}
-                />
-            </div>
+        <AppShell>
+            <div className="container py-8">
+                {/* Hero Section */}
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Video Factory OS</h1>
+                        <p className="text-muted-foreground mt-1">
+                            Control Room — Visão geral da produção
+                        </p>
+                    </div>
+                    <Link href="/jobs/new">
+                        <Button className="gap-2">
+                            <Plus className="h-4 w-4" />
+                            Nova Produção
+                        </Button>
+                    </Link>
+                </div>
 
-            {/* Status Filter */}
-            <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm text-muted-foreground">Filtrar:</span>
-                <StatusBadge status="running" showIcon={false} />
-                <StatusBadge status="success" showIcon={false} />
-                <StatusBadge status="failed" showIcon={false} />
-                <StatusBadge status="pending" showIcon={false} />
-            </div>
-
-            {/* Jobs List */}
-            <div className="grid gap-4">
-                {mockJobs.map((job) => (
-                    <JobCard
-                        key={job.id}
-                        id={job.id}
-                        title={job.title}
-                        recipe={job.recipe}
-                        status={job.status}
-                        progress={job.progress}
-                        steps={job.steps}
-                        createdAt={job.createdAt}
-                        onClick={() => console.log('View job:', job.id)}
-                        onRetry={() => console.log('Retry:', job.id)}
-                        onPreview={() => console.log('Preview:', job.id)}
-                        onDownload={() => console.log('Download:', job.id)}
+                {/* Metrics */}
+                <div className="grid gap-4 md:grid-cols-4 mb-8">
+                    <MetricCard
+                        label="Em Produção"
+                        value={1}
+                        icon={<Zap className="h-4 w-4" />}
                     />
-                ))}
-            </div>
+                    <MetricCard
+                        label="Concluídos Hoje"
+                        value={5}
+                        icon={<Clock className="h-4 w-4" />}
+                    />
+                    <MetricCard
+                        label="Taxa Sucesso"
+                        value="92%"
+                    />
+                    <MetricCard
+                        label="Custo Hoje"
+                        value="$12.45"
+                        icon={<DollarSign className="h-4 w-4" />}
+                    />
+                </div>
 
-            {/* Loading Example */}
-            <div className="mt-8">
-                <h2 className="text-lg font-semibold mb-4 text-muted-foreground">Loading State</h2>
-                <div className="grid gap-4">
-                    <JobCardSkeleton />
+                {/* Recent Jobs */}
+                <div>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-semibold">Jobs Recentes</h2>
+                        <Link href="/jobs" className="text-sm text-primary hover:underline">
+                            Ver todos →
+                        </Link>
+                    </div>
+
+                    {isLoading ? (
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            <JobCardSkeleton />
+                            <JobCardSkeleton />
+                            <JobCardSkeleton />
+                        </div>
+                    ) : (
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {mockJobs.map((job) => (
+                                <JobCard
+                                    key={job.id}
+                                    id={job.id}
+                                    title={job.title}
+                                    recipe={job.recipe}
+                                    status={job.status}
+                                    progress={job.progress}
+                                    createdAt={job.createdAt}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </AppShell>

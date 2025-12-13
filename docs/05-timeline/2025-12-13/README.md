@@ -1,6 +1,6 @@
 # Timeline 2025-12-13
 
-> **SHA Âncora:** `901d6f5` (Gate 1.1 - Hardening + Effective Config)
+> **SHA Âncora:** `ca525e3` (Gate 1.2 - Real Providers + Validators)
 
 ---
 

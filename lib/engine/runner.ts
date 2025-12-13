@@ -1,20 +1,32 @@
 "use server";
 
 /**
- * Video Factory OS - Engine Runner (Phase 2)
+ * Video Factory OS - Engine Runner (Phase 3: Real Providers)
  * 
- * Manifest-first execution com Effective Config:
- * - Cada step resolve bindings via getEffectiveConfig
- * - Manifest registra config snapshot usado
- * - Logs referenciam provider/prompt ids
+ * Manifest-first execution com Real Providers:
+ * - Claude para steps LLM
+ * - Azure TTS para steps TTS
+ * - Validators reais
+ * - Artifact storage
  */
 
 import { getDb, schema } from "@/lib/db";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import crypto from "crypto";
-import { getStepKind, getStepCapability, StepKind } from "./capabilities";
+import { getStepKind, StepKind } from "./capabilities";
 import { getEffectiveConfig } from "@/app/admin/execution-map/actions";
+import {
+    executeLLM,
+    executeTTS,
+    executeValidators,
+    getArtifactPath,
+    ensureArtifactDir,
+    type ProviderConfig,
+    type PromptConfig,
+    type ValidatorConfig,
+    type ValidationResult,
+} from "./providers";
 
 type JobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 type StepStatus = "pending" | "running" | "success" | "failed" | "skipped";
@@ -43,6 +55,39 @@ interface ResolvedConfig {
     kb?: { items: Array<{ id: string; name: string }>; source: string };
 }
 
+interface StepManifest {
+    key: string;
+    kind: StepKind;
+    status: string;
+    config: ResolvedConfig;
+    started_at: string;
+    completed_at?: string;
+    duration_ms?: number;
+    request?: {
+        prompt_id?: string;
+        prompt_version?: number;
+        provider_id?: string;
+        model?: string;
+        max_tokens?: number;
+        temperature?: number;
+    };
+    response?: {
+        output?: unknown;
+        usage?: { inputTokens: number; outputTokens: number };
+    };
+    artifacts?: Array<{
+        uri: string;
+        content_type: string;
+        size_bytes?: number;
+        duration_sec?: number;
+    }>;
+    validations?: ValidationResult[];
+    error?: {
+        code: string;
+        message: string;
+    };
+}
+
 // ============================================
 // MANIFEST HELPERS
 // ============================================
@@ -57,7 +102,7 @@ function createInitialManifest(
     projectId?: string | null
 ) {
     return {
-        version: "2.0.0",
+        version: "3.0.0",
         job_id: job.id,
         project_id: projectId || null,
         created_at: new Date().toISOString(),
@@ -71,121 +116,473 @@ function createInitialManifest(
             },
             config_by_step: {} as Record<string, ResolvedConfig>,
         },
-        steps: [] as Array<{
-            key: string;
-            kind: StepKind;
-            status: string;
-            config: ResolvedConfig;
-            started_at: string;
-            completed_at?: string;
-            duration_ms?: number;
-            output?: unknown;
-        }>,
-        output: null,
+        steps: [] as StepManifest[],
+        artifacts: [] as Array<{ step_key: string; uri: string; content_type: string }>,
+        output: null as unknown,
         metrics: {
             total_duration_ms: 0,
             step_count: 0,
+            llm_tokens_used: 0,
+            tts_duration_sec: 0,
         },
     };
 }
 
 // ============================================
-// STEP EXECUTORS (Phase 2 - Config-Aware)
+// DATABASE LOADERS
 // ============================================
 
-async function executeStep(
+async function loadPrompt(promptId: string): Promise<PromptConfig | null> {
+    const db = getDb();
+    const [prompt] = await db.select().from(schema.prompts).where(eq(schema.prompts.id, promptId));
+    if (!prompt) return null;
+
+    return {
+        id: prompt.id,
+        name: prompt.name,
+        version: prompt.version,
+        systemPrompt: prompt.systemPrompt || "",
+        userTemplate: prompt.userTemplate || "",
+        model: prompt.model,
+        maxTokens: prompt.maxTokens,
+        temperature: prompt.temperature,
+    };
+}
+
+async function loadProvider(providerId: string): Promise<ProviderConfig | null> {
+    const db = getDb();
+    const [provider] = await db.select().from(schema.providers).where(eq(schema.providers.id, providerId));
+    if (!provider) return null;
+
+    return {
+        id: provider.id,
+        slug: provider.slug,
+        name: provider.name,
+        type: provider.type,
+        baseUrl: provider.baseUrl || undefined,
+        defaultModel: provider.defaultModel || undefined,
+        config: JSON.parse(provider.config || "{}"),
+    };
+}
+
+async function loadVoicePreset(presetId: string) {
+    const db = getDb();
+    const [preset] = await db.select().from(schema.presetsVoice).where(eq(schema.presetsVoice.id, presetId));
+    return preset;
+}
+
+async function loadSsmlPreset(presetId: string) {
+    const db = getDb();
+    const [preset] = await db.select().from(schema.presetsSsml).where(eq(schema.presetsSsml.id, presetId));
+    return preset;
+}
+
+async function loadValidators(validatorIds: string[]): Promise<ValidatorConfig[]> {
+    if (validatorIds.length === 0) return [];
+    const db = getDb();
+    const validators = await db.select().from(schema.validators).where(inArray(schema.validators.id, validatorIds));
+
+    return validators.map(v => ({
+        id: v.id,
+        name: v.name,
+        type: v.type,
+        config: JSON.parse(v.config || "{}"),
+        errorMessage: v.errorMessage,
+    }));
+}
+
+async function loadKnowledgeBase(kbIds: string[]): Promise<string> {
+    if (kbIds.length === 0) return "";
+    const db = getDb();
+    const kbs = await db.select().from(schema.knowledgeBase).where(inArray(schema.knowledgeBase.id, kbIds));
+
+    return kbs.map(kb => `[${kb.name}]\n${kb.content}`).join("\n\n---\n\n");
+}
+
+// ============================================
+// STEP EXECUTORS (Real Providers)
+// ============================================
+
+async function executeStepLLM(
     stepDef: StepDefinition,
     stepConfig: ResolvedConfig,
     input: Record<string, unknown>,
-    _previousOutputs: Record<string, unknown>
-): Promise<{ success: boolean; output: unknown; logs: LogEntry[] }> {
-    const logs: LogEntry[] = [];
+    previousOutputs: Record<string, unknown>,
+    logs: LogEntry[],
+    jobId: string
+): Promise<StepManifest> {
     const now = () => new Date().toISOString();
+    const startedAt = now();
     const kind = stepDef.kind || getStepKind(stepDef.key);
 
-    // Log config being used
+    const stepManifest: StepManifest = {
+        key: stepDef.key,
+        kind,
+        status: "running",
+        config: stepConfig,
+        started_at: startedAt,
+    };
+
     logs.push({
         timestamp: now(),
         level: "info",
-        message: `Step: ${stepDef.name} (kind=${kind})`,
+        message: `Step LLM: ${stepDef.name}`,
         stepKey: stepDef.key,
-        meta: {
-            prompt_id: stepConfig.prompt?.id,
-            provider_id: stepConfig.provider?.id,
-            preset_voice_id: stepConfig.preset_voice?.id,
-        }
+        meta: { prompt_id: stepConfig.prompt?.id, provider_id: stepConfig.provider?.id }
     });
 
-    // Simular tempo de execução (200-800ms)
-    const duration = 200 + Math.random() * 600;
-    await new Promise((r) => setTimeout(r, duration));
+    // Load prompt
+    if (!stepConfig.prompt?.id) {
+        stepManifest.status = "failed";
+        stepManifest.completed_at = now();
+        stepManifest.error = { code: "NO_PROMPT", message: "Nenhum prompt configurado para este step" };
+        logs.push({ timestamp: now(), level: "error", message: "Nenhum prompt configurado", stepKey: stepDef.key });
+        return stepManifest;
+    }
 
-    // Output baseado em kind + config
-    let output: unknown;
+    const prompt = await loadPrompt(stepConfig.prompt.id);
+    if (!prompt) {
+        stepManifest.status = "failed";
+        stepManifest.completed_at = now();
+        stepManifest.error = { code: "PROMPT_NOT_FOUND", message: "Prompt não encontrado" };
+        return stepManifest;
+    }
 
-    switch (kind) {
-        case "llm":
-            // Em produção: chamaria Claude aqui
-            logs.push({
-                timestamp: now(),
-                level: "info",
-                message: `LLM: usando prompt=${stepConfig.prompt?.name || 'default'}, provider=${stepConfig.provider?.name || 'claude'}`,
-                stepKey: stepDef.key
-            });
+    // Load provider
+    const provider = stepConfig.provider?.id ? await loadProvider(stepConfig.provider.id) : null;
+    if (!provider) {
+        stepManifest.status = "failed";
+        stepManifest.completed_at = now();
+        stepManifest.error = { code: "PROVIDER_NOT_FOUND", message: "Provider não encontrado" };
+        return stepManifest;
+    }
 
-            if (stepDef.key === "title") {
-                output = { titles: ["Título gerado 1", "Título gerado 2", "Título gerado 3"] };
-            } else if (stepDef.key === "brief") {
-                output = { brief: "Brief expandido com personagens e conflito..." };
-            } else if (stepDef.key === "script") {
-                output = { script: "(voz: NARRADORA)\nQuando mi madre leyó el testamento...", wordCount: 6500 };
-            } else {
-                output = { result: "llm_output" };
-            }
-            break;
+    // Load KB context
+    const kbIds = stepConfig.kb?.items?.map(k => k.id) || [];
+    const kbContext = await loadKnowledgeBase(kbIds);
 
-        case "tts":
-            // Em produção: chamaria Azure TTS aqui
-            logs.push({
-                timestamp: now(),
-                level: "info",
-                message: `TTS: usando voice=${stepConfig.preset_voice?.name || 'default'}, ssml=${stepConfig.preset_ssml?.name || 'none'}`,
-                stepKey: stepDef.key
-            });
-            output = { audioPath: `/tmp/job-${Date.now()}/audio.mp3`, durationSec: 2400 };
-            break;
+    // Load validators
+    const validatorIds = stepConfig.validators?.items?.map(v => v.id) || [];
+    const validators = await loadValidators(validatorIds);
 
-        case "transform":
-            logs.push({ timestamp: now(), level: "info", message: "Transform executado", stepKey: stepDef.key });
-            output = { ssmlPath: `/tmp/job-${Date.now()}/audio.ssml` };
-            break;
+    // Build variables
+    const variables = {
+        ...input,
+        ...previousOutputs,
+    };
 
-        case "render":
-            logs.push({ timestamp: now(), level: "info", message: "Render executado", stepKey: stepDef.key });
-            output = { videoPath: `/tmp/job-${Date.now()}/video.mp4`, sizeMb: 450 };
-            break;
+    // Record request metadata
+    stepManifest.request = {
+        prompt_id: prompt.id,
+        prompt_version: prompt.version,
+        provider_id: provider.id,
+        model: prompt.model,
+        max_tokens: prompt.maxTokens,
+        temperature: prompt.temperature,
+    };
 
-        case "export":
-            logs.push({ timestamp: now(), level: "info", message: "Export executado", stepKey: stepDef.key });
-            output = { packagePath: `/tmp/job-${Date.now()}/package.zip` };
-            break;
+    logs.push({
+        timestamp: now(),
+        level: "info",
+        message: `Chamando Claude: model=${prompt.model}, max_tokens=${prompt.maxTokens}`,
+        stepKey: stepDef.key,
+        meta: { model: prompt.model }
+    });
 
-        default:
-            output = { result: "ok" };
+    // Execute LLM
+    const llmResult = await executeLLM({
+        provider,
+        prompt,
+        variables,
+        kbContext: kbContext || undefined,
+    });
+
+    if (!llmResult.success) {
+        stepManifest.status = "failed";
+        stepManifest.completed_at = now();
+        stepManifest.duration_ms = llmResult.duration_ms;
+        stepManifest.error = llmResult.error;
+        logs.push({ timestamp: now(), level: "error", message: `LLM falhou: ${llmResult.error?.message}`, stepKey: stepDef.key });
+        return stepManifest;
     }
 
     logs.push({
         timestamp: now(),
         level: "info",
-        message: `Step concluído em ${Math.round(duration)}ms`,
+        message: `Claude respondeu: ${llmResult.usage?.outputTokens} tokens em ${llmResult.duration_ms}ms`,
         stepKey: stepDef.key
     });
 
-    return { success: true, output, logs };
+    // Run validators
+    if (validators.length > 0 && llmResult.output) {
+        const validationResults = executeValidators(llmResult.output, validators);
+        stepManifest.validations = validationResults;
+
+        const failed = validationResults.filter(v => !v.passed);
+        if (failed.length > 0) {
+            stepManifest.status = "failed";
+            stepManifest.completed_at = now();
+            stepManifest.duration_ms = llmResult.duration_ms;
+            stepManifest.error = {
+                code: "VALIDATION_FAILED",
+                message: failed[0].errorMessage || "Validação falhou"
+            };
+            logs.push({
+                timestamp: now(),
+                level: "error",
+                message: `Validação falhou: ${failed[0].errorMessage}`,
+                stepKey: stepDef.key
+            });
+            return stepManifest;
+        }
+
+        logs.push({
+            timestamp: now(),
+            level: "info",
+            message: `${validators.length} validadores passaram`,
+            stepKey: stepDef.key
+        });
+    }
+
+    // Save artifact (output text)
+    const artifactDir = await ensureArtifactDir(jobId, stepDef.key);
+    const fs = await import("fs/promises");
+    const outputPath = `${artifactDir}/output.txt`;
+    await fs.writeFile(outputPath, llmResult.output || "");
+
+    stepManifest.artifacts = [{
+        uri: outputPath,
+        content_type: "text/plain",
+        size_bytes: (llmResult.output || "").length,
+    }];
+
+    stepManifest.status = "success";
+    stepManifest.completed_at = now();
+    stepManifest.duration_ms = llmResult.duration_ms;
+    stepManifest.response = {
+        output: llmResult.output,
+        usage: llmResult.usage,
+    };
+
+    return stepManifest;
+}
+
+async function executeStepTTS(
+    stepDef: StepDefinition,
+    stepConfig: ResolvedConfig,
+    input: Record<string, unknown>,
+    previousOutputs: Record<string, unknown>,
+    logs: LogEntry[],
+    jobId: string
+): Promise<StepManifest> {
+    const now = () => new Date().toISOString();
+    const startedAt = now();
+    const kind = stepDef.kind || getStepKind(stepDef.key);
+
+    const stepManifest: StepManifest = {
+        key: stepDef.key,
+        kind,
+        status: "running",
+        config: stepConfig,
+        started_at: startedAt,
+    };
+
+    logs.push({
+        timestamp: now(),
+        level: "info",
+        message: `Step TTS: ${stepDef.name}`,
+        stepKey: stepDef.key,
+        meta: { voice_preset_id: stepConfig.preset_voice?.id }
+    });
+
+    // Get input text from previous step
+    const textInput = (previousOutputs.script as { script?: string })?.script
+        || (previousOutputs.parse_ssml as { ssml?: string })?.ssml
+        || String(input.text || input.script || "");
+
+    if (!textInput) {
+        stepManifest.status = "failed";
+        stepManifest.completed_at = now();
+        stepManifest.error = { code: "NO_INPUT", message: "Nenhum texto/SSML para sintetizar" };
+        return stepManifest;
+    }
+
+    // Load voice preset
+    if (!stepConfig.preset_voice?.id) {
+        stepManifest.status = "failed";
+        stepManifest.completed_at = now();
+        stepManifest.error = { code: "NO_VOICE_PRESET", message: "Nenhum preset de voz configurado" };
+        return stepManifest;
+    }
+
+    const voicePreset = await loadVoicePreset(stepConfig.preset_voice.id);
+    if (!voicePreset) {
+        stepManifest.status = "failed";
+        stepManifest.completed_at = now();
+        stepManifest.error = { code: "VOICE_PRESET_NOT_FOUND", message: "Voice preset não encontrado" };
+        return stepManifest;
+    }
+
+    // Load SSML preset if configured
+    const ssmlPreset = stepConfig.preset_ssml?.id ? await loadSsmlPreset(stepConfig.preset_ssml.id) : null;
+
+    // Load provider
+    const provider = stepConfig.provider?.id ? await loadProvider(stepConfig.provider.id) : null;
+
+    // Prepare output path
+    const artifactDir = await ensureArtifactDir(jobId, stepDef.key);
+    const outputPath = `${artifactDir}/audio.mp3`;
+
+    logs.push({
+        timestamp: now(),
+        level: "info",
+        message: `Chamando Azure TTS: voice=${voicePreset.voiceName}`,
+        stepKey: stepDef.key
+    });
+
+    // Execute TTS
+    const ttsResult = await executeTTS({
+        provider: provider || { id: "", slug: "azure", name: "Azure TTS", type: "tts", config: {} },
+        input: textInput,
+        voicePreset: {
+            id: voicePreset.id,
+            voiceName: voicePreset.voiceName,
+            language: voicePreset.language,
+            rate: voicePreset.rate || undefined,
+            pitch: voicePreset.pitch || undefined,
+            style: voicePreset.style || undefined,
+            styleDegree: voicePreset.styleDegree || undefined,
+        },
+        ssmlPreset: ssmlPreset ? {
+            id: ssmlPreset.id,
+            pauseMapping: JSON.parse(ssmlPreset.pauseMappings || "{}"),
+        } : undefined,
+        outputPath,
+    });
+
+    if (!ttsResult.success) {
+        stepManifest.status = "failed";
+        stepManifest.completed_at = now();
+        stepManifest.error = ttsResult.error;
+        logs.push({ timestamp: now(), level: "error", message: `TTS falhou: ${ttsResult.error?.message}`, stepKey: stepDef.key });
+        return stepManifest;
+    }
+
+    logs.push({
+        timestamp: now(),
+        level: "info",
+        message: `Áudio gerado: ${ttsResult.durationSec}s, ${Math.round((ttsResult.fileSizeBytes || 0) / 1024)}KB`,
+        stepKey: stepDef.key
+    });
+
+    stepManifest.artifacts = [{
+        uri: ttsResult.artifactUri!,
+        content_type: ttsResult.contentType || "audio/mpeg",
+        size_bytes: ttsResult.fileSizeBytes,
+        duration_sec: ttsResult.durationSec,
+    }];
+
+    stepManifest.status = "success";
+    stepManifest.completed_at = now();
+    stepManifest.response = {
+        output: { audioPath: ttsResult.artifactUri, durationSec: ttsResult.durationSec },
+    };
+
+    return stepManifest;
+}
+
+async function executeStepTransform(
+    stepDef: StepDefinition,
+    stepConfig: ResolvedConfig,
+    input: Record<string, unknown>,
+    previousOutputs: Record<string, unknown>,
+    logs: LogEntry[],
+    jobId: string
+): Promise<StepManifest> {
+    const now = () => new Date().toISOString();
+    const startedAt = now();
+    const kind = stepDef.kind || getStepKind(stepDef.key);
+
+    logs.push({ timestamp: now(), level: "info", message: `Step Transform: ${stepDef.name}`, stepKey: stepDef.key });
+
+    // Stub transform for now
+    await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+
+    return {
+        key: stepDef.key,
+        kind,
+        status: "success",
+        config: stepConfig,
+        started_at: startedAt,
+        completed_at: now(),
+        duration_ms: 100,
+        response: { output: { transformed: true } },
+    };
+}
+
+async function executeStepRender(
+    stepDef: StepDefinition,
+    stepConfig: ResolvedConfig,
+    input: Record<string, unknown>,
+    previousOutputs: Record<string, unknown>,
+    logs: LogEntry[],
+    jobId: string
+): Promise<StepManifest> {
+    const now = () => new Date().toISOString();
+    const startedAt = now();
+    const kind = stepDef.kind || getStepKind(stepDef.key);
+
+    logs.push({ timestamp: now(), level: "info", message: `Step Render: ${stepDef.name}`, stepKey: stepDef.key });
+
+    // Stub render for now
+    await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
+
+    const artifactDir = await ensureArtifactDir(jobId, stepDef.key);
+    const outputPath = `${artifactDir}/video.mp4`;
+
+    return {
+        key: stepDef.key,
+        kind,
+        status: "success",
+        config: stepConfig,
+        started_at: startedAt,
+        completed_at: now(),
+        duration_ms: 500,
+        artifacts: [{ uri: outputPath, content_type: "video/mp4" }],
+        response: { output: { videoPath: outputPath } },
+    };
+}
+
+async function executeStepExport(
+    stepDef: StepDefinition,
+    stepConfig: ResolvedConfig,
+    input: Record<string, unknown>,
+    previousOutputs: Record<string, unknown>,
+    logs: LogEntry[],
+    jobId: string
+): Promise<StepManifest> {
+    const now = () => new Date().toISOString();
+    const startedAt = now();
+    const kind = stepDef.kind || getStepKind(stepDef.key);
+
+    logs.push({ timestamp: now(), level: "info", message: `Step Export: ${stepDef.name}`, stepKey: stepDef.key });
+
+    await new Promise(r => setTimeout(r, 100 + Math.random() * 100));
+
+    return {
+        key: stepDef.key,
+        kind,
+        status: "success",
+        config: stepConfig,
+        started_at: startedAt,
+        completed_at: now(),
+        duration_ms: 100,
+        response: { output: { exported: true } },
+    };
 }
 
 // ============================================
-// MAIN RUNNER (Phase 2)
+// MAIN RUNNER (Phase 3)
 // ============================================
 
 export async function runJob(jobId: string): Promise<{ success: boolean; error?: string }> {
@@ -239,6 +636,7 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
     }
 
     // 7. Execute steps sequentially
+    const allLogs: LogEntry[] = [];
     const previousOutputs: Record<string, unknown> = {};
     let lastError: string | null = null;
     let jobFailed = false;
@@ -278,46 +676,73 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
             updatedAt: new Date().toISOString(),
         }).where(eq(schema.jobs.id, jobId));
 
-        // Execute with effective config
-        const result = await executeStep(stepDef, stepConfig, input, previousOutputs);
+        // Execute based on kind
+        let stepManifest: StepManifest;
 
-        // Update step
+        switch (kind) {
+            case "llm":
+                stepManifest = await executeStepLLM(stepDef, stepConfig, input, previousOutputs, allLogs, jobId);
+                break;
+            case "tts":
+                stepManifest = await executeStepTTS(stepDef, stepConfig, input, previousOutputs, allLogs, jobId);
+                break;
+            case "transform":
+                stepManifest = await executeStepTransform(stepDef, stepConfig, input, previousOutputs, allLogs, jobId);
+                break;
+            case "render":
+                stepManifest = await executeStepRender(stepDef, stepConfig, input, previousOutputs, allLogs, jobId);
+                break;
+            case "export":
+                stepManifest = await executeStepExport(stepDef, stepConfig, input, previousOutputs, allLogs, jobId);
+                break;
+            default:
+                stepManifest = await executeStepTransform(stepDef, stepConfig, input, previousOutputs, allLogs, jobId);
+        }
+
+        // Update step record
         const stepCompletedAt = new Date().toISOString();
-        const durationMs = new Date(stepCompletedAt).getTime() - new Date(stepStartedAt).getTime();
+        const durationMs = stepManifest.duration_ms || 0;
 
-        if (result.success) {
-            previousOutputs[stepDef.key] = result.output;
+        if (stepManifest.status === "success") {
+            previousOutputs[stepDef.key] = stepManifest.response?.output;
 
             await db.update(schema.jobSteps).set({
                 status: "success",
                 completedAt: stepCompletedAt,
                 durationMs,
-                outputRefs: JSON.stringify(result.output),
-                logs: JSON.stringify(result.logs),
+                outputRefs: JSON.stringify(stepManifest.response?.output || {}),
+                logs: JSON.stringify(allLogs.filter(l => l.stepKey === stepDef.key)),
             }).where(eq(schema.jobSteps.id, step.id));
 
-            // Add to manifest with config snapshot
-            manifest.steps.push({
-                key: stepDef.key,
-                kind,
-                status: "success",
-                config: stepConfig,
-                started_at: stepStartedAt,
-                completed_at: stepCompletedAt,
-                duration_ms: durationMs,
-                output: result.output,
-            });
+            // Add artifacts to manifest
+            if (stepManifest.artifacts) {
+                for (const artifact of stepManifest.artifacts) {
+                    manifest.artifacts.push({
+                        step_key: stepDef.key,
+                        uri: artifact.uri,
+                        content_type: artifact.content_type,
+                    });
+                }
+            }
+
+            // Update metrics
+            if (stepManifest.response?.usage) {
+                manifest.metrics.llm_tokens_used += (stepManifest.response.usage.inputTokens || 0) + (stepManifest.response.usage.outputTokens || 0);
+            }
+
         } else {
-            lastError = "Step falhou";
+            lastError = stepManifest.error?.message || "Step falhou";
             jobFailed = true;
             await db.update(schema.jobSteps).set({
                 status: "failed",
                 completedAt: stepCompletedAt,
                 durationMs,
                 lastError,
-                logs: JSON.stringify(result.logs),
+                logs: JSON.stringify(allLogs.filter(l => l.stepKey === stepDef.key)),
             }).where(eq(schema.jobSteps.id, step.id));
         }
+
+        manifest.steps.push(stepManifest);
     }
 
     // 8. Finalize job

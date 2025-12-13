@@ -8,7 +8,8 @@ import {
     Loader2,
     Circle
 } from "lucide-react";
-import type { JobStatus } from "./StatusBadge";
+
+type JobStatus = "pending" | "running" | "success" | "failed" | "warning" | "skipped";
 
 /**
  * StepIndicator - Indicador visual de um step no pipeline

@@ -37,3 +37,18 @@ export function JobCard({ id, title, recipe, status, progress, createdAt, classN
         </Link>
     );
 }
+
+export function JobCardSkeleton({ className }: { className?: string }) {
+    return (
+        <div className={cn("border rounded-lg p-4 animate-pulse", className)}>
+            <div className="flex items-start justify-between mb-2">
+                <div className="flex-1 min-w-0">
+                    <div className="h-5 bg-muted rounded w-3/4 mb-2" />
+                    <div className="h-4 bg-muted rounded w-1/2" />
+                </div>
+                <div className="h-5 bg-muted rounded w-16" />
+            </div>
+            <div className="h-3 bg-muted rounded w-1/4 mt-2" />
+        </div>
+    );
+}

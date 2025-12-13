@@ -172,6 +172,7 @@ export async function createValidator() {
         name: "Novo Validator",
         type: "forbidden_patterns",
         config: "{}",
+        errorMessage: "Validação falhou",
         severity: "error",
         isActive: true,
         createdAt: now,
