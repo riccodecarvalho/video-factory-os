@@ -1,0 +1,226 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =====================================================
+   Video Factory OS - Design System "The Engine"
+   
+   Identidade: Fábrica de alta performance
+   Vibe: Produção, pipeline, transformação
+   Dark Mode First
+   ===================================================== */
+
+@layer base {
+  :root {
+    /* Light Mode (Fallback secundário) */
+    --background: 224 71% 98%;
+    --foreground: 224 71% 4%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+
+    /* Primary: Azul vibrante inspirado no 4pice (#3b82f6) */
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 14.3% 10%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 8.9% 46.1%;
+
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 14.3% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217.2 91.2% 59.8%;
+
+    --radius: 0.75rem;
+
+    /* Status Colors */
+    --status-success: 150 100% 39%;
+    --status-warning: 38 92% 50%;
+    --status-error: 0 94% 60%;
+    --status-running: 199 89% 48%;
+    --status-pending: 215 16% 47%;
+    --status-info: 217 91% 60%;
+  }
+
+  /* DARK MODE FIRST - O Padrão do Video Factory */
+  .dark {
+    --background: 224 71% 4%;
+    /* #02040A - Deep Void */
+    --foreground: 210 40% 98%;
+
+    --card: 224 71% 7%;
+    /* #050A14 - Surface */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 224 71% 7%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Primary: Azul vibrante inspirado no 4pice (#3b82f6) */
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 19% 27%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 19% 15%;
+    /* Camada intermediária */
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    /* Glow do primary */
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 13% 18%;
+    /* Divisores sutis */
+    --input: 220 13% 18%;
+    --ring: 217.2 91.2% 59.8%;
+
+    /* Status Colors - Dark */
+    --status-success: 150 100% 39%;
+    --status-warning: 38 92% 50%;
+    --status-error: 0 84% 60%;
+    --status-running: 199 89% 48%;
+    --status-pending: 215 16% 47%;
+    --status-info: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-primary/30;
+  }
+}
+
+/* =====================================================
+   Utilitários do Video Factory
+   ===================================================== */
+
+@layer components {
+
+  /* Glassmorphism */
+  .glass {
+    @apply bg-background/60 backdrop-blur-lg border border-white/5;
+  }
+
+  /* Status backgrounds com opacity */
+  .bg-status-success {
+    background-color: hsl(var(--status-success) / 0.15);
+  }
+
+  .bg-status-warning {
+    background-color: hsl(var(--status-warning) / 0.15);
+  }
+
+  .bg-status-error {
+    background-color: hsl(var(--status-error) / 0.15);
+  }
+
+  .bg-status-running {
+    background-color: hsl(var(--status-running) / 0.15);
+  }
+
+  .bg-status-pending {
+    background-color: hsl(var(--status-pending) / 0.15);
+  }
+
+  /* Status text */
+  .text-status-success {
+    color: hsl(var(--status-success));
+  }
+
+  .text-status-warning {
+    color: hsl(var(--status-warning));
+  }
+
+  .text-status-error {
+    color: hsl(var(--status-error));
+  }
+
+  .text-status-running {
+    color: hsl(var(--status-running));
+  }
+
+  .text-status-pending {
+    color: hsl(var(--status-pending));
+  }
+
+  /* Card hover glow */
+  .card-hover-glow {
+    @apply transition-shadow duration-300;
+  }
+
+  .card-hover-glow:hover {
+    box-shadow: 0 0 20px -10px hsl(var(--primary) / 0.15);
+  }
+}
+
+@layer utilities {
+
+  /* Animação de pulse glow para "running" */
+  .animate-pulse-glow {
+    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-glow {
+
+    0%,
+    100% {
+      opacity: 1;
+      box-shadow: 0 0 10px 0 hsl(var(--primary) / 0.5);
+    }
+
+    50% {
+      opacity: 0.8;
+      box-shadow: 0 0 20px 5px hsl(var(--primary) / 0.2);
+    }
+  }
+
+  /* Animação de flow para pipeline */
+  .animate-flow {
+    animation: flow 1.5s linear infinite;
+  }
+
+  @keyframes flow {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
