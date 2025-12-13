@@ -47,12 +47,61 @@ interface StepDefinition {
 }
 
 interface ResolvedConfig {
-    prompt?: { id: string; name: string; source: string };
-    provider?: { id: string; name: string; source: string };
-    preset_voice?: { id: string; name: string; source: string };
-    preset_ssml?: { id: string; name: string; source: string };
-    validators?: { items: Array<{ id: string; name: string }>; source: string };
-    kb?: { items: Array<{ id: string; name: string }>; source: string };
+    prompt?: {
+        id: string;
+        name: string;
+        source: string;
+        // Expanded fields for visibility
+        model?: string;
+        maxTokens?: number;
+        temperature?: number;
+        systemPromptPreview?: string; // First 300 chars
+        systemPromptHash?: string; // SHA256 hash for change detection
+    };
+    provider?: {
+        id: string;
+        name: string;
+        source: string;
+        // Expanded fields for visibility
+        type?: string;
+        defaultModel?: string;
+        // Note: NO apiKey or secrets here
+    };
+    preset_voice?: {
+        id: string;
+        name: string;
+        source: string;
+        // Expanded fields
+        voiceName?: string;
+        outputFormat?: string;
+        speakingRate?: number;
+    };
+    preset_ssml?: {
+        id: string;
+        name: string;
+        source: string;
+        // Expanded fields
+        pauseMappings?: Record<string, number>;
+    };
+    validators?: {
+        items: Array<{
+            id: string;
+            name: string;
+            type?: string;
+            config?: Record<string, unknown>;
+        }>;
+        source: string;
+    };
+    kb?: {
+        items: Array<{
+            id: string;
+            name: string;
+            tier?: string;
+            contentPreview?: string; // First 200 chars
+            contentHash?: string;
+        }>;
+        source: string;
+    };
 }
 
 interface StepManifest {

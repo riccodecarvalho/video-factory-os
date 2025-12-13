@@ -91,8 +91,14 @@ Dia focado em **foundational hardening** do Video Factory OS. Estabelecemos:
 **Gate 1.35 — Traceability Closure**
 - Timeline corrigida com SHAs reais
 - Audit events comprovados via UI
-- UsedBySection integrado em Providers
-- Job real executado para validar tabs
+---
+
+## Próximo Gate
+
+**Gate 1.4.1 — Real E2E Execution**
+- Executar npm run vf:e2e com providers reais
+- Verificar artifacts gerados
+- Project filter em /jobs e /jobs/new
 
 ---
 
@@ -100,7 +106,9 @@ Dia focado em **foundational hardening** do Video Factory OS. Estabelecemos:
 
 ### git log --oneline -n 10
 ```
-81754ae (HEAD -> main, origin/main) feat: Gate 1.3 - UI Visibility
+ecde316 (HEAD -> main, origin/main) feat: Gate 1.4 - E2E Test Pack (Partial)
+c12ba39 feat: Gate 1.35 - Traceability Closure
+81754ae feat: Gate 1.3 - UI Visibility
 b68973c chore: Gate 1.25 checkpoint
 eca083a feat: Gate 1.25 - Governance + Traceability
 3e803a4 feat: Gate 1.2 - Real Providers + Validators
@@ -108,8 +116,6 @@ eca083a feat: Gate 1.25 - Governance + Traceability
 e28e857 feat: Gate 1.0 - Admin Visibility + Project Context + Execution Map
 a2ba590 feat: Gate 0.9 - Engine Integration (Manifest-First)
 b09c9c8 feat: Gate 0.8 - Admin Baseline Completo (Config-First Real)
-4a7b4d9 feat: Gate 0.75 - UI Patterns Parity (4pice Benchmark)
-ec7d615 feat: Gate 0.7 - Layout AppShell
 ```
 
 ### git remote -v

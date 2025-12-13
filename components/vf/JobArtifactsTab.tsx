@@ -67,7 +67,21 @@ function formatBytes(bytes?: number): string {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function ArtifactRow({ artifact }: { artifact: Artifact }) {
+function getArtifactUrl(uri: string, jobId: string): string {
+    // Convert local paths to API URLs
+    // Input: ./artifacts/{jobId}/{stepKey}/file.mp3
+    // Output: /api/artifacts/{jobId}/{stepKey}/file.mp3
+    if (uri.startsWith('./artifacts/')) {
+        return `/api/artifacts/${uri.replace('./artifacts/', '')}`;
+    }
+    if (uri.startsWith('artifacts/')) {
+        return `/api/artifacts/${uri.replace('artifacts/', '')}`;
+    }
+    // If it's already a URL or external, return as-is
+    return uri;
+}
+
+function ArtifactRow({ artifact, jobId }: { artifact: Artifact; jobId: string }) {
     const [copied, setCopied] = useState(false);
     const Icon = getIcon(artifact.type);
 
@@ -78,6 +92,9 @@ function ArtifactRow({ artifact }: { artifact: Artifact }) {
     };
 
     const filename = artifact.uri.split("/").pop() || artifact.uri;
+    const viewUrl = getArtifactUrl(artifact.uri, jobId);
+    const downloadUrl = `${viewUrl}?download=true`;
+    const isLocalArtifact = artifact.uri.startsWith('./') || artifact.uri.startsWith('artifacts/');
 
     return (
         <div className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted/50 transition-colors">
@@ -104,6 +121,7 @@ function ArtifactRow({ artifact }: { artifact: Artifact }) {
                     size="icon"
                     className="h-8 w-8"
                     onClick={handleCopy}
+                    title="Copy path"
                 >
                     {copied ? (
                         <Check className="h-4 w-4 text-status-success" />
@@ -112,18 +130,31 @@ function ArtifactRow({ artifact }: { artifact: Artifact }) {
                     )}
                 </Button>
 
-                {artifact.uri.startsWith("./") || artifact.uri.startsWith("/") ? (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => {
-                            // Em produção: abrir explorador de arquivos
-                            console.log("Open:", artifact.uri);
-                        }}
-                    >
-                        <FolderOpen className="h-4 w-4" />
-                    </Button>
+                {isLocalArtifact ? (
+                    <>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            asChild
+                            title="View"
+                        >
+                            <a href={viewUrl} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-4 w-4" />
+                            </a>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            asChild
+                            title="Download"
+                        >
+                            <a href={downloadUrl} download>
+                                <FolderOpen className="h-4 w-4" />
+                            </a>
+                        </Button>
+                    </>
                 ) : (
                     <Button
                         variant="ghost"
@@ -144,9 +175,11 @@ function ArtifactRow({ artifact }: { artifact: Artifact }) {
 function StepArtifactsCard({
     stepKey,
     artifacts,
+    jobId,
 }: {
     stepKey: string;
     artifacts: Artifact[];
+    jobId: string;
 }) {
     if (artifacts.length === 0) return null;
 
@@ -162,7 +195,7 @@ function StepArtifactsCard({
             </CardHeader>
             <CardContent className="space-y-1">
                 {artifacts.map((artifact, idx) => (
-                    <ArtifactRow key={artifact.id || idx} artifact={artifact} />
+                    <ArtifactRow key={artifact.id || idx} artifact={artifact} jobId={jobId} />
                 ))}
             </CardContent>
         </Card>
@@ -231,6 +264,7 @@ export function JobArtifactsTab({ manifest, jobId, className }: JobArtifactsTabP
                         key={stepKey}
                         stepKey={stepKey}
                         artifacts={artifactsByStep[stepKey]}
+                        jobId={jobId}
                     />
                 ))}
             </div>

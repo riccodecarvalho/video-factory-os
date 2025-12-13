@@ -120,7 +120,10 @@ export async function getProviderTypes() {
 
 export async function updateProvider(id: string, data: Partial<typeof schema.providers.$inferInsert>) {
     const db = getDb();
+    const [before] = await db.select().from(schema.providers).where(eq(schema.providers.id, id));
     await db.update(schema.providers).set(data).where(eq(schema.providers.id, id));
+    const [after] = await db.select().from(schema.providers).where(eq(schema.providers.id, id));
+    await auditCrud("updated", "provider", id, after.name, before, after);
     revalidatePath("/admin/providers");
 }
 
@@ -170,7 +173,10 @@ export async function getValidatorTypes() {
 
 export async function updateValidator(id: string, data: Partial<typeof schema.validators.$inferInsert>) {
     const db = getDb();
+    const [before] = await db.select().from(schema.validators).where(eq(schema.validators.id, id));
     await db.update(schema.validators).set(data).where(eq(schema.validators.id, id));
+    const [after] = await db.select().from(schema.validators).where(eq(schema.validators.id, id));
+    await auditCrud("updated", "validator", id, after.name, before, after);
     revalidatePath("/admin/validators");
 }
 
@@ -357,5 +363,74 @@ export async function getVideoPresets() {
 export async function getEffectsPresets() {
     const db = getDb();
     return db.select().from(schema.presetsEffects);
+}
+
+// ============================================
+// PROJECTS
+// ============================================
+
+export async function getProjects(search?: string) {
+    const db = getDb();
+    const results = await db.select().from(schema.projects);
+
+    return results.filter(p => {
+        const matchesSearch = !search ||
+            p.name.toLowerCase().includes(search.toLowerCase()) ||
+            p.key.toLowerCase().includes(search.toLowerCase());
+        return matchesSearch;
+    });
+}
+
+export async function createProject() {
+    const db = getDb();
+    const now = new Date().toISOString();
+    const id = uuid();
+
+    const newProject = {
+        id,
+        key: `project-${Date.now()}`,
+        name: "Novo Project",
+        description: "",
+        isActive: true,
+        createdAt: now,
+    };
+
+    await db.insert(schema.projects).values(newProject);
+
+    await auditCrud("created", "project", id, newProject.name, undefined, newProject);
+
+    revalidatePath("/admin/projects");
+    return newProject;
+}
+
+export async function updateProject(id: string, data: Partial<{
+    name: string;
+    key: string;
+    description: string;
+}>) {
+    const db = getDb();
+
+    const [before] = await db.select().from(schema.projects).where(eq(schema.projects.id, id));
+
+    await db.update(schema.projects).set(data).where(eq(schema.projects.id, id));
+
+    const [after] = await db.select().from(schema.projects).where(eq(schema.projects.id, id));
+
+    await auditCrud("updated", "project", id, after.name, before, after);
+
+    revalidatePath("/admin/projects");
+}
+
+export async function toggleProjectActive(id: string, isActive: boolean) {
+    const db = getDb();
+
+    const [before] = await db.select().from(schema.projects).where(eq(schema.projects.id, id));
+
+    await db.update(schema.projects).set({ isActive }).where(eq(schema.projects.id, id));
+
+    const action = isActive ? "updated" : "updated";
+    await auditCrud(action, "project", id, before.name, { isActive: before.isActive }, { isActive });
+
+    revalidatePath("/admin/projects");
 }
 
