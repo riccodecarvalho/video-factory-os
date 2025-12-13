@@ -325,3 +325,25 @@ export async function getPresetCounts() {
         ssml: ssml.length,
     };
 }
+
+// Individual preset queries for Execution Map
+export async function getVoicePresets() {
+    const db = getDb();
+    return db.select().from(schema.presetsVoice);
+}
+
+export async function getSsmlPresets() {
+    const db = getDb();
+    return db.select().from(schema.presetsSsml);
+}
+
+export async function getVideoPresets() {
+    const db = getDb();
+    return db.select().from(schema.presetsVideo);
+}
+
+export async function getEffectsPresets() {
+    const db = getDb();
+    return db.select().from(schema.presetsEffects);
+}
+

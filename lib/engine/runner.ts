@@ -1,16 +1,20 @@
 "use server";
 
 /**
- * Video Factory OS - Engine Runner
+ * Video Factory OS - Engine Runner (Phase 2)
  * 
- * Manifest-first execution: cada job gera manifest versionado.
- * Steps executam sequencialmente, atualizando status e logs.
+ * Manifest-first execution com Effective Config:
+ * - Cada step resolve bindings via getEffectiveConfig
+ * - Manifest registra config snapshot usado
+ * - Logs referenciam provider/prompt ids
  */
 
 import { getDb, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import crypto from "crypto";
+import { getStepKind, getStepCapability, StepKind } from "./capabilities";
+import { getEffectiveConfig } from "@/app/admin/execution-map/actions";
 
 type JobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 type StepStatus = "pending" | "running" | "success" | "failed" | "skipped";
@@ -20,16 +24,23 @@ interface LogEntry {
     level: "info" | "warn" | "error" | "debug";
     message: string;
     stepKey?: string;
+    meta?: Record<string, unknown>;
 }
 
 interface StepDefinition {
     key: string;
     name: string;
-    promptSlug?: string;
-    ssmlPresetSlug?: string;
-    providerSlug?: string;
-    videoPresetSlug?: string;
+    kind?: StepKind;
     required: boolean;
+}
+
+interface ResolvedConfig {
+    prompt?: { id: string; name: string; source: string };
+    provider?: { id: string; name: string; source: string };
+    preset_voice?: { id: string; name: string; source: string };
+    preset_ssml?: { id: string; name: string; source: string };
+    validators?: { items: Array<{ id: string; name: string }>; source: string };
+    kb?: { items: Array<{ id: string; name: string }>; source: string };
 }
 
 // ============================================
@@ -40,21 +51,36 @@ function generateInputHash(input: Record<string, unknown>): string {
     return crypto.createHash("sha256").update(JSON.stringify(input)).digest("hex").slice(0, 16);
 }
 
-function createInitialManifest(job: typeof schema.jobs.$inferSelect, recipe: typeof schema.recipes.$inferSelect) {
+function createInitialManifest(
+    job: typeof schema.jobs.$inferSelect,
+    recipe: typeof schema.recipes.$inferSelect,
+    projectId?: string | null
+) {
     return {
-        version: "1.0.0",
+        version: "2.0.0",
         job_id: job.id,
+        project_id: projectId || null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         input: JSON.parse(job.input),
         snapshots: {
             recipe: {
+                id: recipe.id,
                 slug: recipe.slug,
                 version: recipe.version,
-                pipeline: JSON.parse(recipe.pipeline || "[]"),
             },
+            config_by_step: {} as Record<string, ResolvedConfig>,
         },
-        steps: [],
+        steps: [] as Array<{
+            key: string;
+            kind: StepKind;
+            status: string;
+            config: ResolvedConfig;
+            started_at: string;
+            completed_at?: string;
+            duration_ms?: number;
+            output?: unknown;
+        }>,
         output: null,
         metrics: {
             total_duration_ms: 0,
@@ -64,65 +90,102 @@ function createInitialManifest(job: typeof schema.jobs.$inferSelect, recipe: typ
 }
 
 // ============================================
-// STEP EXECUTORS (Stubbed Phase 1)
+// STEP EXECUTORS (Phase 2 - Config-Aware)
 // ============================================
 
 async function executeStep(
     stepDef: StepDefinition,
-    _input: Record<string, unknown>,
-    _snapshots: Record<string, unknown>
+    stepConfig: ResolvedConfig,
+    input: Record<string, unknown>,
+    _previousOutputs: Record<string, unknown>
 ): Promise<{ success: boolean; output: unknown; logs: LogEntry[] }> {
     const logs: LogEntry[] = [];
     const now = () => new Date().toISOString();
+    const kind = stepDef.kind || getStepKind(stepDef.key);
 
-    logs.push({ timestamp: now(), level: "info", message: `Iniciando step: ${stepDef.name}`, stepKey: stepDef.key });
+    // Log config being used
+    logs.push({
+        timestamp: now(),
+        level: "info",
+        message: `Step: ${stepDef.name} (kind=${kind})`,
+        stepKey: stepDef.key,
+        meta: {
+            prompt_id: stepConfig.prompt?.id,
+            provider_id: stepConfig.provider?.id,
+            preset_voice_id: stepConfig.preset_voice?.id,
+        }
+    });
 
     // Simular tempo de execução (200-800ms)
     const duration = 200 + Math.random() * 600;
     await new Promise((r) => setTimeout(r, duration));
 
-    // Stubbed output por tipo de step
+    // Output baseado em kind + config
     let output: unknown;
-    switch (stepDef.key) {
-        case "title":
-            output = { titles: ["Título gerado 1", "Título gerado 2", "Título gerado 3"] };
-            logs.push({ timestamp: now(), level: "info", message: "3 títulos gerados", stepKey: stepDef.key });
+
+    switch (kind) {
+        case "llm":
+            // Em produção: chamaria Claude aqui
+            logs.push({
+                timestamp: now(),
+                level: "info",
+                message: `LLM: usando prompt=${stepConfig.prompt?.name || 'default'}, provider=${stepConfig.provider?.name || 'claude'}`,
+                stepKey: stepDef.key
+            });
+
+            if (stepDef.key === "title") {
+                output = { titles: ["Título gerado 1", "Título gerado 2", "Título gerado 3"] };
+            } else if (stepDef.key === "brief") {
+                output = { brief: "Brief expandido com personagens e conflito..." };
+            } else if (stepDef.key === "script") {
+                output = { script: "(voz: NARRADORA)\nQuando mi madre leyó el testamento...", wordCount: 6500 };
+            } else {
+                output = { result: "llm_output" };
+            }
             break;
-        case "brief":
-            output = { brief: "Brief expandido com personagens e conflito..." };
-            logs.push({ timestamp: now(), level: "info", message: "Brief expandido", stepKey: stepDef.key });
-            break;
-        case "script":
-            output = { script: "(voz: NARRADORA)\nQuando mi madre leyó el testamento...", wordCount: 6500 };
-            logs.push({ timestamp: now(), level: "info", message: "Roteiro: 6500 palavras", stepKey: stepDef.key });
-            break;
-        case "parse_ssml":
-            output = { ssmlPath: `/tmp/job-${Date.now()}/audio.ssml` };
-            logs.push({ timestamp: now(), level: "info", message: "SSML gerado", stepKey: stepDef.key });
-            break;
+
         case "tts":
+            // Em produção: chamaria Azure TTS aqui
+            logs.push({
+                timestamp: now(),
+                level: "info",
+                message: `TTS: usando voice=${stepConfig.preset_voice?.name || 'default'}, ssml=${stepConfig.preset_ssml?.name || 'none'}`,
+                stepKey: stepDef.key
+            });
             output = { audioPath: `/tmp/job-${Date.now()}/audio.mp3`, durationSec: 2400 };
-            logs.push({ timestamp: now(), level: "info", message: "Áudio: 40min gerado", stepKey: stepDef.key });
             break;
+
+        case "transform":
+            logs.push({ timestamp: now(), level: "info", message: "Transform executado", stepKey: stepDef.key });
+            output = { ssmlPath: `/tmp/job-${Date.now()}/audio.ssml` };
+            break;
+
         case "render":
+            logs.push({ timestamp: now(), level: "info", message: "Render executado", stepKey: stepDef.key });
             output = { videoPath: `/tmp/job-${Date.now()}/video.mp4`, sizeMb: 450 };
-            logs.push({ timestamp: now(), level: "info", message: "Vídeo renderizado: 450MB", stepKey: stepDef.key });
             break;
+
         case "export":
+            logs.push({ timestamp: now(), level: "info", message: "Export executado", stepKey: stepDef.key });
             output = { packagePath: `/tmp/job-${Date.now()}/package.zip` };
-            logs.push({ timestamp: now(), level: "info", message: "Pacote exportado", stepKey: stepDef.key });
             break;
+
         default:
             output = { result: "ok" };
     }
 
-    logs.push({ timestamp: now(), level: "info", message: `Step concluído em ${Math.round(duration)}ms`, stepKey: stepDef.key });
+    logs.push({
+        timestamp: now(),
+        level: "info",
+        message: `Step concluído em ${Math.round(duration)}ms`,
+        stepKey: stepDef.key
+    });
 
     return { success: true, output, logs };
 }
 
 // ============================================
-// MAIN RUNNER
+// MAIN RUNNER (Phase 2)
 // ============================================
 
 export async function runJob(jobId: string): Promise<{ success: boolean; error?: string }> {
@@ -151,10 +214,16 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
         progress: 0,
     }).where(eq(schema.jobs.id, jobId));
 
-    // 4. Create initial manifest
-    const manifest = createInitialManifest(job, recipe);
+    // 4. Create initial manifest with project context
+    const manifest = createInitialManifest(job, recipe, job.projectId);
 
-    // 5. Create job steps
+    // 5. Resolve effective config for ALL steps upfront (snapshot)
+    for (const stepDef of pipeline) {
+        const config = await getEffectiveConfig(job.recipeId, stepDef.key, job.projectId || undefined);
+        manifest.snapshots.config_by_step[stepDef.key] = config as ResolvedConfig;
+    }
+
+    // 6. Create job steps
     const input = JSON.parse(job.input);
     for (let i = 0; i < pipeline.length; i++) {
         const stepDef = pipeline[i];
@@ -169,8 +238,8 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
         }).onConflictDoNothing();
     }
 
-    // 6. Execute steps sequentially
-    const allLogs: LogEntry[] = [];
+    // 7. Execute steps sequentially
+    const previousOutputs: Record<string, unknown> = {};
     let lastError: string | null = null;
     let jobFailed = false;
 
@@ -178,6 +247,8 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
         if (jobFailed) break;
 
         const stepDef = pipeline[i];
+        const kind = stepDef.kind || getStepKind(stepDef.key);
+        const stepConfig = manifest.snapshots.config_by_step[stepDef.key] || {};
         const progress = Math.round(((i + 1) / pipeline.length) * 100);
 
         // Get step record
@@ -189,7 +260,6 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
         // Check if cancelled
         const [currentJob] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, jobId));
         if (currentJob?.status === "cancelled") {
-            allLogs.push({ timestamp: new Date().toISOString(), level: "warn", message: "Job cancelado pelo usuário" });
             break;
         }
 
@@ -208,15 +278,16 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
             updatedAt: new Date().toISOString(),
         }).where(eq(schema.jobs.id, jobId));
 
-        // Execute
-        const result = await executeStep(stepDef, input, manifest.snapshots);
-        allLogs.push(...result.logs);
+        // Execute with effective config
+        const result = await executeStep(stepDef, stepConfig, input, previousOutputs);
 
         // Update step
         const stepCompletedAt = new Date().toISOString();
         const durationMs = new Date(stepCompletedAt).getTime() - new Date(stepStartedAt).getTime();
 
         if (result.success) {
+            previousOutputs[stepDef.key] = result.output;
+
             await db.update(schema.jobSteps).set({
                 status: "success",
                 completedAt: stepCompletedAt,
@@ -225,10 +296,12 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
                 logs: JSON.stringify(result.logs),
             }).where(eq(schema.jobSteps.id, step.id));
 
-            // Add to manifest
+            // Add to manifest with config snapshot
             manifest.steps.push({
                 key: stepDef.key,
+                kind,
                 status: "success",
+                config: stepConfig,
                 started_at: stepStartedAt,
                 completed_at: stepCompletedAt,
                 duration_ms: durationMs,
@@ -247,7 +320,7 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
         }
     }
 
-    // 7. Finalize job
+    // 8. Finalize job
     const completedAt = new Date().toISOString();
     manifest.updated_at = completedAt;
     manifest.metrics.total_duration_ms = new Date(completedAt).getTime() - new Date(startedAt).getTime();

@@ -1,6 +1,6 @@
 # Timeline 2025-12-13
 
-> **SHA Âncora:** `0d76aa6` (Gate 1.0 - Admin Visibility + Execution Map)
+> **SHA Âncora:** `901d6f5` (Gate 1.1 - Hardening + Effective Config)
 
 ---
 

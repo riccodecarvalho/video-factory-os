@@ -1,0 +1,112 @@
+/**
+ * Step Capabilities - Mapeamento de slots por step kind
+ * 
+ * Define quais slots fazem sentido para cada tipo de step.
+ * Evita nonsense como "voice_preset" em step de script.
+ */
+
+export type StepKind = 'llm' | 'tts' | 'transform' | 'render' | 'export';
+
+export type SlotType =
+    | 'prompt'
+    | 'provider'
+    | 'preset_voice'
+    | 'preset_ssml'
+    | 'preset_video'
+    | 'preset_effects'
+    | 'validators'
+    | 'kb';
+
+export interface StepCapability {
+    kind: StepKind;
+    requiredSlots: SlotType[];
+    optionalSlots: SlotType[];
+    providerType?: 'llm' | 'tts' | 'render'; // tipo de provider esperado
+}
+
+// Capabilities por kind
+export const STEP_CAPABILITIES: Record<StepKind, StepCapability> = {
+    llm: {
+        kind: 'llm',
+        requiredSlots: ['prompt', 'provider'],
+        optionalSlots: ['validators', 'kb'],
+        providerType: 'llm',
+    },
+    tts: {
+        kind: 'tts',
+        requiredSlots: ['provider', 'preset_voice'],
+        optionalSlots: ['preset_ssml', 'validators'],
+        providerType: 'tts',
+    },
+    transform: {
+        kind: 'transform',
+        requiredSlots: [],
+        optionalSlots: ['validators'],
+    },
+    render: {
+        kind: 'render',
+        requiredSlots: ['preset_video'],
+        optionalSlots: ['preset_effects'],
+        providerType: 'render',
+    },
+    export: {
+        kind: 'export',
+        requiredSlots: [],
+        optionalSlots: [],
+    },
+};
+
+// Mapeamento step_key → kind (baseado no pipeline típico)
+export const STEP_KIND_MAP: Record<string, StepKind> = {
+    title: 'llm',
+    brief: 'llm',
+    script: 'llm',
+    analysis: 'llm',
+    parse_ssml: 'transform',
+    tts: 'tts',
+    render: 'render',
+    export: 'export',
+};
+
+// Helpers
+export function getStepKind(stepKey: string): StepKind {
+    return STEP_KIND_MAP[stepKey] || 'transform';
+}
+
+export function getStepCapability(stepKey: string): StepCapability {
+    const kind = getStepKind(stepKey);
+    return STEP_CAPABILITIES[kind];
+}
+
+export function getAllowedSlots(stepKey: string): SlotType[] {
+    const cap = getStepCapability(stepKey);
+    return [...cap.requiredSlots, ...cap.optionalSlots];
+}
+
+export function isSlotAllowed(stepKey: string, slot: SlotType): boolean {
+    return getAllowedSlots(stepKey).includes(slot);
+}
+
+export function getRequiredSlots(stepKey: string): SlotType[] {
+    return getStepCapability(stepKey).requiredSlots;
+}
+
+// Labels para UI
+export const SLOT_LABELS: Record<SlotType, string> = {
+    prompt: 'Prompt',
+    provider: 'Provider',
+    preset_voice: 'Voice Preset',
+    preset_ssml: 'SSML Preset',
+    preset_video: 'Video Preset',
+    preset_effects: 'Effects Preset',
+    validators: 'Validators',
+    kb: 'Knowledge Base',
+};
+
+export const KIND_LABELS: Record<StepKind, string> = {
+    llm: 'LLM (Geração)',
+    tts: 'TTS (Áudio)',
+    transform: 'Transform',
+    render: 'Render (Vídeo)',
+    export: 'Export',
+};

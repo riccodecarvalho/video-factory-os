@@ -22,7 +22,6 @@ import {
 } from "@/components/layout";
 import {
     Settings2,
-    Link as LinkIcon,
     RefreshCw,
     Check,
     Loader2,
@@ -32,6 +31,8 @@ import {
     ShieldCheck,
     BookOpen,
     ExternalLink,
+    Video,
+    Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -42,23 +43,26 @@ import {
     resetToGlobal,
     seedDefaultBindings,
 } from "./actions";
-import { getRecipes, getPrompts, getProviders, getValidators, getKnowledgeBase } from "../actions";
+import { getRecipes, getPrompts, getProviders, getValidators, getKnowledgeBase, getVoicePresets, getSsmlPresets } from "../actions";
+import { getStepKind, getAllowedSlots, KIND_LABELS, SlotType } from "@/lib/engine/capabilities";
 
 type Project = Awaited<ReturnType<typeof getProjects>>[0];
 type Recipe = Awaited<ReturnType<typeof getRecipes>>[0];
 
 interface StepSlot {
-    slot: string;
+    slot: SlotType;
     label: string;
     icon: typeof FileText;
     type: "single" | "multi";
 }
 
-const STEP_SLOTS: StepSlot[] = [
+const ALL_SLOTS: StepSlot[] = [
     { slot: "prompt", label: "Prompt", icon: FileText, type: "single" },
     { slot: "provider", label: "Provider", icon: Server, type: "single" },
     { slot: "preset_voice", label: "Voice Preset", icon: Mic, type: "single" },
     { slot: "preset_ssml", label: "SSML Preset", icon: FileText, type: "single" },
+    { slot: "preset_video", label: "Video Preset", icon: Video, type: "single" },
+    { slot: "preset_effects", label: "Effects Preset", icon: Sparkles, type: "single" },
     { slot: "validators", label: "Validators", icon: ShieldCheck, type: "multi" },
     { slot: "kb", label: "Knowledge Base", icon: BookOpen, type: "multi" },
 ];
@@ -78,17 +82,21 @@ export default function ExecutionMapPage() {
     const [providersList, setProvidersList] = useState<Array<{ id: string; name: string }>>([]);
     const [validatorsList, setValidatorsList] = useState<Array<{ id: string; name: string }>>([]);
     const [kbList, setKbList] = useState<Array<{ id: string; name: string }>>([]);
+    const [voicePresetsList, setVoicePresetsList] = useState<Array<{ id: string; name: string }>>([]);
+    const [ssmlPresetsList, setSsmlPresetsList] = useState<Array<{ id: string; name: string }>>([]);
 
     // Load initial data
     useEffect(() => {
         startTransition(async () => {
-            const [projectsData, recipesData, prompts, providers, validators, kb] = await Promise.all([
+            const [projectsData, recipesData, prompts, providers, validators, kb, voicePresets, ssmlPresets] = await Promise.all([
                 getProjects(),
                 getRecipes(),
                 getPrompts(),
                 getProviders(),
                 getValidators(),
                 getKnowledgeBase(),
+                getVoicePresets(),
+                getSsmlPresets(),
             ]);
             setProjects(projectsData);
             setRecipes(recipesData);
@@ -96,6 +104,8 @@ export default function ExecutionMapPage() {
             setProvidersList(providers.map(p => ({ id: p.id, name: p.name })));
             setValidatorsList(validators.map(v => ({ id: v.id, name: v.name })));
             setKbList(kb.map(k => ({ id: k.id, name: k.name })));
+            setVoicePresetsList(voicePresets.map(v => ({ id: v.id, name: v.name })));
+            setSsmlPresetsList(ssmlPresets.map(s => ({ id: s.id, name: s.name })));
 
             // Auto-select first recipe
             if (recipesData.length > 0) {
@@ -188,9 +198,16 @@ export default function ExecutionMapPage() {
             case "provider": return providersList;
             case "validators": return validatorsList;
             case "kb": return kbList;
+            case "preset_voice": return voicePresetsList;
+            case "preset_ssml": return ssmlPresetsList;
             default: return [];
         }
     };
+
+    // Get step kind and allowed slots
+    const stepKind = selectedStep ? getStepKind(selectedStep) : null;
+    const allowedSlots = selectedStep ? getAllowedSlots(selectedStep) : [];
+    const filteredSlots = ALL_SLOTS.filter(s => allowedSlots.includes(s.slot));
 
     return (
         <div className="flex min-h-screen bg-background">
@@ -257,30 +274,36 @@ export default function ExecutionMapPage() {
                         }
                         list={
                             <div>
-                                {steps.map((step, index) => (
-                                    <SplitViewListItem
-                                        key={step.key}
-                                        title={step.name}
-                                        subtitle={step.key}
-                                        meta={`Step ${index + 1}`}
-                                        isActive={selectedStep === step.key}
-                                        onClick={() => setSelectedStep(step.key)}
-                                    />
-                                ))}
+                                {steps.map((step, index) => {
+                                    const kind = getStepKind(step.key);
+                                    return (
+                                        <SplitViewListItem
+                                            key={step.key}
+                                            title={step.name}
+                                            subtitle={`${step.key} • ${KIND_LABELS[kind]}`}
+                                            meta={`Step ${index + 1}`}
+                                            isActive={selectedStep === step.key}
+                                            onClick={() => setSelectedStep(step.key)}
+                                        />
+                                    );
+                                })}
                             </div>
                         }
                         detail={
                             selectedStep ? (
                                 <SplitViewDetail>
                                     <div className="mb-6">
-                                        <h2 className="text-xl font-semibold">{steps.find(s => s.key === selectedStep)?.name}</h2>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h2 className="text-xl font-semibold">{steps.find(s => s.key === selectedStep)?.name}</h2>
+                                            <Badge variant="outline">{stepKind && KIND_LABELS[stepKind]}</Badge>
+                                        </div>
                                         <p className="text-sm text-muted-foreground">
                                             Step: {selectedStep} • Scope: {selectedProjectId === "global" ? "Global" : projects.find(p => p.id === selectedProjectId)?.name}
                                         </p>
                                     </div>
 
                                     <div className="space-y-6">
-                                        {STEP_SLOTS.map(slotDef => {
+                                        {filteredSlots.map(slotDef => {
                                             const value = getSlotValue(slotDef.slot);
                                             const Icon = slotDef.icon;
                                             const options = getOptionsForSlot(slotDef.slot);
