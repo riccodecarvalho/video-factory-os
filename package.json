@@ -14,21 +14,21 @@
         "db:seed": "tsx lib/db/seed.ts"
     },
     "dependencies": {
-        "next": "14.2.18",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
-        "drizzle-orm": "^0.38.3",
-        "better-sqlite3": "^11.7.0",
         "@anthropic-ai/sdk": "^0.39.0",
         "@radix-ui/react-label": "^2.1.1",
         "@radix-ui/react-progress": "^1.1.1",
         "@radix-ui/react-slot": "^1.1.1",
+        "better-sqlite3": "^11.7.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "drizzle-orm": "^0.38.3",
         "lucide-react": "^0.468.0",
+        "next": "14.2.18",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
         "tailwind-merge": "^2.6.0",
         "uuid": "^11.0.3",
-        "zod": "^3.24.1"
+        "zod": "^3.25.76"
     },
     "devDependencies": {
         "@types/better-sqlite3": "^7.6.12",

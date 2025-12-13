@@ -318,3 +318,30 @@ export const presetsSsml = sqliteTable('presets_ssml', {
     isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
     createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
 });
+
+// ============================================
+// PRESETS (UNIFICADA) - Voice, Video, SSML, Effects
+// ============================================
+// Decisão: Unificar em uma tabela com type + config JSON
+// Facilita CRUD/admin, mantém flexível sem hardcode
+// UI mostra separado por tabs/filtros por type
+export const presets = sqliteTable('presets', {
+    id: text('id').primaryKey(),
+    slug: text('slug').notNull().unique(),
+    name: text('name').notNull(),
+    description: text('description'),
+
+    // Discriminator - validado por Zod no código
+    type: text('type').notNull(), // 'voice' | 'video' | 'ssml' | 'effects'
+
+    // Config JSON (schema validado por Zod discriminatedUnion)
+    config: text('config').notNull(), // JSON específico por type
+
+    // Metadata
+    tags: text('tags'), // JSON array: ["graciela", "intense", "default"]
+    version: integer('version').notNull().default(1),
+
+    isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+    createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
+    updatedAt: text('updated_at').notNull().default('CURRENT_TIMESTAMP'),
+});
