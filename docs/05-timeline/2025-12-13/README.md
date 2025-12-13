@@ -1,6 +1,6 @@
 # Timeline 2025-12-13
 
-> **SHA Âncora:** `eca083a` (Gate 1.25 - Governance + Traceability)
+> **Timeline covers up to:** `81754ae`
 
 ---
 
@@ -11,6 +11,7 @@ Dia focado em **foundational hardening** do Video Factory OS. Estabelecemos:
 - Runner com effective config resolution
 - Providers reais (Claude + Azure TTS)
 - Auditoria de mudanças críticas
+- UI Visibility (tabs Config e Artifacts)
 
 ---
 
@@ -39,6 +40,16 @@ Dia focado em **foundational hardening** do Video Factory OS. Estabelecemos:
 - **O que:** audit_events, Timeline viva, GitHub oficial.
 - **Por que:** Rastreabilidade é pré-requisito para escalar. Sem fonte de verdade, não há produto.
 - **Mudanças:** lib/db/schema.ts (audit_events), lib/audit/index.ts, instrumented actions.
+
+### Gate 1.25 Checkpoint
+- **SHA:** `b68973c`
+- **O que:** .gitignore corrigido (+artifacts/), Timeline SHA, updatePrompt instrumentado.
+
+### Gate 1.3 — UI Visibility
+- **SHA:** `81754ae`
+- **O que:** Job Detail tabs (Config, Artifacts), UsedBySection component.
+- **Por que:** Admin/Operador precisa ver exatamente o que foi usado sem abrir código.
+- **Mudanças:** JobConfigTab.tsx, JobArtifactsTab.tsx, UsedBySection.tsx, jobs/page.tsx.
 
 ---
 
@@ -69,20 +80,40 @@ Dia focado em **foundational hardening** do Video Factory OS. Estabelecemos:
 | `lib/engine/runner.ts` | 1.2 | Phase 3 com real providers |
 | `lib/audit/index.ts` | 1.25 | Audit service |
 | `app/admin/execution-map/` | 1.0 | UI de governança de bindings |
+| `components/vf/JobConfigTab.tsx` | 1.3 | Tab Config para Job Detail |
+| `components/vf/JobArtifactsTab.tsx` | 1.3 | Tab Artifacts para Job Detail |
+| `components/vf/UsedBySection.tsx` | 1.3 | "Used by" para entidades Admin |
 
 ---
 
 ## Próximo Gate
 
-**Gate 1.4 — End-to-End Test**
-- Teste real de job execution
-- Validação de providers reais
-- Verificação de artifacts
+**Gate 1.35 — Traceability Closure**
+- Timeline corrigida com SHAs reais
+- Audit events comprovados via UI
+- UsedBySection integrado em Providers
+- Job real executado para validar tabs
 
 ---
 
-### Gate 1.3 — UI Visibility
-- **SHA:** `4cefb52`
-- **O que:** Job Detail tabs (Config, Artifacts), UsedBySection component.
-- **Por que:** Admin/Operador precisa ver exatamente o que foi usado sem abrir código.
-- **Mudanças:** JobConfigTab.tsx, JobArtifactsTab.tsx, UsedBySection.tsx, jobs/page.tsx.
+## Evidence Snapshot
+
+### git log --oneline -n 10
+```
+81754ae (HEAD -> main, origin/main) feat: Gate 1.3 - UI Visibility
+b68973c chore: Gate 1.25 checkpoint
+eca083a feat: Gate 1.25 - Governance + Traceability
+3e803a4 feat: Gate 1.2 - Real Providers + Validators
+41575e1 feat: Gate 1.1 - Hardening + Effective Config
+e28e857 feat: Gate 1.0 - Admin Visibility + Project Context + Execution Map
+a2ba590 feat: Gate 0.9 - Engine Integration (Manifest-First)
+b09c9c8 feat: Gate 0.8 - Admin Baseline Completo (Config-First Real)
+4a7b4d9 feat: Gate 0.75 - UI Patterns Parity (4pice Benchmark)
+ec7d615 feat: Gate 0.7 - Layout AppShell
+```
+
+### git remote -v
+```
+origin  https://github.com/riccodecarvalho/video-factory-os.git (fetch)
+origin  https://github.com/riccodecarvalho/video-factory-os.git (push)
+```
