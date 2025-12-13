@@ -100,6 +100,33 @@
 
 ---
 
+## 4. UI Patterns (Gate 0.75)
+
+### PageHeader
+- `breadcrumb` + `title` + `description` + `actions`
+- Border-b, bg-card
+- Tipografia: h1 text-2xl font-semibold
+
+### SplitView
+- Lista à esquerda (1/3), detalhe à direita (2/3)
+- Estados: loading, empty, selected
+- Active item: `border-l-4 border-l-primary bg-primary/5`
+
+### SectionCards
+- Grid de cards com contadores
+- Active: `border-primary/50 bg-primary/5`
+- Usado para categorias (Todos, Analysis, etc)
+
+### EmptyState
+- Variantes: empty, error, no-results
+- Icon + title + description + action button
+
+### FiltersBar
+- Chips/tabs à esquerda + busca à direita
+- Active chip: `bg-primary text-primary-foreground`
+
+---
+
 ## 4. Layout
 
 ```

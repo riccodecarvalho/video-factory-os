@@ -1,6 +1,6 @@
 # Timeline 2025-12-13
 
-> **SHA Âncora:** `0103ed5` (Gate 0.5 - Arquitetura de Informação)
+> **SHA Âncora:** `f6d508a` (Gate 0.75 - UI Patterns Parity)
 
 ---
 
