@@ -74,7 +74,15 @@ Dia focado em **foundational hardening** do Video Factory OS. Estabelecemos:
 
 ## Próximo Gate
 
-**Gate 1.3 — UI Visibility**
-- Job Detail Tab "Config" com snapshot navegável
-- Job Detail Tab "Artifacts" com links
-- Admin "Used by" para entidades
+**Gate 1.4 — End-to-End Test**
+- Teste real de job execution
+- Validação de providers reais
+- Verificação de artifacts
+
+---
+
+### Gate 1.3 — UI Visibility
+- **SHA:** `4cefb52`
+- **O que:** Job Detail tabs (Config, Artifacts), UsedBySection component.
+- **Por que:** Admin/Operador precisa ver exatamente o que foi usado sem abrir código.
+- **Mudanças:** JobConfigTab.tsx, JobArtifactsTab.tsx, UsedBySection.tsx, jobs/page.tsx.
