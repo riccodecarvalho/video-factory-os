@@ -40,7 +40,7 @@ const adminNavigation = [
     { name: "Recipes", href: "/admin/recipes", icon: BookOpen },
     { name: "Providers", href: "/admin/providers", icon: Server },
     { name: "Validators", href: "/admin/validators", icon: ShieldCheck },
-    { name: "Knowledge Base", href: "/admin/knowledge", icon: BookOpen },
+    { name: "Knowledge Base", href: "/admin/knowledge-base", icon: BookOpen },
 ];
 
 interface SidebarProps {
