@@ -391,3 +391,34 @@ export const presets = sqliteTable('presets', {
     createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
     updatedAt: text('updated_at').notNull().default('CURRENT_TIMESTAMP'),
 });
+
+// ============================================
+// AUDIT EVENTS - Rastreabilidade de mudanças no Admin
+// ============================================
+export const auditEvents = sqliteTable('audit_events', {
+    id: text('id').primaryKey(),
+    createdAt: text('created_at').notNull(),
+
+    // Actor (quem fez a mudança)
+    actor: text('actor').notNull().default('admin'), // 'admin' | 'system' | 'api'
+
+    // Action (o que foi feito)
+    action: text('action').notNull(), // 'created' | 'updated' | 'deleted' | 'binding.set' | 'binding.reset'
+
+    // Entity context
+    entityType: text('entity_type').notNull(), // 'prompt' | 'provider' | 'preset' | 'validator' | 'recipe' | 'kb' | 'binding' | 'project'
+    entityId: text('entity_id').notNull(),
+    entityName: text('entity_name'), // nome legível para facilitar auditoria
+
+    // Scope context (para bindings)
+    scope: text('scope'), // 'global' | 'project'
+    projectId: text('project_id'),
+
+    // Before/After snapshots
+    beforeJson: text('before_json'), // JSON do estado anterior (null para creates)
+    afterJson: text('after_json'), // JSON do estado novo (null para deletes)
+
+    // Metadata
+    metadata: text('metadata'), // JSON com info extra (ex: step_key, slot, etc)
+});
+

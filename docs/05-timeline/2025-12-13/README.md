@@ -1,87 +1,80 @@
 # Timeline 2025-12-13
 
-> **SHA Âncora:** `ca525e3` (Gate 1.2 - Real Providers + Validators)
+> **SHA Âncora:** `9895db5` (Gate 1.25 - Governance + Traceability)
 
 ---
 
-## Contexto
+## Resumo do Dia
 
-Início do projeto Video Factory OS com foco em governança e arquitetura de informação antes de UI visual.
-
----
-
-## Decisões Tomadas
-
-| Decisão | ADR | Resumo |
-|---------|-----|--------|
-| Stage Directions | [ADR-001](../01-adr/2025-12-13-adr-001-stage-directions.md) | Formato Stage Direction, proibido SSML/Markdown misturado |
-| DS: Inspirar, não portar | [ADR-004](../01-adr/2025-12-13-adr-004-design-system.md) | Usar 4pice como benchmark, não copiar código |
+Dia focado em **foundational hardening** do Video Factory OS. Estabelecemos:
+- Execution Map como fonte da verdade para wiring
+- Runner com effective config resolution
+- Providers reais (Claude + Azure TTS)
+- Auditoria de mudanças críticas
 
 ---
 
-## Session Log
+## Gates Completados
 
-### 10:00 - 10:30
-- Início da sessão com revisão dos documentos existentes
-- Identificado problema: UI implementada sem arquitetura de informação
-- Identificado problema: Cores do DS diferentes do benchmark (4pice)
+### Gate 1.0 — Admin Visibility + Execution Map
+- **SHA:** `e28e857`
+- **O que:** Tabelas projects, execution_bindings. Página /admin/execution-map.
+- **Por que:** Precisávamos de governança sobre wiring (qual prompt/provider/preset cada step usa).
+- **ADR:** [ADR-008](../../01-adr/2025-12-13-adr-008-project-context-execution-bindings.md)
 
-### 10:30 - 10:45
-- Correção de nomenclatura de diretórios (lowercase)
-- Correção de cores do DS (roxo → azul 4pice)
-- Commit inicial: `b23afd1`
+### Gate 1.1 — Hardening + Effective Config
+- **SHA:** `41575e1`
+- **O que:** StepCapabilities por kind. Runner resolve getEffectiveConfig. Manifest v2.0.
+- **Por que:** Slots filtrados por kind eliminam drift. Config snapshot garante auditoria.
+- **Mudanças:** lib/engine/capabilities.ts, runner phase 2, execution-map UI filtering.
 
-### 10:45 - 11:00
-- Análise completa dos documentos em `z-tmp3/`
-- Feedback recebido: precisa de gates com contratos e entregáveis
-- Decisões: presets unificados, validators starter pack, timeline com session log
+### Gate 1.2 — Real Providers + Validators
+- **SHA:** `3e803a4`
+- **O que:** executeLLM (Claude), executeTTS (Azure), executeValidators. Manifest v3.0.
+- **Por que:** Sair de stubs para produção real. Validators bloqueiam execução quando falham.
+- **Mudanças:** lib/engine/providers.ts, runner phase 3, artifact storage.
 
-### 11:00 - Atual
-- Gate 0.5.1: `00-information-architecture.md` ✅
-- Gate 0.5.2: `01-domain-model.md` ✅
-- Gate 0.5.3: `02-manifest-contract.md` + `manifest.schema.ts` ✅
-- Gate 0.5.4: (em progresso) presets unificados no schema
-
----
-
-## Evidências
-
-### Comandos Executados
-```bash
-# Nomenclatura
-mv docs/00-REGRAS docs/00-regras
-mv docs/ADR docs/01-adr
-
-# Git
-git init
-git add .
-git commit -m "feat: initial commit - Video Factory OS Fase 0"
-# SHA: b23afd1
-
-# Zod
-npm install zod
-```
-
-### Build Status
-```bash
-npm run dev
-# Status: Running em http://localhost:3000
-```
-
-### API Health
-```
-GET /api/health → { status: "ok" }
-```
+### Gate 1.25 — Governance + Traceability (em andamento)
+- **SHA:** TBD
+- **O que:** audit_events, Timeline viva, GitHub oficial.
+- **Por que:** Rastreabilidade é pré-requisito para escalar. Sem fonte de verdade, não há produto.
+- **Mudanças:** lib/db/schema.ts (audit_events), lib/audit/index.ts, instrumented actions.
 
 ---
 
-## Próximos Passos
+## ADRs Criados
 
-1. [ ] Completar Gate 0.5.4 (zero hardcode)
-2. [ ] Commit das mudanças do Gate 0.5
-3. [ ] Gate 0.6: preparar prompt Gemini para DS
-4. [ ] Entregar ao usuário para revisão
+| ID | Título | Link |
+|----|--------|------|
+| ADR-008 | Project Context + Execution Bindings | [Link](../../01-adr/2025-12-13-adr-008-project-context-execution-bindings.md) |
 
 ---
 
-**Timeline covers up to:** `pendente`
+## Decisões Importantes
+
+1. **Config-First enforced:** Nenhum hardcode de prompt, provider, preset ou validator.
+2. **Manifest como fonte de verdade:** Cada job registra snapshot completo da config usada.
+3. **StepCapabilities:** Slots são filtrados por kind para evitar bindings inválidos.
+4. **Audit events:** Mudanças críticas no Admin são registradas para rastreabilidade.
+
+---
+
+## Arquivos-Chave Criados
+
+| Arquivo | Gate | Descrição |
+|---------|------|-----------|
+| `lib/db/schema.ts` | 1.0 | +projects, +execution_bindings, +audit_events |
+| `lib/engine/capabilities.ts` | 1.1 | StepCapabilities por kind |
+| `lib/engine/providers.ts` | 1.2 | Claude LLM, Azure TTS, Validators |
+| `lib/engine/runner.ts` | 1.2 | Phase 3 com real providers |
+| `lib/audit/index.ts` | 1.25 | Audit service |
+| `app/admin/execution-map/` | 1.0 | UI de governança de bindings |
+
+---
+
+## Próximo Gate
+
+**Gate 1.3 — UI Visibility**
+- Job Detail Tab "Config" com snapshot navegável
+- Job Detail Tab "Artifacts" com links
+- Admin "Used by" para entidades

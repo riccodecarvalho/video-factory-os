@@ -11,6 +11,7 @@ import { getDb, schema } from "@/lib/db";
 import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { v4 as uuid } from "uuid";
+import { auditBinding } from "@/lib/audit";
 
 // ============================================
 // QUERIES
@@ -192,8 +193,9 @@ export async function setBinding(
     }
 
     // Insert new binding
+    const bindingId = uuid();
     await db.insert(schema.executionBindings).values({
-        id: uuid(),
+        id: bindingId,
         scope,
         projectId: projectId || null,
         recipeId,
@@ -205,15 +207,47 @@ export async function setBinding(
         updatedAt: now,
     });
 
+    // Audit
+    await auditBinding(
+        'binding.set',
+        bindingId,
+        recipeId,
+        stepKey,
+        slot,
+        scope,
+        projectId,
+        null,
+        { targetId, scope, projectId }
+    );
+
     revalidatePath('/admin/execution-map');
     return { success: true };
 }
 
 export async function removeBinding(bindingId: string) {
     const db = getDb();
+
+    // Get before state
+    const [before] = await db.select().from(schema.executionBindings).where(eq(schema.executionBindings.id, bindingId));
+
     await db.update(schema.executionBindings)
         .set({ isActive: false, updatedAt: new Date().toISOString() })
         .where(eq(schema.executionBindings.id, bindingId));
+
+    // Audit
+    if (before) {
+        await auditBinding(
+            'binding.removed',
+            bindingId,
+            before.recipeId,
+            before.stepKey,
+            before.slot,
+            before.scope as 'global' | 'project',
+            before.projectId || undefined,
+            before,
+            null
+        );
+    }
 
     revalidatePath('/admin/execution-map');
     return { success: true };
@@ -221,6 +255,17 @@ export async function removeBinding(bindingId: string) {
 
 export async function resetToGlobal(recipeId: string, stepKey: string, slot: string, projectId: string) {
     const db = getDb();
+
+    // Get before state
+    const [before] = await db.select().from(schema.executionBindings)
+        .where(and(
+            eq(schema.executionBindings.recipeId, recipeId),
+            eq(schema.executionBindings.stepKey, stepKey),
+            eq(schema.executionBindings.slot, slot),
+            eq(schema.executionBindings.scope, 'project'),
+            eq(schema.executionBindings.projectId, projectId)
+        ));
+
     await db.update(schema.executionBindings)
         .set({ isActive: false, updatedAt: new Date().toISOString() })
         .where(and(
@@ -230,6 +275,21 @@ export async function resetToGlobal(recipeId: string, stepKey: string, slot: str
             eq(schema.executionBindings.scope, 'project'),
             eq(schema.executionBindings.projectId, projectId)
         ));
+
+    // Audit
+    if (before) {
+        await auditBinding(
+            'binding.reset',
+            before.id,
+            recipeId,
+            stepKey,
+            slot,
+            'project',
+            projectId,
+            before,
+            null
+        );
+    }
 
     revalidatePath('/admin/execution-map');
     return { success: true };
