@@ -8,6 +8,49 @@
 import { sqliteTable, text, integer, real, blob } from 'drizzle-orm/sqlite-core';
 
 // ============================================
+// PROJECTS - Contexto de projeto (canais)
+// ============================================
+export const projects = sqliteTable('projects', {
+    id: text('id').primaryKey(),
+    key: text('key').notNull().unique(), // 'graciela', 'mil-nightmares', etc
+    name: text('name').notNull(),
+    description: text('description'),
+
+    isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+    createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
+});
+
+// ============================================
+// EXECUTION BINDINGS - Fonte da verdade para wiring
+// ============================================
+export const executionBindings = sqliteTable('execution_bindings', {
+    id: text('id').primaryKey(),
+
+    // Scope: global applies to all, project overrides global
+    scope: text('scope').notNull().default('global'), // 'global' | 'project'
+    projectId: text('project_id'), // null for global, FK projects for project override
+
+    // Recipe context
+    recipeId: text('recipe_id').notNull(),
+
+    // Step context
+    stepKey: text('step_key').notNull(), // 'title', 'brief', 'script', 'tts', 'render'
+
+    // Slot type being bound
+    slot: text('slot').notNull(), // 'prompt' | 'provider' | 'preset_voice' | 'preset_video' | 'preset_ssml' | 'validators' | 'kb'
+
+    // Target entity ID (references the appropriate table based on slot)
+    targetId: text('target_id').notNull(),
+
+    // Priority for multi-value slots (validators, kb)
+    priority: integer('priority').default(0),
+
+    isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+    createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
+    updatedAt: text('updated_at').notNull().default('CURRENT_TIMESTAMP'),
+});
+
+// ============================================
 // PROMPTS - Templates com variáveis e config do modelo
 // ============================================
 export const prompts = sqliteTable('prompts', {
@@ -209,6 +252,9 @@ export const recipes = sqliteTable('recipes', {
 // ============================================
 export const jobs = sqliteTable('jobs', {
     id: text('id').primaryKey(),
+
+    // Project context
+    projectId: text('project_id'), // FK projects, nullable for backwards compat
 
     // Recipe snapshot
     recipeId: text('recipe_id').notNull(),

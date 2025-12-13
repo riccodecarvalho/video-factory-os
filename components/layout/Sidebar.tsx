@@ -14,6 +14,7 @@ import {
     Server,
     ShieldCheck,
     ChevronRight,
+    Settings2,
 } from "lucide-react";
 
 // Navigation structure
@@ -35,6 +36,7 @@ const navigation = [
 ];
 
 const adminNavigation = [
+    { name: "Execution Map", href: "/admin/execution-map", icon: Settings2 },
     { name: "Prompts", href: "/admin/prompts", icon: FileText },
     { name: "Presets", href: "/admin/presets", icon: Sliders },
     { name: "Recipes", href: "/admin/recipes", icon: BookOpen },

@@ -13,6 +13,8 @@
 
 import { getDb, closeDb } from './index';
 import {
+    projects,
+    executionBindings,
     prompts,
     knowledgeBase,
     presetsVoice,
@@ -29,6 +31,22 @@ async function seed() {
     console.log('🌱 Iniciando seed do Video Factory OS...');
     const db = getDb();
     const now = new Date().toISOString();
+
+    // ============================================
+    // 0. PROJECT - Graciela
+    // ============================================
+    console.log('🎬 Criando projeto Graciela...');
+    const gracielaProjectId = uuid();
+    await db.insert(projects).values([
+        {
+            id: gracielaProjectId,
+            key: 'graciela',
+            name: 'Verdades de Graciela',
+            description: 'Canal de storytime em espanhol mexicano com histórias familiares dramáticas',
+            isActive: true,
+            createdAt: now,
+        },
+    ]).onConflictDoNothing();
 
     // ============================================
     // 1. PROVIDERS
