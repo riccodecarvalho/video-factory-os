@@ -150,7 +150,7 @@ async function createTestJob(projectId: string, recipe: { id: string; slug: stri
     });
 
     log('📝', `Created job: ${jobId.slice(0, 8)}... (project: ${projectId.slice(0, 8)}...)`);
-    log('📄', `Input: ${gracielaInput.title.slice(0, 50)}...`);
+    log('📄', `Input: ${gracielaInput.titulo.slice(0, 50)}...`);
 
     return jobId;
 }

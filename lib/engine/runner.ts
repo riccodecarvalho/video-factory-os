@@ -134,6 +134,11 @@ interface StepManifest {
     error?: {
         code: string;
         message: string;
+        // Diagnostic fields for UI debugging
+        statusCode?: number;
+        provider?: string;
+        payloadSizeBytes?: number;
+        stack?: string;
     };
 }
 
@@ -314,10 +319,36 @@ async function executeStepLLM(
     const validatorIds = stepConfig.validators?.items?.map(v => v.id) || [];
     const validators = await loadValidators(validatorIds);
 
-    // Build variables
+    // Build variables with aliasing for pt/es compatibility
+    // Flatten previousOutputs: extract actual output strings from step results
+    const flattenedOutputs: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(previousOutputs)) {
+        if (typeof value === "string") {
+            flattenedOutputs[key] = value;
+        } else if (value && typeof value === "object" && "output" in value) {
+            flattenedOutputs[key] = (value as { output: unknown }).output;
+        } else if (value && typeof value === "object") {
+            // Try common output field names
+            const obj = value as Record<string, unknown>;
+            flattenedOutputs[key] = obj.output || obj.text || obj.script || obj.ssml || JSON.stringify(value);
+        }
+    }
+
+    // Apply aliases for pt/es variable names (input base takes precedence over aliases)
+    const inputAliases: Record<string, unknown> = {
+        // titulo = input.titulo || input.title (Portuguese/Spanish)
+        titulo: input.titulo || input.title,
+        // idea = input.idea || input.brief
+        idea: input.idea || input.brief,
+        // duracao = input.duracao || input.duration || "40" (default 40 min)
+        duracao: input.duracao || input.duration || "40",
+    };
+
+    // Build final variables: input base → aliases → flattened outputs (input takes precedence)
     const variables = {
-        ...input,
-        ...previousOutputs,
+        ...inputAliases,
+        ...flattenedOutputs,
+        ...input, // Input overrides everything if explicitly provided
     };
 
     // Record request metadata
@@ -351,7 +382,30 @@ async function executeStepLLM(
         stepManifest.completed_at = now();
         stepManifest.duration_ms = llmResult.duration_ms;
         stepManifest.error = llmResult.error;
-        logs.push({ timestamp: now(), level: "error", message: `LLM falhou: ${llmResult.error?.message}`, stepKey: stepDef.key });
+
+        // Build detailed error message for logs and UI
+        const errorDetails = [
+            `LLM falhou: ${llmResult.error?.message}`,
+            llmResult.error?.code ? `Code: ${llmResult.error.code}` : null,
+            llmResult.error?.statusCode ? `HTTP: ${llmResult.error.statusCode}` : null,
+            llmResult.error?.provider ? `Provider: ${llmResult.error.provider}` : null,
+            llmResult.error?.payloadSizeBytes ? `Payload: ${Math.round(llmResult.error.payloadSizeBytes / 1024)}KB` : null,
+            `Model: ${llmResult.model}`,
+        ].filter(Boolean).join(" | ");
+
+        logs.push({
+            timestamp: now(),
+            level: "error",
+            message: errorDetails,
+            stepKey: stepDef.key,
+            meta: {
+                code: llmResult.error?.code,
+                statusCode: llmResult.error?.statusCode,
+                provider: llmResult.error?.provider,
+                payloadSizeBytes: llmResult.error?.payloadSizeBytes,
+                stack: llmResult.error?.stack,
+            }
+        });
         return stepManifest;
     }
 

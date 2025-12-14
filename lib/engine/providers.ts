@@ -52,6 +52,11 @@ export interface LLMResponse {
     error?: {
         code: string;
         message: string;
+        // Diagnostic fields for debugging
+        statusCode?: number;
+        provider?: string;
+        payloadSizeBytes?: number;
+        stack?: string;
     };
 }
 
@@ -126,6 +131,18 @@ export async function executeLLM(request: LLMRequest): Promise<LLMResponse> {
     const maxTokens = request.prompt.maxTokens || 4096;
     const temperature = request.prompt.temperature ?? 0.7;
 
+    // Calculate payload size for diagnostics
+    const requestBody = JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        temperature,
+        system: systemPrompt,
+        messages: [
+            { role: "user", content: userMessage }
+        ]
+    });
+    const payloadSizeBytes = new TextEncoder().encode(requestBody).length;
+
     try {
         const response = await fetch("https://api.anthropic.com/v1/messages", {
             method: "POST",
@@ -134,15 +151,7 @@ export async function executeLLM(request: LLMRequest): Promise<LLMResponse> {
                 "x-api-key": apiKey,
                 "anthropic-version": "2023-06-01",
             },
-            body: JSON.stringify({
-                model,
-                max_tokens: maxTokens,
-                temperature,
-                system: systemPrompt,
-                messages: [
-                    { role: "user", content: userMessage }
-                ]
-            }),
+            body: requestBody,
         });
 
         if (!response.ok) {
@@ -153,7 +162,10 @@ export async function executeLLM(request: LLMRequest): Promise<LLMResponse> {
                 duration_ms: Date.now() - startTime,
                 error: {
                     code: `HTTP_${response.status}`,
-                    message: errorText.slice(0, 500)
+                    message: errorText.slice(0, 500),
+                    statusCode: response.status,
+                    provider: request.provider.slug,
+                    payloadSizeBytes,
                 }
             };
         }
@@ -173,13 +185,19 @@ export async function executeLLM(request: LLMRequest): Promise<LLMResponse> {
         };
 
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const errorStack = error instanceof Error ? error.stack?.slice(0, 500) : undefined;
+
         return {
             success: false,
             model,
             duration_ms: Date.now() - startTime,
             error: {
                 code: "NETWORK_ERROR",
-                message: error instanceof Error ? error.message : "Unknown error"
+                message: errorMessage,
+                provider: request.provider.slug,
+                payloadSizeBytes,
+                stack: errorStack,
             }
         };
     }
