@@ -2,6 +2,57 @@
 
 Note: _This is purely the output of the chat conversation and does not contain any raw data, codebase snippets, etc. used to generate the output._
 
+---
+
+# 📋 HANDOVER / FECHAMENTO DE SESSÃO
+
+> **Data:** 2025-12-14T08:20:00-03:00
+> **SHA HEAD:** `1c9f431`
+> **Conteúdo:** Setup local + troubleshooting Azure Key
+
+---
+
+## 🎯 RESUMO DESTE LOG
+
+Este arquivo contém uma sessão curta (89 linhas) focada em:
+1. **Subir servidor localmente:** `npm run dev`
+2. **Resolver porta ocupada:** 3000 → 3001
+3. **Buscar Azure Key:** Não encontrada no repositório (correto por segurança)
+
+---
+
+## 📝 INFORMAÇÕES EXTRAÍDAS
+
+### Portas
+- **Padrão:** 3000
+- **Alternativa:** 3001 (automático se 3000 ocupada)
+- **Evidência:** Linhas 21-27 deste log
+
+### Azure Speech Key
+- **NÃO está no repositório** (segurança)
+- **Localização 1:** n8n → Settings → Credentials → "Azure TTS"
+  - Tipo: Header Auth
+  - Nome: `Ocp-Apim-Subscription-Key`
+- **Localização 2:** Portal Azure → Speech Services → Keys and Endpoint
+- **Documentação:** `z- archive/n8n-riccodecarvalho-com/projetos/verdades-de-graciela/docs/0005-setup-azure-tts.md`
+- **Evidência:** Linhas 68-88 deste log
+
+---
+
+## 📚 DOCUMENTAÇÃO RELACIONADA
+
+| Recurso | Caminho |
+|---------|---------|
+| **Troubleshooting** | `docs/00-regras/operacao/troubleshooting.md` |
+| **Mapeamento Completo** | `docs/05-timeline/2025-12-13/mapeamento-starting-service.md` |
+
+---
+
+# ⬇️ CONTEÚDO ORIGINAL DO LOG DE CONVERSAS (preservado integralmente) ⬇️
+
+---
+
+
 ### User Input
 
 suba o servicopar eu testar localhost

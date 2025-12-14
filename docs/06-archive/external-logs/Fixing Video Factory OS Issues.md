@@ -2,6 +2,164 @@
 
 Note: _This is purely the output of the chat conversation and does not contain any raw data, codebase snippets, etc. used to generate the output._
 
+---
+
+# 📋 HANDOVER / FECHAMENTO DE SESSÃO
+
+> **Data:** 2025-12-14T08:20:00-03:00
+> **SHA HEAD:** `1c9f431`
+> **Branch:** `main` (up to date with `origin/main`)
+> **Working tree:** clean
+
+---
+
+## 🎯 ONDE PARAMOS (Estado Exato)
+
+**Gates Completados:** 0.5 → 1.5.2 (15 gates no total)
+
+| Gate | SHA | Status | Session Log |
+|------|-----|--------|-------------|
+| 0.5 | `0103ed5` | ✅ Done | - |
+| 0.6 | `18b667e` | ✅ Done | - |
+| 0.65 | `3788ba7` | ✅ Done | - |
+| 0.7 | `ec7d615` | ✅ Done | [004](../05-timeline/2025-12-13/sessions/004-gate-0.7-appshell.md) |
+| 0.75 | `4a7b4d9` | ✅ Done | [005](../05-timeline/2025-12-13/sessions/005-gate-0.75-ui-patterns.md) |
+| 0.8 | `b09c9c8` | ✅ Done | [006](../05-timeline/2025-12-13/sessions/006-gate-0.8-admin-baseline.md) |
+| 0.9 | `a2ba590` | ✅ Done | [007](../05-timeline/2025-12-13/sessions/007-gate-0.9-engine.md) |
+| 1.0 | `e28e857` | ✅ Done | [008](../05-timeline/2025-12-13/sessions/008-gate-1.0-execution-map.md) |
+| 1.1 | `41575e1` | ✅ Done | [009](../05-timeline/2025-12-13/sessions/009-gate-1.1-hardening.md) |
+| 1.2 | `3e803a4` | ✅ Done | [010](../05-timeline/2025-12-13/sessions/010-gate-1.2-real-providers.md) |
+| 1.25 | `eca083a` | ✅ Done | [011](../05-timeline/2025-12-13/sessions/011-gate-1.25-governance.md) |
+| 1.3 | `81754ae` | ✅ Done | [012](../05-timeline/2025-12-13/sessions/012-gate-1.3-ui-visibility.md) |
+| 1.35 | `c12ba39` | ✅ Done | [017](../05-timeline/2025-12-13/sessions/017-gate-1.35-traceability-closure.md) |
+| 1.4 | `8f7b404` | ✅ Done | [013](../05-timeline/2025-12-13/sessions/013-gate-1.4-e2e-pack.md) |
+| 1.5 | `9b336b5` | ✅ Done | [014](../05-timeline/2025-12-13/sessions/014-gate-1.5-pipeline-bindings.md) |
+| 1.5.1 | `73f4dbc` | ✅ Done | [015](../05-timeline/2025-12-13/sessions/015-gate-1.5.1-batch-tts.md) |
+| 1.5.2 | `cbc62c5` | ✅ Done | [016](../05-timeline/2025-12-13/sessions/016-gate-1.5.2-product-fixes.md) |
+
+**Último E2E Completo:**
+- Job ID: `18f8290b-ddf6-4491-bfbb-56f722ab4654`
+- Projeto: Verdades de Graciela
+- Status: `completed ✅`
+- Duração: 419.2s
+- Audio: 41MB (~28 min)
+
+---
+
+## 🚀 COMO RETOMAR (Primeiros 3 Passos)
+
+```bash
+# 1. Pull do repositório
+git pull origin main
+# Esperado: Already up to date (ou SHA 1c9f431+)
+
+# 2. Instalar dependências
+npm install
+
+# 3. Subir servidor
+npm run dev
+# Esperado: http://localhost:3000 (ou 3001 se 3000 ocupada)
+```
+
+**Verificação:**
+- Acessar http://localhost:3000/jobs
+- Rodar E2E: `npm run vf:e2e`
+
+---
+
+## ✅ O QUE ESTÁ PRONTO
+
+1. **UI Completa:** AppShell, SplitView, PageHeader, SectionCards, FiltersBar, EmptyState
+2. **Admin:** Prompts, Providers, Presets, Validators, Recipes, Knowledge Base, Execution Map
+3. **Engine:** Runner manifest-first com execução sequencial
+4. **Providers Reais:** Claude (LLM), Azure Batch TTS
+5. **Validators:** forbidden_patterns, required_patterns, min_words, max_words
+6. **Job Detail:** Tabs Pipeline, Logs, Manifest, Config, Artifacts
+7. **Artifacts API:** Streaming com Range headers
+8. **Multi-Projeto:** Graciela + Virando o Jogo
+9. **Audit:** audit_events com rastreamento de mudanças
+10. **Documentação:** 6 ADRs, 17 Session Logs, Timeline completa
+
+---
+
+## ❌ O QUE FALTA
+
+1. **Gate 1.6 — Render + Export**
+   - `executeStepRender` (vídeo) — stub atual
+   - `executeStepExport` (pacote final) — stub atual
+   - Integração FFmpeg local
+
+2. **Observability**
+   - Métricas de execução
+   - Dashboard de jobs
+
+3. **UI de Audit**
+   - Visualização de audit_events no Admin
+
+---
+
+## ⚠️ RISCOS / BLOQUEIOS
+
+| Risco | Mitigação |
+|-------|-----------|
+| Azure Key expirada | Obter nova em Portal Azure → Speech Services → Keys |
+| Anthropic Key expirada | Obter nova em console.anthropic.com |
+| Porta 3000 ocupada | Next.js usa 3001 automaticamente |
+
+---
+
+## 🎯 PRÓXIMA AÇÃO RECOMENDADA
+
+**Gate 1.6 — Render + Export**
+- Implementar FFmpeg local para `executeStepRender`
+- Gerar vídeo a partir de audio + imagens
+- Implementar `executeStepExport` para pacote final
+
+---
+
+## 📚 LINKS / EVIDÊNCIAS ESSENCIAIS
+
+| Recurso | Caminho |
+|---------|---------|
+| **Timeline Master** | `docs/05-timeline/2025-12-13/README.md` |
+| **Mapeamento Log 1** | `docs/05-timeline/2025-12-13/mapeamento-log-conversas.md` |
+| **Mapeamento Log 2** | `docs/05-timeline/2025-12-13/mapeamento-starting-service.md` |
+| **Troubleshooting** | `docs/00-regras/operacao/troubleshooting.md` |
+| **ADRs** | `docs/01-adr/` (6 arquivos) |
+| **Session Logs** | `docs/05-timeline/2025-12-13/sessions/` (17 arquivos) |
+
+---
+
+## 📊 EVIDÊNCIA GIT
+
+### git log --oneline -n 10
+```
+1c9f431 docs: Map Starting Service Locally log + expand troubleshooting
+55bf744 docs: Complete mapping of conversation log + Gate 1.35 session
+772ca52 docs: Complete session logs (004-016) for Gates 0.7 to 1.5.2
+a9190d7 docs: Restore Timeline fidelity (Gates 0.7 to 1.5.2)
+6452042 docs: Consolidate session history and operational rules [SANITIZED]
+790714a docs: Session closure - Timeline updated to cbc62c5
+cbc62c5 fix: Gate 1.5.2 - 5 fixes de produto
+73f4dbc feat: Gate 1.5.1 - Azure Batch TTS + COMPLETED E2E
+9b336b5 feat: Gate 1.5 - Pipeline Bindings + TTS Fix (partial)
+1146b8e feat: Gate 1.4.2 - Project Filter + E2E Real Execution
+```
+
+### git status
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+nothing to commit, working tree clean
+```
+
+---
+
+# ⬇️ CONTEÚDO ORIGINAL DO LOG DE CONVERSAS (preservado integralmente) ⬇️
+
+---
+
+
 ### Planner Response
 
 Screenshots capturados. Vou verificá-los para confirmar o layout:
