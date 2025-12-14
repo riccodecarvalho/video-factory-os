@@ -1,8 +1,99 @@
 # Timeline 2025-12-13
 
-> **Timeline covers up to:** `6452042` (Consolidação após Gate 1.5.2)
+> **Timeline covers up to:** `7eb9e1a` (Fechamento de Sessão 2025-12-14)
 
 ---
+
+# 📋 HANDOVER / FECHAMENTO DE SESSÃO
+
+> **Data do Handover:** 2025-12-14T08:27:00-03:00
+> **SHA HEAD:** `7eb9e1a`
+> **Branch:** `main` (up to date with `origin/main`)
+> **Working tree:** clean
+
+---
+
+## 🚀 COMO RETOMAR (Primeiros 3 Passos)
+
+```bash
+# 1. Pull do repositório
+git pull origin main
+# Esperado: Already up to date (ou SHA 7eb9e1a+)
+
+# 2. Instalar dependências
+npm install
+
+# 3. Subir servidor
+npm run dev
+# Esperado: http://localhost:3000 (ou 3001 se 3000 ocupada)
+```
+
+**Verificação:**
+- Acessar http://localhost:3000/jobs
+- Rodar E2E: `npm run vf:e2e`
+
+---
+
+## ✅ O QUE ESTÁ PRONTO
+
+1. **UI Completa:** AppShell, SplitView, PageHeader, SectionCards, FiltersBar, EmptyState
+2. **Admin:** Prompts, Providers, Presets, Validators, Recipes, Knowledge Base, Execution Map
+3. **Engine:** Runner manifest-first com execução sequencial
+4. **Providers Reais:** Claude (LLM), Azure Batch TTS
+5. **Validators:** forbidden_patterns, required_patterns, min_words, max_words
+6. **Job Detail:** Tabs Pipeline, Logs, Manifest, Config, Artifacts
+7. **Artifacts API:** Streaming com Range headers
+8. **Multi-Projeto:** Graciela + Virando o Jogo
+9. **Audit:** audit_events com rastreamento de mudanças
+10. **Documentação:** 6 ADRs, 17 Session Logs, Timeline completa
+
+---
+
+## ❌ O QUE FALTA
+
+1. **Gate 1.6 — Render + Export**
+   - `executeStepRender` (vídeo) — stub atual
+   - `executeStepExport` (pacote final) — stub atual
+   - Integração FFmpeg local
+
+2. **Observability**
+   - Métricas de execução
+   - Dashboard de jobs
+
+3. **UI de Audit**
+   - Visualização de audit_events no Admin
+
+---
+
+## ⚠️ RISCOS / BLOQUEIOS
+
+| Risco | Mitigação |
+|-------|-----------|
+| Azure Key expirada | Obter nova em Portal Azure → Speech Services → Keys |
+| Anthropic Key expirada | Obter nova em console.anthropic.com |
+| Porta 3000 ocupada | Next.js usa 3001 automaticamente |
+
+---
+
+## 🎯 PRÓXIMA AÇÃO RECOMENDADA
+
+**Gate 1.6 — Render + Export**
+- Implementar FFmpeg local para `executeStepRender`
+- Gerar vídeo a partir de audio + imagens
+- Implementar `executeStepExport` para pacote final
+
+---
+
+## 📊 Último E2E Completo
+
+- **Job ID:** `18f8290b-ddf6-4491-bfbb-56f722ab4654`
+- **Projeto:** Verdades de Graciela
+- **Status:** `completed ✅`
+- **Duração:** 419.2s
+- **Audio:** 41MB (~28 min)
+
+---
+
 
 ## Resumo do Dia
 
