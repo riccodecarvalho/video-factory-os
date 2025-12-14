@@ -444,10 +444,36 @@ async function executeStepTTS(
         meta: { voice_preset_id: stepConfig.preset_voice?.id }
     });
 
-    // Get input text from previous step
-    const textInput = (previousOutputs.script as { script?: string })?.script
-        || (previousOutputs.parse_ssml as { ssml?: string })?.ssml
-        || String(input.text || input.script || "");
+    // Get input text from previous step (can be string or object)
+    const scriptOutput = previousOutputs.script;
+    const ssmlOutput = previousOutputs.parse_ssml;
+
+    let textInput = "";
+
+    // Try script output (string or object)
+    if (typeof scriptOutput === "string" && scriptOutput.length > 0) {
+        textInput = scriptOutput;
+    } else if (scriptOutput && typeof scriptOutput === "object") {
+        textInput = (scriptOutput as { script?: string; output?: string }).script
+            || (scriptOutput as { script?: string; output?: string }).output
+            || String(scriptOutput);
+    }
+
+    // Try parse_ssml output (string or object)
+    if (!textInput) {
+        if (typeof ssmlOutput === "string" && ssmlOutput.length > 0) {
+            textInput = ssmlOutput;
+        } else if (ssmlOutput && typeof ssmlOutput === "object") {
+            textInput = (ssmlOutput as { ssml?: string; output?: string }).ssml
+                || (ssmlOutput as { ssml?: string; output?: string }).output
+                || String(ssmlOutput);
+        }
+    }
+
+    // Fallback to input
+    if (!textInput) {
+        textInput = String(input.text || input.script || "");
+    }
 
     if (!textInput) {
         stepManifest.status = "failed";
