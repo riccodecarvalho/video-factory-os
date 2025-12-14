@@ -1,108 +1,158 @@
 # Timeline 2025-12-13
 
-> **Timeline covers up to:** `cbc62c5`
+> **Timeline covers up to:** `6452042`
 
 ---
 
 ## Resumo do Dia
 
-Dia focado em **foundational hardening** + **E2E real** do Video Factory OS. Estabelecemos:
-- Execution Map como fonte da verdade para wiring
-- Runner com effective config resolution
-- Providers reais (Claude + Azure TTS)
-- Auditoria de mudanças críticas
-- UI Visibility (tabs Config e Artifacts)
-- **E2E real com Azure Batch TTS** (41MB audio gerado)
-- **5 fixes de produto** (voz única, audio streaming, UI erros, fixtures, docs)
-- **Consolidação de Conhecimento:** Session logs retroativos e regras operacionais.
+Dia focado em **foundational hardening** + **E2E real** do Video Factory OS, cobrindo desde a **Paridade de UI** (0.7) até a **Execução Real** (1.5).
 
-## 📚 Novas Documentações Operacionais
-- [Manual de Modelos IA](../../00-regras/operacao/manual-modelos-ia.md)
-- [Troubleshooting & Setup](../../00-regras/operacao/troubleshooting.md)
-- [UI Guidelines](../../00-regras/design-system/ui-guidelines.md)
-
-## Sessions
-
-| # | Session | Status | Foco |
-|---|---------|--------|------|
-| 001 | [Foundational Hardening](sessions/001-foundational-hardening-2025-12-13.md) | ✅ Completa | Config & Providers |
-| 002 | [Gate 0.7-0.9 Consolidation](sessions/002-consolidation-gate-0-7-to-0-9.md) | ✅ Consolidada | UI Baseline & Engine |
-| 003 | [Gate 1.0-1.5 Consolidation](sessions/003-consolidation-gate-1-0-to-1-5.md) | ✅ Consolidada | Admin & E2E Real |
+Estabelecemos:
+- **UI Architecture:** Paridade visual com 4pice (Zero Glow, SplitView, PageHeader).
+- **Admin Governance:** Telas de configuração reais (Prompts, Providers, Recipes).
+- **Engine Foundation:** Runner manifest-first com execução sequencial.
+- **Providers Reais:** Integração de ponta a ponta com Claude (LLM) e Azure Batch (TTS).
+- **Fixes de Produto:** Voz única, Audio Streaming, UI Error Visibility.
 
 ---
 
 ## Gates Completados
 
+### Gate 0.7 — Layout AppShell
+- **SHA:** `ec7d615`
+- **O que:** Estrutura base com Sidebar, Header e Breadcrumb.
+- **Por que:** Necessário para suportar a navegação entre contextos (Jobs vs Admin).
+
+### Gate 0.75 — UI Patterns Parity (4pice Benchmark)
+- **SHA:** `4a7b4d9`
+- **O que:** Componentes canônicos (`SplitView`, `PageHeader`, `SectionCards`, `EmptyState`, `FiltersBar`).
+- **Por que:** Evitar drift visual. Decisão de "Glow Budget Zero" para manter a hierarquia limpa.
+- **ADR:** [ADR-006](../../01-adr/2025-12-13-adr-006-ui-patterns-parity-4pice.md)
+
+### Gate 0.8 — Admin Baseline Completo (Config-First Real)
+- **SHA:** `b09c9c8`
+- **O que:** Páginas Admin (Prompts, Recipes, Providers, Validators) conectadas ao DB.
+- **Por que:** Eliminar hardcode. Tudo que o engine usa deve ser configurável via UI.
+- **Mudanças:** Server actions CRUD, Seed de dados Graciela.
+
+### Gate 0.9 — Engine Integration (Manifest-First)
+- **SHA:** `a2ba590`
+- **O que:** `runner.ts` sequencial + UI de Jobs (PipelineView, LogsViewer).
+- **Por que:** O runner precisa ser a fonte da verdade da execução, persistindo estado no Manifest JSON.
+- **ADR:** [ADR-007](../../01-adr/2025-12-13-adr-007-engine-execution-model.md)
+
 ### Gate 1.0 — Admin Visibility + Execution Map
 - **SHA:** `e28e857`
-- **O que:** Tabelas projects, execution_bindings. Página /admin/execution-map.
+- **O que:** Tabelas `projects`, `execution_bindings`. UI `/admin/execution-map`.
+- **Por que:** Governança sobre o wiring (quem usa qual prompt/provider).
+- **ADR:** [ADR-008](../../01-adr/2025-12-13-adr-008-project-context-execution-bindings.md)
 
 ### Gate 1.1 — Hardening + Effective Config
 - **SHA:** `41575e1`
-- **O que:** StepCapabilities por kind. Runner resolve getEffectiveConfig.
+- **O que:** `StepCapabilities`, resolução de `getEffectiveConfig` no runner.
+- **Por que:** Garantir que o runner saiba exatamente qual configuração usar antes de executar.
 
 ### Gate 1.2 — Real Providers + Validators
 - **SHA:** `3e803a4`
-- **O que:** executeLLM (Claude), executeTTS (Azure), executeValidators.
+- **O que:** Implementação real de `executeLLM` (Claude) e `executeTTS` (Azure).
+- **Por que:** Sair do modo stub. Validadores bloqueiam execução se inputs forem inválidos.
 
 ### Gate 1.25 — Governance + Traceability
 - **SHA:** `eca083a`
-- **O que:** audit_events, Timeline viva, GitHub oficial.
+- **O que:** `audit_events`, Timeline viva, `GitHub` resource.
+- **Por que:** Rastreabilidade é pré-requisito para escalar.
 
 ### Gate 1.3 — UI Visibility
 - **SHA:** `81754ae`
-- **O que:** Job Detail tabs (Config, Artifacts), UsedBySection component.
+- **O que:** Tabs `Config` (snapshot) e `Artifacts` (files) no Job Detail.
+- **Por que:** Admin precisa ver o input/output real sem acessar o servidor.
 
 ### Gate 1.4 — E2E Test Pack
 - **SHA:** `8f7b404`
-- **O que:** Script E2E, Artifacts API, Admin Projects, Audit expandido.
+- **O que:** Script `npm run vf:e2e`, Artifacts API.
+- **Por que:** Automação de testes de fluxo completo (criação -> execução -> validação).
 
 ### Gate 1.4.1 — Multi-Project UX Closure
 - **SHA:** `2a41d91`
-- **O que:** Project dropdown em /jobs/new, projectId em createJob.
+- **O que:** Dropdown de projetos na criação de jobs.
+- **Por que:** Suporte a múltiplos canais (Graciela, etc) na mesma instância.
 
 ### Gate 1.4.2 — Project Filter + E2E Real Execution
 - **SHA:** `1146b8e`
-- **O que:** Project filter em /jobs, E2E real execution com Claude.
+- **O que:** Filtro por projeto na lista de jobs. E2E real com providers.
 
-### Gate 1.5 — Pipeline Bindings + TTS Fix (partial)
+### Gate 1.5 — Pipeline Bindings + TTS Fix
 - **SHA:** `9b336b5`
-- **O que:** Bindings para todos steps Graciela, fix extração texto para TTS.
+- **O que:** Bindings completos para Graciela. Fix na extração de texto para TTS.
 
 ### Gate 1.5.1 — Azure Batch TTS + COMPLETED E2E ✅
 - **SHA:** `73f4dbc`
-- **O que:** Implementação Azure Batch Synthesis API (PUT+poll+download), voice preset Ximena.
-- **Resultado:** E2E COMPLETED, 419.2s, audio 41MB (~28 min)
+- **O que:** Implementação Azure Batch Synthesis API (PUT -> poll -> download).
+- **Por que:** Realtime API falha com textos longos (>10min). Batch é mandatório para narrativas.
+- **Resultado:** E2E completo em ~7min, gerando 41MB de áudio.
 
 ### Gate 1.5.2 — 5 Fixes de Produto ✅
 - **SHA:** `cbc62c5`
 - **O que:**
-  - A) Script Voz Única: parse_ssml limpa (voz:X), [PAUSA], SSML
-  - B) Audio Streaming: Range headers + HTTP 206 support
-  - C) UI Error Visibility: PipelineView mostra lastError
-  - D) Placeholders: Fixture real + validação E2E
-  - E) Documentação: docs/FLUXO-JOBS-STEPS-TABS.md
+  1. **Script Voz Única:** `parse_ssml` limpa tags de voz/pausa.
+  2. **Audio Streaming:** Headers `Range` / `HTTP 206` na API.
+  3. **UI Error Visibility:** `lastError` visível no PipelineStep.
+  4. **Placeholders:** Fixture real e validação de `{{ }}` no outputs.
+  5. **Docs:** `FLUXO-JOBS-STEPS-TABS.md`.
 
 ---
 
-## Arquivos-Chave Criados/Modificados Hoje
+## ADRs Criados
+
+| ID | Título | Link |
+|----|--------|------|
+| ADR-005 | UI Baseline (4pice Reference) | [Link](../../01-adr/2025-12-13-adr-005-ui-baseline-4pice-reference.md) |
+| ADR-006 | UI Patterns Parity | [Link](../../01-adr/2025-12-13-adr-006-ui-patterns-parity-4pice.md) |
+| ADR-007 | Engine Execution Model | [Link](../../01-adr/2025-12-13-adr-007-engine-execution-model.md) |
+| ADR-008 | Project Context + Bindings | [Link](../../01-adr/2025-12-13-adr-008-project-context-execution-bindings.md) |
+
+---
+
+## Decisões Importantes
+
+1.  **Config-First Enforced:** Nenhum hardcode de prompt, provider ou preset. Tudo vem do DB.
+2.  **Manifest Source of Truth:** O estado do job é o JSON do manifest, não colunas soltas.
+3.  **UI 4pice Baseline:** "Zero Glow". Hierarquia por layout (SplitView) e tipografia.
+4.  **Batch TTS:** Para vídeos longos, usar apenas Azure Batch API (não Realtime).
+5.  **Audit Trail:** Mudanças críticas geram logs de auditoria.
+
+---
+
+## Arquivos-Chave Criados/Modificados
 
 | Arquivo | Gate | Descrição |
 |---------|------|-----------|
-| `lib/engine/providers.ts` | 1.5.1 | Azure Batch Synthesis API |
-| `lib/engine/runner.ts` | 1.5.2 | executeStepTransform real (limpeza voz) |
-| `app/api/artifacts/[...path]/route.ts` | 1.5.2 | Range + 206 Partial Content |
-| `components/vf/PipelineView.tsx` | 1.5.2 | lastError display |
-| `fixtures/graciela.input.json` | 1.5.2 | Input real em espanhol |
-| `docs/FLUXO-JOBS-STEPS-TABS.md` | 1.5.2 | Documentação completa do fluxo |
+| `components/layout/AppShell.tsx` | 0.7 | Layout base |
+| `components/vf/JobDetail.tsx` | 0.9 | UI principal de Jobs |
+| `lib/engine/runner.ts` | 0.9 / 1.5.2 | Engine de execução |
+| `app/admin/execution-map/` | 1.0 | Governança de wiring |
+| `lib/engine/providers.ts` | 1.2 / 1.5.1 | Integração Claude e Azure |
+| `docs/FLUXO-JOBS-STEPS-TABS.md` | 1.5.2 | Documentação de fluxo |
+
+---
+
+## Próximo Gate
+
+**Gate 1.6 — Render + Export (Stubs Reais)**
+- Implementar `executeStepRender` (vídeo)
+- Implementar `executeStepExport` (pacote final)
+- Integração com FFmpeg local (próxima fase)
 
 ---
 
 ## Evidence Snapshot
 
-### git log --oneline -n 15
+### git log --oneline -n 20
 ```
-cbc62c5 (HEAD -> main, origin/main) fix: Gate 1.5.2 - 5 fixes de produto
+6452042 docs: Consolidate session history and operational rules [SANITIZED]
+790714a docs: Session closure - Timeline updated to cbc62c5
+cbc62c5 fix: Gate 1.5.2 - 5 fixes de produto
 73f4dbc feat: Gate 1.5.1 - Azure Batch TTS + COMPLETED E2E
 9b336b5 feat: Gate 1.5 - Pipeline Bindings + TTS Fix (partial)
 1146b8e feat: Gate 1.4.2 - Project Filter + E2E Real Execution
@@ -117,54 +167,7 @@ eca083a feat: Gate 1.25 - Governance + Traceability
 e28e857 feat: Gate 1.0 - Admin Visibility + Project Context + Execution Map
 a2ba590 feat: Gate 0.9 - Engine Integration (Manifest-First)
 b09c9c8 feat: Gate 0.8 - Admin Baseline Completo (Config-First Real)
+4a7b4d9 feat: Gate 0.75 - UI Patterns Parity (4pice Benchmark)
+ec7d615 feat: Gate 0.7 - Layout AppShell
+3788ba7 feat: Gate 0.65 - UI Baseline Alignment (ADR-005)
 ```
-
-### E2E Real Mode Output (Gate 1.5.1)
-```
-========================================
-   E2E TEST SUMMARY
-========================================
-Job ID:          18f8290b-ddf6-4491-bfbb-56f722ab4654
-Project:         Verdades de Graciela
-Status:          completed ✅
-Manifest:        ✅
-Steps:           7
-Logs:            15
-Artifacts:       9
-Duration:        419.2s
-Stub Mode:       No
-----------------------------------------
-RESULT: ✅ ALL CHECKS PASSED
-```
-
-### Artifacts Gerados
-```
-artifacts/18f8290b.../
-├── title/output.txt      (1.4KB)
-├── brief/output.txt      (1.7KB)
-├── script/output.txt     (30KB)
-└── tts/audio.mp3         (41MB, ~28 min)
-```
-
----
-
-## Próximo Gate
-
-**Gate 1.6 — Render + Export**
-- Implementar step render (video generation)
-- Implementar step export (pacote final)
-- Ambos são stubs atualmente
-
----
-
-## Decisões Importantes
-
-1. **Azure Batch API** é o modo correto para TTS longo (conforme n8n)
-2. **Voz única** (Ximena) - parse_ssml normaliza texto
-3. **Range headers** obrigatórios para streaming de áudio
-4. **Fixture real** em espanhol para testes E2E
-5. **Documentação viva** - FLUXO-JOBS-STEPS-TABS.md
-
-RESULT:          ✅ ALL CHECKS PASSED
-```
-
