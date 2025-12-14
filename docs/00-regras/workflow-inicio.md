@@ -59,6 +59,8 @@
 6. **Dados reais, NUNCA estimativas:** calcular antes de enviar para IA
 
 7. **Idioma Obrigatório:** Toda comunicação (mensagens, pensamentos, reflexões, documentação) deve ser em **Português (Brasil)**. 🇧🇷
+   - ❌ Proibido falar em inglês (exceto termos técnicos de código)
+   - ✅ O Antigravity e a IA devem se comunicar exclusivamente em PT-BR
 
 ---
 
