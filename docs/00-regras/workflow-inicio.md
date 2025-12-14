@@ -493,3 +493,61 @@ video-factory/
 ---
 
 **Este documento é a base para manter consistência entre projetos.** 📚
+
+---
+
+# PARTE 8: SINCRONIZAÇÃO DE DECISÕES (GOVERNANÇA)
+
+## 📋 Onde Cada Tipo de Informação Deve Estar
+
+| Tipo de Informação | Documento Correto | Por quê |
+|--------------------|-------------------|---------|
+| **Decisões Fundacionais** | `04-produto/prd.md` | São "verdades" do produto |
+| **Arquitetura Técnica** | `04-produto/architecture.md` | Diagramas e stack |
+| **Decisões Arquiteturais** | `01-adr/*.md` | Histórico formal de decisões |
+| **Histórico de Sessões** | `05-timeline/` | Cronológico, append-only |
+| **Lições Aprendidas** | `00-regras/operacao/troubleshooting.md` | Operacionais |
+| **Evidências Mapeadas** | `05-timeline/{data}/mapeamento-*.md` | Referência histórica |
+
+## 🔄 Regras de Sincronização
+
+### Ao tomar uma decisão fundacional:
+1. ✅ Registrar em `prd.md` (seção apropriada)
+2. ✅ Se for arquitetural, criar/atualizar ADR
+3. ✅ Atualizar `architecture.md` se mudar stack/camadas
+
+### Ao encontrar problema/lição:
+1. ✅ Adicionar em `troubleshooting.md`
+2. ✅ Se for recorrente, criar seção dedicada
+
+### Ao mudar status de módulo/funcionalidade:
+1. ✅ Atualizar tabela dos 5 Módulos em `prd.md` seção 1.5
+
+### Ao processar evidência externa (chat logs, etc):
+1. ✅ Criar mapeamento em `05-timeline/{data}/mapeamento-*.md`
+2. ✅ Extrair decisões para docs canônicos
+3. ✅ Manter mapeamento como referência histórica
+
+## ✅ Checklist de Governança (usar em toda sessão)
+
+```markdown
+[ ] Decisões novas estão no PRD ou ADR?
+[ ] Lições aprendidas estão no troubleshooting?
+[ ] Status dos 5 Módulos está atualizado?
+[ ] Timeline tem SHA âncora atualizado?
+[ ] Handover está completo?
+```
+
+## 📚 Docs de Referência (ler no início de sessão)
+
+| Doc | Contém |
+|-----|--------|
+| `04-produto/prd.md` | Seções 1.4, 1.5, 2.5 (decisões fundacionais) |
+| `04-produto/architecture.md` | Stack, 4 camadas, adapters |
+| `00-regras/operacao/troubleshooting.md` | Lições aprendidas |
+| `05-timeline/2025-12-13/README.md` | Handover e estado atual |
+
+---
+
+**Última atualização:** 2025-12-14 | SHA: `f842fcf`
+
