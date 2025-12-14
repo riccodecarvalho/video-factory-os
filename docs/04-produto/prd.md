@@ -41,7 +41,37 @@ O produto é uma "fábrica" com:
 - Operação 24/7 em servidor (primeiro local; SaaS depois)
 - "Efeitos pesados" ON por padrão (sempre via preset/feature flag)
 
+### 1.4 Por que não n8n (racional explícito)
+
+**Custos do n8n:**
+- Fluxo "preso" em modelo de automação genérico
+- Dificulta padronizar como "produto" (manifest, templates, versão, repetibilidade)
+- UI boa para automação, mas não para criação de vídeo como produto
+- Debugging, versionamento e reuso de blocos complexos
+
+**Ganhos do sistema próprio:**
+- Pipeline vira **produto** (não "automação")
+- Tudo vira **config + manifest + execução reproduzível**
+- Versionar templates/prompts/SSML
+- Re-render rápido trocando 1 peça (ex: só voz, só legenda)
+- Caminho natural para SaaS
+
+> Decisão: sistema próprio, documentada em [mapeamento-chatgpt-plano.md](../05-timeline/2025-12-13/mapeamento-chatgpt-plano.md)
+
 ---
+
+## 1.5) 5 Módulos do Produto (Visão de Alto Nível)
+
+| Módulo | Descrição | Status |
+|--------|-----------|--------|
+| **Project Manager** | Projetos, episódios, presets, biblioteca de assets | ✅ Parcial (Admin) |
+| **Script Studio** | Editor de roteiro, segmentação em cenas, versionamento | ⏳ Não implementado |
+| **Voice Lab** | Editor de SSML, preview por cena, normalização, cache de TTS | ⏳ Não implementado |
+| **Video Factory** | Composição (assets + áudio + legendas), render FFmpeg, artefatos | ✅ Parcial (runner) |
+| **Dashboard** | Lista de jobs, logs por etapa, re-run, comparação de versões | ✅ Implementado (/jobs) |
+
+---
+
 
 ## 2) Conceitos de domínio (Config-First)
 
@@ -77,6 +107,23 @@ Cada job gera um `manifest.json` que contém:
 - estado por etapa (status, hash, tentativas, duração)
 - refs de outputs/artefatos
 - custo estimado por etapa (tokens/tts/render)
+
+### 2.5 Knowledge Base Governance (sistema de tiers)
+
+A Knowledge Base é dividida em **tiers** para controle de tokens e contexto:
+
+| Tier | Descrição | Quando carregar |
+|------|-----------|-----------------|
+| **tier1** | Sempre carrega (DNA do projeto, orchestrator) | Toda execução |
+| **tier2** | Por fase do pipeline (ex: regras de roteiro, vozes) | Contexto específico |
+| **tier3** | Sob demanda (schemas, exemplos, referências) | Apenas se necessário |
+
+**Por que isso é importante:**
+- Controle de tokens (evitar explodir limite de contexto)
+- Performance (carregar apenas o necessário)
+- Organização (cada fase sabe o que precisa)
+
+> Documentado em: [mapeamento-chatgpt-plano.md](../05-timeline/2025-12-13/mapeamento-chatgpt-plano.md#6-sistema-de-tiers-knowledge-base)
 
 ---
 

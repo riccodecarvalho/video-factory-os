@@ -36,3 +36,30 @@ As chaves **NÃO** ficam no repositório.
 - **Sintoma:** Player carrega mas não sai som.
 - **Causa:** Falta de suporte a `Range` requests no servidor.
 - **Solução:** (Corrigido no Gate 1.5.2) Garantir que `app/api/artifacts` tenha headers `Accept-Ranges`.
+
+---
+
+## 📚 Lições Aprendidas (do ChatGPT e n8n legado)
+
+> Origem: [mapeamento-chatgpt-plano.md](../../05-timeline/2025-12-13/mapeamento-chatgpt-plano.md)
+
+### 1. FFmpeg precisa de arquivo local
+- **Problema:** FFmpeg não consegue ler diretamente do Drive/URL remota.
+- **Solução:** Sempre seguir fluxo **Download → Render → Upload**.
+- **Impacto:** O runner baixa o arquivo antes de processar.
+
+### 2. Checkpoint por etapa
+- **Problema:** Reprocessar tudo quando só uma etapa falhou.
+- **Solução:** Não refazer o que já está pronto (input_hash).
+- **Impacto:** Se input_hash igual, skip automático.
+
+### 3. Filtros visuais pesados explodem tempo
+- **Problema:** Render com efeitos pode levar 2-3h em CPU.
+- **Solução:** Usar `VideoToolbox` (encoder acelerado) e filtros OFF por default.
+- **Impacto:** Presets com filtros são opt-in, não padrão.
+
+### 4. Governança "anti-cagada"
+- **Problema:** Fallback silencioso mascara erros.
+- **Solução:** `getPromptOrThrow` — se falta config, falha explícita.
+- **Impacto:** Código NUNCA usa hardcode ou fallback. Sempre consulta DB.
+
