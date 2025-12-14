@@ -1,19 +1,43 @@
 # Timeline 2025-12-13
 
-> **Timeline covers up to:** `6452042`
+> **Timeline covers up to:** `6452042` (Consolidação após Gate 1.5.2)
 
 ---
 
 ## Resumo do Dia
 
-Dia focado em **foundational hardening** + **E2E real** do Video Factory OS, cobrindo desde a **Paridade de UI** (0.7) até a **Execução Real** (1.5).
+Dia focado em **foundational hardening** + **E2E real** do Video Factory OS, cobrindo desde a **Paridade de UI** (0.7) até a **Execução Real** (1.5.2).
 
 Estabelecemos:
 - **UI Architecture:** Paridade visual com 4pice (Zero Glow, SplitView, PageHeader).
-- **Admin Governance:** Telas de configuração reais (Prompts, Providers, Recipes).
+- **Admin Governance:** Telas de configuração reais (Prompts, Providers, Recipes, Execution Map).
 - **Engine Foundation:** Runner manifest-first com execução sequencial.
 - **Providers Reais:** Integração de ponta a ponta com Claude (LLM) e Azure Batch (TTS).
 - **Fixes de Produto:** Voz única, Audio Streaming, UI Error Visibility.
+- **Consolidação:** Session logs detalhados e documentação operacional.
+
+---
+
+## 📋 Sessions (Fonte de Verdade Detalhada)
+
+| # | Session | Gate | SHA | Foco |
+|---|---------|------|-----|------|
+| 001 | [Foundational Hardening](sessions/001-foundational-hardening-2025-12-13.md) | - | - | Config & Providers |
+| 002 | [Gate 0.7-0.9 Consolidation](sessions/002-consolidation-gate-0-7-to-0-9.md) | 0.7-0.9 | - | UI & Engine (Retroativo) |
+| 003 | [Gate 1.0-1.5 Consolidation](sessions/003-consolidation-gate-1-0-to-1-5.md) | 1.0-1.5 | - | Admin & E2E (Retroativo) |
+| 004 | [Gate 0.7 AppShell](sessions/004-gate-0.7-appshell.md) | **0.7** | `ec7d615` | Layout base |
+| 005 | [Gate 0.75 UI Patterns](sessions/005-gate-0.75-ui-patterns.md) | **0.75** | `4a7b4d9` | SplitView, PageHeader |
+| 006 | [Gate 0.8 Admin Baseline](sessions/006-gate-0.8-admin-baseline.md) | **0.8** | `b09c9c8` | Config-First Real |
+| 007 | [Gate 0.9 Engine](sessions/007-gate-0.9-engine.md) | **0.9** | `a2ba590` | Manifest-First Runner |
+| 008 | [Gate 1.0 Execution Map](sessions/008-gate-1.0-execution-map.md) | **1.0** | `e28e857` | Project Context |
+| 009 | [Gate 1.1 Hardening](sessions/009-gate-1.1-hardening.md) | **1.1** | `41575e1` | StepCapabilities |
+| 010 | [Gate 1.2 Real Providers](sessions/010-gate-1.2-real-providers.md) | **1.2** | `3e803a4` | Claude + Azure |
+| 011 | [Gate 1.25 Governance](sessions/011-gate-1.25-governance.md) | **1.25** | `eca083a` | Audit + GitHub |
+| 012 | [Gate 1.3 UI Visibility](sessions/012-gate-1.3-ui-visibility.md) | **1.3** | `81754ae` | Config/Artifacts Tabs |
+| 013 | [Gate 1.4 E2E Pack](sessions/013-gate-1.4-e2e-pack.md) | **1.4** | `8f7b404` | Test Automation |
+| 014 | [Gate 1.5 Pipeline Bindings](sessions/014-gate-1.5-pipeline-bindings.md) | **1.5** | `9b336b5` | TTS Fix |
+| 015 | [Gate 1.5.1 Batch TTS](sessions/015-gate-1.5.1-batch-tts.md) | **1.5.1** | `73f4dbc` | Azure Batch API |
+| 016 | [Gate 1.5.2 Product Fixes](sessions/016-gate-1.5.2-product-fixes.md) | **1.5.2** | `cbc62c5` | 5 Fixes |
 
 ---
 
@@ -23,60 +47,68 @@ Estabelecemos:
 - **SHA:** `ec7d615`
 - **O que:** Estrutura base com Sidebar, Header e Breadcrumb.
 - **Por que:** Necessário para suportar a navegação entre contextos (Jobs vs Admin).
+- **Detalhes:** [Session 004](sessions/004-gate-0.7-appshell.md)
 
 ### Gate 0.75 — UI Patterns Parity (4pice Benchmark)
 - **SHA:** `4a7b4d9`
 - **O que:** Componentes canônicos (`SplitView`, `PageHeader`, `SectionCards`, `EmptyState`, `FiltersBar`).
 - **Por que:** Evitar drift visual. Decisão de "Glow Budget Zero" para manter a hierarquia limpa.
 - **ADR:** [ADR-006](../../01-adr/2025-12-13-adr-006-ui-patterns-parity-4pice.md)
+- **Detalhes:** [Session 005](sessions/005-gate-0.75-ui-patterns.md)
 
 ### Gate 0.8 — Admin Baseline Completo (Config-First Real)
 - **SHA:** `b09c9c8`
 - **O que:** Páginas Admin (Prompts, Recipes, Providers, Validators) conectadas ao DB.
 - **Por que:** Eliminar hardcode. Tudo que o engine usa deve ser configurável via UI.
-- **Mudanças:** Server actions CRUD, Seed de dados Graciela.
+- **Detalhes:** [Session 006](sessions/006-gate-0.8-admin-baseline.md)
 
 ### Gate 0.9 — Engine Integration (Manifest-First)
 - **SHA:** `a2ba590`
 - **O que:** `runner.ts` sequencial + UI de Jobs (PipelineView, LogsViewer).
 - **Por que:** O runner precisa ser a fonte da verdade da execução, persistindo estado no Manifest JSON.
 - **ADR:** [ADR-007](../../01-adr/2025-12-13-adr-007-engine-execution-model.md)
+- **Detalhes:** [Session 007](sessions/007-gate-0.9-engine.md)
 
 ### Gate 1.0 — Admin Visibility + Execution Map
 - **SHA:** `e28e857`
 - **O que:** Tabelas `projects`, `execution_bindings`. UI `/admin/execution-map`.
 - **Por que:** Governança sobre o wiring (quem usa qual prompt/provider).
 - **ADR:** [ADR-008](../../01-adr/2025-12-13-adr-008-project-context-execution-bindings.md)
+- **Detalhes:** [Session 008](sessions/008-gate-1.0-execution-map.md)
 
 ### Gate 1.1 — Hardening + Effective Config
 - **SHA:** `41575e1`
 - **O que:** `StepCapabilities`, resolução de `getEffectiveConfig` no runner.
 - **Por que:** Garantir que o runner saiba exatamente qual configuração usar antes de executar.
+- **Detalhes:** [Session 009](sessions/009-gate-1.1-hardening.md)
 
 ### Gate 1.2 — Real Providers + Validators
 - **SHA:** `3e803a4`
 - **O que:** Implementação real de `executeLLM` (Claude) e `executeTTS` (Azure).
 - **Por que:** Sair do modo stub. Validadores bloqueiam execução se inputs forem inválidos.
+- **Detalhes:** [Session 010](sessions/010-gate-1.2-real-providers.md)
 
 ### Gate 1.25 — Governance + Traceability
 - **SHA:** `eca083a`
 - **O que:** `audit_events`, Timeline viva, `GitHub` resource.
 - **Por que:** Rastreabilidade é pré-requisito para escalar.
+- **Detalhes:** [Session 011](sessions/011-gate-1.25-governance.md)
 
 ### Gate 1.3 — UI Visibility
 - **SHA:** `81754ae`
 - **O que:** Tabs `Config` (snapshot) e `Artifacts` (files) no Job Detail.
 - **Por que:** Admin precisa ver o input/output real sem acessar o servidor.
+- **Detalhes:** [Session 012](sessions/012-gate-1.3-ui-visibility.md)
 
 ### Gate 1.4 — E2E Test Pack
 - **SHA:** `8f7b404`
-- **O que:** Script `npm run vf:e2e`, Artifacts API.
+- **O que:** Script `npm run vf:e2e`, Artifacts API, Multi-Project.
 - **Por que:** Automação de testes de fluxo completo (criação -> execução -> validação).
+- **Detalhes:** [Session 013](sessions/013-gate-1.4-e2e-pack.md)
 
 ### Gate 1.4.1 — Multi-Project UX Closure
 - **SHA:** `2a41d91`
 - **O que:** Dropdown de projetos na criação de jobs.
-- **Por que:** Suporte a múltiplos canais (Graciela, etc) na mesma instância.
 
 ### Gate 1.4.2 — Project Filter + E2E Real Execution
 - **SHA:** `1146b8e`
@@ -85,12 +117,14 @@ Estabelecemos:
 ### Gate 1.5 — Pipeline Bindings + TTS Fix
 - **SHA:** `9b336b5`
 - **O que:** Bindings completos para Graciela. Fix na extração de texto para TTS.
+- **Detalhes:** [Session 014](sessions/014-gate-1.5-pipeline-bindings.md)
 
 ### Gate 1.5.1 — Azure Batch TTS + COMPLETED E2E ✅
 - **SHA:** `73f4dbc`
 - **O que:** Implementação Azure Batch Synthesis API (PUT -> poll -> download).
 - **Por que:** Realtime API falha com textos longos (>10min). Batch é mandatório para narrativas.
 - **Resultado:** E2E completo em ~7min, gerando 41MB de áudio.
+- **Detalhes:** [Session 015](sessions/015-gate-1.5.1-batch-tts.md)
 
 ### Gate 1.5.2 — 5 Fixes de Produto ✅
 - **SHA:** `cbc62c5`
@@ -100,6 +134,7 @@ Estabelecemos:
   3. **UI Error Visibility:** `lastError` visível no PipelineStep.
   4. **Placeholders:** Fixture real e validação de `{{ }}` no outputs.
   5. **Docs:** `FLUXO-JOBS-STEPS-TABS.md`.
+- **Detalhes:** [Session 016](sessions/016-gate-1.5.2-product-fixes.md)
 
 ---
 
@@ -114,6 +149,17 @@ Estabelecemos:
 
 ---
 
+## 📚 Documentação Operacional
+
+| Documento | Caminho | O que contém |
+|-----------|---------|--------------|
+| **Manual IA** | [manual-modelos-ia.md](../../00-regras/operacao/manual-modelos-ia.md) | Regras de uso Claude vs Gemini |
+| **Troubleshooting** | [troubleshooting.md](../../00-regras/operacao/troubleshooting.md) | Portas e Chaves (Azure) |
+| **UI Guidelines** | [ui-guidelines.md](../../00-regras/design-system/ui-guidelines.md) | Regras de Glow e 4pice Benchmark |
+| **Fluxo Jobs** | [FLUXO-JOBS-STEPS-TABS.md](../../FLUXO-JOBS-STEPS-TABS.md) | Documentação do pipeline |
+
+---
+
 ## Decisões Importantes
 
 1.  **Config-First Enforced:** Nenhum hardcode de prompt, provider ou preset. Tudo vem do DB.
@@ -121,19 +167,6 @@ Estabelecemos:
 3.  **UI 4pice Baseline:** "Zero Glow". Hierarquia por layout (SplitView) e tipografia.
 4.  **Batch TTS:** Para vídeos longos, usar apenas Azure Batch API (não Realtime).
 5.  **Audit Trail:** Mudanças críticas geram logs de auditoria.
-
----
-
-## Arquivos-Chave Criados/Modificados
-
-| Arquivo | Gate | Descrição |
-|---------|------|-----------|
-| `components/layout/AppShell.tsx` | 0.7 | Layout base |
-| `components/vf/JobDetail.tsx` | 0.9 | UI principal de Jobs |
-| `lib/engine/runner.ts` | 0.9 / 1.5.2 | Engine de execução |
-| `app/admin/execution-map/` | 1.0 | Governança de wiring |
-| `lib/engine/providers.ts` | 1.2 / 1.5.1 | Integração Claude e Azure |
-| `docs/FLUXO-JOBS-STEPS-TABS.md` | 1.5.2 | Documentação de fluxo |
 
 ---
 
@@ -148,7 +181,7 @@ Estabelecemos:
 
 ## Evidence Snapshot
 
-### git log --oneline -n 20
+### git log --oneline -n 25
 ```
 6452042 docs: Consolidate session history and operational rules [SANITIZED]
 790714a docs: Session closure - Timeline updated to cbc62c5
@@ -170,4 +203,7 @@ b09c9c8 feat: Gate 0.8 - Admin Baseline Completo (Config-First Real)
 4a7b4d9 feat: Gate 0.75 - UI Patterns Parity (4pice Benchmark)
 ec7d615 feat: Gate 0.7 - Layout AppShell
 3788ba7 feat: Gate 0.65 - UI Baseline Alignment (ADR-005)
+18b667e feat: Gate 0.6 - Design System implementation (light mode first)
+0103ed5 docs: Gate 0.5 - Arquitetura de Informação + Contratos
+b23afd1 feat: initial commit - Video Factory OS Fase 0
 ```
