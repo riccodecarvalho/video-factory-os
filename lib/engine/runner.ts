@@ -580,8 +580,75 @@ async function executeStepTransform(
 
     logs.push({ timestamp: now(), level: "info", message: `Step Transform: ${stepDef.name}`, stepKey: stepDef.key });
 
-    // Stub transform for now
-    await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+    // Get script from previousOutputs
+    let rawScript = "";
+    const scriptOutput = previousOutputs.script;
+    if (typeof scriptOutput === "string") {
+        rawScript = scriptOutput;
+    } else if (scriptOutput && typeof scriptOutput === "object" && "output" in scriptOutput) {
+        rawScript = String((scriptOutput as Record<string, unknown>).output || "");
+    }
+
+    if (!rawScript) {
+        logs.push({ timestamp: now(), level: "error", message: "No script found in previousOutputs", stepKey: stepDef.key });
+        return {
+            key: stepDef.key,
+            kind,
+            status: "failed",
+            config: stepConfig,
+            started_at: startedAt,
+            completed_at: now(),
+            duration_ms: 0,
+            response: { output: null },
+        };
+    }
+
+    // =============================================
+    // CLEAN SCRIPT (mirroring n8n Parse Guión logic)
+    // =============================================
+    let cleanScript = rawScript
+        // Remove voice tags: (voz: NARRADORA), (voz: ANTAGONISTA), (voz: OTRO), etc.
+        .replace(/\(voz:\s*[^)]+\)/gi, "")
+        // Remove pause markers: [PAUSA], [PAUSA CORTA], [PAUSA LARGA]
+        .replace(/\[PAUSA[^\]]*\]/gi, "")
+        // Remove Markdown headers: # ## ### 
+        .replace(/^#{1,6}\s+/gm, "")
+        // Remove bold/italic: ** __ * _
+        .replace(/\*{1,2}([^*]+)\*{1,2}/g, "$1")
+        .replace(/_{1,2}([^_]+)_{1,2}/g, "$1")
+        // Remove SSML tags (voice, break, speak, prosody)
+        .replace(/<voice[^>]*>/gi, "")
+        .replace(/<\/voice>/gi, "")
+        .replace(/<break[^>]*\/?>/gi, "")
+        .replace(/<speak[^>]*>/gi, "")
+        .replace(/<\/speak>/gi, "")
+        .replace(/<prosody[^>]*>/gi, "")
+        .replace(/<\/prosody>/gi, "")
+        // Remove any remaining XML tags
+        .replace(/<[^>]+>/g, "")
+        // Clean special characters
+        .replace(/&/g, " y ")
+        .replace(/</g, "")
+        .replace(/>/g, "")
+        // Clean whitespace
+        .replace(/[ \t]+$/gm, "")
+        .replace(/ {2,}/g, " ")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+
+    const wordCount = cleanScript.split(/\s+/).filter(w => w.length > 0).length;
+    logs.push({
+        timestamp: now(),
+        level: "info",
+        message: `Cleaned script: ${wordCount} words, ${cleanScript.length} chars`,
+        stepKey: stepDef.key
+    });
+
+    // Save cleaned script as artifact
+    const artifactDir = await ensureArtifactDir(jobId, stepDef.key);
+    const outputPath = `${artifactDir}/output.txt`;
+    const fs = await import("fs/promises");
+    await fs.writeFile(outputPath, cleanScript, "utf-8");
 
     return {
         key: stepDef.key,
@@ -590,8 +657,9 @@ async function executeStepTransform(
         config: stepConfig,
         started_at: startedAt,
         completed_at: now(),
-        duration_ms: 100,
-        response: { output: { transformed: true } },
+        duration_ms: Date.now() - new Date(startedAt).getTime(),
+        artifacts: [{ uri: outputPath, content_type: "text/plain" }],
+        response: { output: cleanScript },
     };
 }
 

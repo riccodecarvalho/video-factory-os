@@ -93,7 +93,7 @@ export function PipelineView({ steps, currentStep, onRetry, className }: Pipelin
                                 )}
                             />
 
-                            {/* Label + Meta */}
+                            {/* Label + Meta + Error */}
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate">{label}</p>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -114,6 +114,12 @@ export function PipelineView({ steps, currentStep, onRetry, className }: Pipelin
                                         </>
                                     )}
                                 </div>
+                                {/* Error message display */}
+                                {step.status === "failed" && step.lastError && (
+                                    <p className="text-xs text-status-error mt-1 truncate" title={step.lastError}>
+                                        ⚠ {step.lastError}
+                                    </p>
+                                )}
                             </div>
 
                             {/* Status Badge */}

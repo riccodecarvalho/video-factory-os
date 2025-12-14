@@ -23,6 +23,9 @@ import { runJob } from '@/lib/engine';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+// Load fixture for Graciela project
+import gracielaInput from '../fixtures/graciela.input.json';
+
 const STUB_MODE = process.argv.includes('--stub');
 
 // ============================================
@@ -124,9 +127,9 @@ async function createTestJob(projectId: string, recipe: { id: string; slug: stri
     const now = new Date().toISOString();
 
     const jobId = uuid();
+    // Use real fixture input from graciela.input.json
     const jobInput = {
-        theme: 'E2E Test - Historia de superación',
-        context: 'Test run for Gate 1.4',
+        ...gracielaInput,
         timestamp: now,
         stub_mode: STUB_MODE,
     };
@@ -147,6 +150,7 @@ async function createTestJob(projectId: string, recipe: { id: string; slug: stri
     });
 
     log('📝', `Created job: ${jobId.slice(0, 8)}... (project: ${projectId.slice(0, 8)}...)`);
+    log('📄', `Input: ${gracielaInput.title.slice(0, 50)}...`);
 
     return jobId;
 }
@@ -206,12 +210,27 @@ async function validateJob(jobId: string): Promise<ValidationResults> {
         }
     }
 
-    // Check artifacts directory
+    // Check artifacts directory for placeholder validation
     const artifactsDir = path.join(process.cwd(), 'artifacts', jobId);
     try {
         const files = await fs.readdir(artifactsDir, { recursive: true });
         const artifactFiles = files.filter(f => typeof f === 'string' && !f.startsWith('.'));
         results.artifactsCount = Math.max(results.artifactsCount, artifactFiles.length);
+
+        // Validate: check for placeholders in output files
+        for (const file of artifactFiles) {
+            if (typeof file === 'string' && file.endsWith('.txt')) {
+                const filePath = path.join(artifactsDir, file);
+                try {
+                    const content = await fs.readFile(filePath, 'utf-8');
+                    if (content.includes('{{') || content.includes('}}')) {
+                        results.errors.push(`Placeholder found in ${file}: contains {{ or }}`);
+                    }
+                } catch {
+                    // Skip unreadable files
+                }
+            }
+        }
     } catch {
         // Directory doesn't exist yet
     }
