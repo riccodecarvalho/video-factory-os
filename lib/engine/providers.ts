@@ -80,6 +80,7 @@ export interface TTSResponse {
     contentType?: string;
     durationSec?: number;
     fileSizeBytes?: number;
+    batchJobId?: string;
     error?: {
         code: string;
         message: string;
@@ -185,15 +186,12 @@ export async function executeLLM(request: LLMRequest): Promise<LLMResponse> {
 }
 
 // ============================================
-// AZURE TTS PROVIDER
+// AZURE TTS PROVIDER (Batch Synthesis)
 // ============================================
 
 export async function executeTTS(request: TTSRequest): Promise<TTSResponse> {
-    const startTime = Date.now();
-
-    // Get API key from env
     const subscriptionKey = process.env.AZURE_SPEECH_KEY;
-    const region = process.env.AZURE_SPEECH_REGION || "brazilsouth";
+    const region = process.env.AZURE_SPEECH_REGION || "eastus2";
 
     if (!subscriptionKey) {
         return {
@@ -205,30 +203,112 @@ export async function executeTTS(request: TTSRequest): Promise<TTSResponse> {
         };
     }
 
+    // Generate unique job ID
+    const jobId = `vfos-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
     // Build SSML from input
     const ssml = buildSSML(request.input, request.voicePreset, request.ssmlPreset);
 
     try {
-        const response = await fetch(
-            `https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`,
+        // 1. Create batch synthesis job (PUT)
+        const createResponse = await fetch(
+            `https://${region}.api.cognitive.microsoft.com/texttospeech/batchsyntheses/${jobId}?api-version=2024-04-01`,
             {
-                method: "POST",
+                method: "PUT",
                 headers: {
-                    "Content-Type": "application/ssml+xml",
+                    "Content-Type": "application/json",
                     "Ocp-Apim-Subscription-Key": subscriptionKey,
-                    "X-Microsoft-OutputFormat": "audio-48khz-192kbitrate-mono-mp3",
                 },
-                body: ssml,
+                body: JSON.stringify({
+                    inputKind: "SSML",
+                    inputs: [{ content: ssml }],
+                    properties: {
+                        outputFormat: "audio-48khz-192kbitrate-mono-mp3",
+                        concatenateResult: true,
+                        timeToLiveInHours: 24
+                    }
+                }),
             }
         );
 
-        if (!response.ok) {
-            const errorText = await response.text();
+        if (!createResponse.ok) {
+            const errorText = await createResponse.text();
             return {
                 success: false,
                 error: {
-                    code: `HTTP_${response.status}`,
-                    message: errorText.slice(0, 500)
+                    code: `HTTP_${createResponse.status}`,
+                    message: `Batch job creation failed: ${errorText.slice(0, 500)}`
+                }
+            };
+        }
+
+        console.log(`[TTS] Created batch job: ${jobId}`);
+
+        // 2. Poll for completion (max 30 attempts = ~30 min)
+        const maxPolls = 30;
+        const pollInterval = 60000; // 60 seconds
+        let resultUrl: string | null = null;
+
+        for (let i = 0; i < maxPolls; i++) {
+            await new Promise(r => setTimeout(r, pollInterval));
+
+            const statusResponse = await fetch(
+                `https://${region}.api.cognitive.microsoft.com/texttospeech/batchsyntheses/${jobId}?api-version=2024-04-01`,
+                {
+                    headers: {
+                        "Ocp-Apim-Subscription-Key": subscriptionKey,
+                    },
+                }
+            );
+
+            if (!statusResponse.ok) {
+                console.log(`[TTS] Poll ${i + 1}/${maxPolls} failed: HTTP ${statusResponse.status}`);
+                continue;
+            }
+
+            const statusData = await statusResponse.json();
+            const status = statusData.status;
+
+            console.log(`[TTS] Poll ${i + 1}/${maxPolls}: ${status}`);
+
+            if (status === "Succeeded") {
+                resultUrl = statusData.outputs?.result;
+                break;
+            }
+
+            if (status === "Failed") {
+                return {
+                    success: false,
+                    error: {
+                        code: "BATCH_FAILED",
+                        message: statusData.properties?.error?.message || "Batch synthesis failed"
+                    }
+                };
+            }
+
+            // Continue polling if Running or NotStarted
+        }
+
+        if (!resultUrl) {
+            return {
+                success: false,
+                error: {
+                    code: "TIMEOUT",
+                    message: `Batch synthesis timed out after ${maxPolls} polls`
+                }
+            };
+        }
+
+        // 3. Download audio file
+        console.log(`[TTS] Downloading audio from: ${resultUrl}`);
+
+        const audioResponse = await fetch(resultUrl);
+        if (!audioResponse.ok) {
+            return {
+                success: false,
+                error: {
+                    code: `DOWNLOAD_${audioResponse.status}`,
+                    message: "Failed to download audio file"
                 }
             };
         }
@@ -242,7 +322,7 @@ export async function executeTTS(request: TTSRequest): Promise<TTSResponse> {
         await fs.mkdir(dir, { recursive: true });
 
         // Write file
-        const arrayBuffer = await response.arrayBuffer();
+        const arrayBuffer = await audioResponse.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         await fs.writeFile(request.outputPath, buffer);
 
@@ -252,12 +332,15 @@ export async function executeTTS(request: TTSRequest): Promise<TTSResponse> {
         // Estimate duration (rough: 192kbps = 24000 bytes/sec)
         const durationSec = Math.round(buffer.length / 24000);
 
+        console.log(`[TTS] Audio saved: ${request.outputPath} (${stats.size} bytes, ~${durationSec}s)`);
+
         return {
             success: true,
             artifactUri: request.outputPath,
             contentType: "audio/mpeg",
             durationSec,
             fileSizeBytes: stats.size,
+            batchJobId: jobId,
         };
 
     } catch (error) {
