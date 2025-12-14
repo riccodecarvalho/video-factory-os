@@ -6,6 +6,27 @@
 
 ---
 
+> [!IMPORTANT]
+> ## 🔄 EXECUÇÃO OBRIGATÓRIA NO INÍCIO DE SESSÃO
+> 
+> **Ao receber este arquivo no início de uma sessão, o agente DEVE:**
+> 
+> 1. **Ler a PARTE 8** (Sincronização de Decisões) ao final deste documento
+> 2. **Executar os passos de verificação:**
+>    - Verificar Timeline Master (`docs/05-timeline/2025-12-13/README.md`)
+>    - Verificar SHA âncora e Handover
+>    - Ler decisões fundacionais em `prd.md` (seções 1.4, 1.5, 2.5)
+> 3. **Aplicar as regras ao longo da sessão:**
+>    - Decisão nova → Registrar em PRD ou ADR
+>    - Lição aprendida → Registrar em troubleshooting.md
+>    - Status mudou → Atualizar tabela dos 5 Módulos
+> 4. **Ao finalizar:** Atualizar Timeline com SHA e Handover
+>
+> **Referência rápida:** Ver [PARTE 8: SINCRONIZAÇÃO DE DECISÕES](#parte-8-sincronização-de-decisões-governança)
+
+---
+
+
 # PARTE 1: PRINCÍPIOS FUNDAMENTAIS
 
 ## 🎯 Princípio Mestre
