@@ -109,6 +109,17 @@ Estabelecemos:
 
 ---
 
+## 📄 Mapeamentos de Evidências Externas
+
+| Arquivo | Descrição | Mapeamento |
+|---------|-----------|------------|
+| `Fixing Video Factory OS Issues.md` | Chat Antigravity (Gates 0.7-1.5.2) | [mapeamento-log-conversas.md](mapeamento-log-conversas.md) |
+| `Starting Service Locally.md` | Chat Antigravity (Setup) | [mapeamento-starting-service.md](mapeamento-starting-service.md) |
+| `Plano Video Factory Local.md` | Chat ChatGPT (Blueprint fundacional) | [mapeamento-chatgpt-plano.md](mapeamento-chatgpt-plano.md) |
+
+---
+
+
 ## 📋 Sessions (Fonte de Verdade Detalhada)
 
 | # | Session | Gate | SHA | Foco |
