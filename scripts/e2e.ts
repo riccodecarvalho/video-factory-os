@@ -12,6 +12,10 @@
  * Usage: npm run vf:e2e [--stub]
  */
 
+// Load .env.local
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
 import { getDb, closeDb, schema } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { v4 as uuid } from 'uuid';
@@ -68,7 +72,7 @@ async function ensureProjects() {
         await db.insert(schema.projects).values({
             id: uuid(),
             key: 'graciela',
-            name: 'Verdades de Graciela',
+            name: 'Graciela',
             description: 'Canal de storytime em espanhol mexicano com histórias familiares dramáticas',
             isActive: true,
             createdAt: now,
