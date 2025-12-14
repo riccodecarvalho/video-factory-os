@@ -37,6 +37,8 @@
 
 6. **Dados reais, NUNCA estimativas:** calcular antes de enviar para IA
 
+7. **Idioma Obrigatório:** Toda comunicação (mensagens, pensamentos, reflexões, documentação) deve ser em **Português (Brasil)**. 🇧🇷
+
 ---
 
 # PARTE 2: ESTRUTURA DE DIRETÓRIOS

@@ -14,6 +14,20 @@ Dia focado em **foundational hardening** + **E2E real** do Video Factory OS. Est
 - UI Visibility (tabs Config e Artifacts)
 - **E2E real com Azure Batch TTS** (41MB audio gerado)
 - **5 fixes de produto** (voz única, audio streaming, UI erros, fixtures, docs)
+- **Consolidação de Conhecimento:** Session logs retroativos e regras operacionais.
+
+## 📚 Novas Documentações Operacionais
+- [Manual de Modelos IA](../../00-regras/operacao/manual-modelos-ia.md)
+- [Troubleshooting & Setup](../../00-regras/operacao/troubleshooting.md)
+- [UI Guidelines](../../00-regras/design-system/ui-guidelines.md)
+
+## Sessions
+
+| # | Session | Status | Foco |
+|---|---------|--------|------|
+| 001 | [Foundational Hardening](sessions/001-foundational-hardening-2025-12-13.md) | ✅ Completa | Config & Providers |
+| 002 | [Gate 0.7-0.9 Consolidation](sessions/002-consolidation-gate-0-7-to-0-9.md) | ✅ Consolidada | UI Baseline & Engine |
+| 003 | [Gate 1.0-1.5 Consolidation](sessions/003-consolidation-gate-1-0-to-1-5.md) | ✅ Consolidada | Admin & E2E Real |
 
 ---
 
