@@ -63,3 +63,26 @@ As chaves **NÃO** ficam no repositório.
 - **Solução:** `getPromptOrThrow` — se falta config, falha explícita.
 - **Impacto:** Código NUNCA usa hardcode ou fallback. Sempre consulta DB.
 
+---
+
+## 📚 Lições Aprendidas (2025-12-16)
+
+### 5. Azure TTS retorna ZIP, não MP3
+- **Problema:** Batch TTS retorna `results.zip` contendo `0001.mp3`.
+- **Solução:** Usar `adm-zip` para extrair MP3 antes de salvar.
+- **Impacto:** `lib/engine/providers.ts` agora extrai ZIP automaticamente.
+
+### 6. FFprobe precisa de instalação separada
+- **Problema:** `@ffmpeg-installer/ffmpeg` não inclui ffprobe.
+- **Solução:** Instalar `@ffprobe-installer/ffprobe` + configurar path.
+- **Impacto:** `ffmpeg.ts` usa `setFfprobePath()` do installer.
+
+### 7. Webpack bundling de módulos nativos
+- **Problema:** Webpack tenta bundlear README.md de pacotes.
+- **Solução:** `serverComponentsExternalPackages` + `webpack.externals`.
+- **Impacto:** `next.config.js` marca ffmpeg/ffprobe como external.
+
+### 8. Formatos de output_refs inconsistentes
+- **Problema:** TTS retorna `{audioPath}`, runner esperava `{output: {audioPath}}`.
+- **Solução:** Suportar ambos formatos no carregamento de previousOutputs.
+- **Impacto:** Resume de jobs funciona com qualquer formato de output.
