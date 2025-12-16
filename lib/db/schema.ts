@@ -422,3 +422,65 @@ export const auditEvents = sqliteTable('audit_events', {
     metadata: text('metadata'), // JSON com info extra (ex: step_key, slot, etc)
 });
 
+// ============================================
+// SCRIPT VERSIONS - Versionamento de roteiros (Script Studio)
+// ============================================
+export const scriptVersions = sqliteTable('script_versions', {
+    id: text('id').primaryKey(),
+
+    // Reference to job
+    jobId: text('job_id').notNull(),
+
+    // Version number (1, 2, 3, ...)
+    version: integer('version').notNull(),
+
+    // Content
+    content: text('content').notNull(),
+
+    // Metrics
+    wordCount: integer('word_count'),
+    characterCount: integer('character_count'),
+    estimatedDurationSec: integer('estimated_duration_sec'), // Based on WPM
+
+    // Source
+    createdBy: text('created_by').notNull().default('ai'), // 'ai' | 'human'
+
+    // Notes
+    notes: text('notes'),
+
+    // Flags
+    isCurrent: integer('is_current', { mode: 'boolean' }).notNull().default(false),
+    isApproved: integer('is_approved', { mode: 'boolean' }).notNull().default(false),
+
+    createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
+});
+
+// ============================================
+// SCENE MARKERS - Marcadores de cena para roteiros
+// ============================================
+export const sceneMarkers = sqliteTable('scene_markers', {
+    id: text('id').primaryKey(),
+
+    // Reference to script version
+    scriptVersionId: text('script_version_id').notNull(),
+
+    // Scene info
+    sceneNumber: integer('scene_number').notNull(),
+    title: text('title'),
+
+    // Position in content
+    startLine: integer('start_line'),
+    endLine: integer('end_line'),
+    startChar: integer('start_char'),
+    endChar: integer('end_char'),
+
+    // Time markers (optional)
+    estimatedStartSec: integer('estimated_start_sec'),
+    estimatedEndSec: integer('estimated_end_sec'),
+
+    // Notes
+    notes: text('notes'),
+    color: text('color'), // For UI highlight
+
+    createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
+});

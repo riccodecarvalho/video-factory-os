@@ -3,16 +3,39 @@
  * 
  * Render de vídeo com áudio + imagem de fundo.
  * Usa VideoToolbox (h264_videotoolbox) para aceleração no Mac.
+ * 
+ * SERVER-ONLY: Este módulo só pode ser usado no servidor.
  */
 
-import ffmpeg from 'fluent-ffmpeg';
-import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
+import 'server-only';
+
 import { existsSync } from 'fs';
 import { stat } from 'fs/promises';
-import path from 'path';
 
-// Configura path do ffmpeg
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+// Types
+type FfmpegCommand = ReturnType<typeof import('fluent-ffmpeg')>;
+
+// Lazy load ffmpeg para evitar bundling no webpack
+let ffmpegModule: typeof import('fluent-ffmpeg') | null = null;
+
+async function getFFmpeg(): Promise<typeof import('fluent-ffmpeg')> {
+    if (!ffmpegModule) {
+        // Dynamic import para evitar problemas com webpack
+        const ffmpeg = (await import('fluent-ffmpeg')).default;
+
+        // Tentar obter o path do ffmpeg do sistema ou do installer
+        try {
+            const ffmpegInstaller = await import('@ffmpeg-installer/ffmpeg');
+            ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+        } catch {
+            // Fallback: usar ffmpeg do sistema
+            console.log('[FFmpeg] Using system ffmpeg');
+        }
+
+        ffmpegModule = ffmpeg;
+    }
+    return ffmpegModule;
+}
 
 export interface VideoPreset {
     encoder: string;       // 'h264_videotoolbox' | 'libx264'
@@ -58,6 +81,38 @@ const DEFAULT_PRESET: VideoPreset = {
 const DEFAULT_BACKGROUND_COLOR = 'black';
 
 /**
+ * Obtém duração de arquivo de áudio em segundos
+ */
+export async function getAudioDuration(audioPath: string): Promise<number | null> {
+    const ffmpeg = await getFFmpeg();
+    return new Promise((resolve) => {
+        ffmpeg.ffprobe(audioPath, (err: Error | null, metadata: { format?: { duration?: number } }) => {
+            if (err || !metadata.format?.duration) {
+                resolve(null);
+                return;
+            }
+            resolve(metadata.format.duration);
+        });
+    });
+}
+
+/**
+ * Obtém duração de arquivo de vídeo em segundos
+ */
+export async function getVideoDuration(videoPath: string): Promise<number | null> {
+    const ffmpeg = await getFFmpeg();
+    return new Promise((resolve) => {
+        ffmpeg.ffprobe(videoPath, (err: Error | null, metadata: { format?: { duration?: number } }) => {
+            if (err || !metadata.format?.duration) {
+                resolve(null);
+                return;
+            }
+            resolve(metadata.format.duration);
+        });
+    });
+}
+
+/**
  * Renderiza vídeo a partir de áudio + imagem de fundo
  */
 export async function renderVideo(options: RenderOptions): Promise<RenderResult> {
@@ -87,10 +142,11 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
         };
     }
 
-    return new Promise((resolve) => {
-        const [width, height] = effectivePreset.scale.split(':').map(Number);
+    const ffmpeg = await getFFmpeg();
+    const [width, height] = effectivePreset.scale.split(':').map(Number);
 
-        let command: ffmpeg.FfmpegCommand;
+    return new Promise((resolve) => {
+        let command: FfmpegCommand;
 
         if (backgroundImagePath && existsSync(backgroundImagePath)) {
             // Com imagem de fundo
@@ -127,7 +183,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
                 ]);
         }
 
-        command
+        (command as any)
             .output(outputPath)
             .on('end', async () => {
                 try {
@@ -146,7 +202,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
                     });
                 }
             })
-            .on('error', (err, stdout, stderr) => {
+            .on('error', (err: Error, _stdout: string, stderr: string) => {
                 console.error('[FFmpeg Error]', err.message);
                 console.error('[FFmpeg Stderr]', stderr);
 
@@ -192,16 +248,17 @@ export async function extractThumbnail(
     }
 
     const seekTime = (duration * timePercentage) / 100;
+    const ffmpeg = await getFFmpeg();
 
     return new Promise((resolve) => {
-        ffmpeg(videoPath)
+        (ffmpeg(videoPath) as any)
             .seekInput(seekTime)
             .outputOptions(['-vframes', '1', '-q:v', '2'])
             .output(outputPath)
             .on('end', () => {
                 resolve({ success: true, thumbnailPath: outputPath });
             })
-            .on('error', (err) => {
+            .on('error', (err: Error) => {
                 resolve({ success: false, error: err.message });
             })
             .run();
@@ -209,42 +266,17 @@ export async function extractThumbnail(
 }
 
 /**
- * Obtém duração de arquivo de áudio em segundos
- */
-export function getAudioDuration(audioPath: string): Promise<number | null> {
-    return new Promise((resolve) => {
-        ffmpeg.ffprobe(audioPath, (err, metadata) => {
-            if (err || !metadata.format?.duration) {
-                resolve(null);
-                return;
-            }
-            resolve(metadata.format.duration);
-        });
-    });
-}
-
-/**
- * Obtém duração de arquivo de vídeo em segundos
- */
-export function getVideoDuration(videoPath: string): Promise<number | null> {
-    return new Promise((resolve) => {
-        ffmpeg.ffprobe(videoPath, (err, metadata) => {
-            if (err || !metadata.format?.duration) {
-                resolve(null);
-                return;
-            }
-            resolve(metadata.format.duration);
-        });
-    });
-}
-
-/**
  * Verifica se FFmpeg está disponível
  */
 export async function checkFFmpegAvailable(): Promise<boolean> {
-    return new Promise((resolve) => {
-        ffmpeg.getAvailableFormats((err) => {
-            resolve(!err);
+    try {
+        const ffmpeg = await getFFmpeg();
+        return new Promise((resolve) => {
+            ffmpeg.getAvailableFormats((err: Error | null) => {
+                resolve(!err);
+            });
         });
-    });
+    } catch {
+        return false;
+    }
 }
