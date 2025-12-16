@@ -1,45 +1,38 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/layout";
-import { JobCard, JobCardSkeleton, MetricCard, StatusBadge } from "@/components/vf";
-import { Plus, Zap, Clock, DollarSign } from "lucide-react";
+import { JobCard, MetricCard } from "@/components/vf";
+import { Plus, Zap, Clock, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
+import { getJobs, getJobStatusCounts } from "@/app/jobs/actions";
 
 /**
  * Dashboard - "Control Room"
  * 
- * Mostra: métricas, lista de jobs recentes, ações rápidas
+ * Mostra: métricas reais, lista de jobs recentes, ações rápidas
  */
 
-// Dados de exemplo (em produção viriam do DB)
-const mockJobs = [
-    {
-        id: "job_01HXYZ123ABC",
-        title: "El secreto que mi suegra guardó por 30 años",
-        recipe: "Graciela YouTube Long",
-        status: "running" as const,
-        progress: 45,
-        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    },
-    {
-        id: "job_02HXYZ456DEF",
-        title: "La herencia que destruyó a mi familia",
-        recipe: "Graciela YouTube Long",
-        status: "completed" as const,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    },
-    {
-        id: "job_03HXYZ789GHI",
-        title: "Cuando descubrí que mi esposo tenía otra vida",
-        recipe: "Graciela YouTube Long",
-        status: "failed" as const,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-    },
-];
+export default async function DashboardPage() {
+    // Buscar dados reais do banco
+    const [jobs, statusCounts] = await Promise.all([
+        getJobs(),
+        getJobStatusCounts()
+    ]);
 
-export default function DashboardPage() {
-    const isLoading = false;
+    // Pegar os 6 jobs mais recentes
+    const recentJobs = jobs.slice(0, 6);
+
+    // Calcular jobs concluídos hoje
+    const today = new Date().toISOString().split("T")[0];
+    const completedToday = jobs.filter(j =>
+        j.status === "completed" &&
+        j.completedAt?.startsWith(today)
+    ).length;
+
+    // Calcular taxa de sucesso (evitar divisão por zero)
+    const totalFinished = statusCounts.completed + statusCounts.failed;
+    const successRate = totalFinished > 0
+        ? Math.round((statusCounts.completed / totalFinished) * 100)
+        : 100;
 
     return (
         <AppShell>
@@ -64,22 +57,23 @@ export default function DashboardPage() {
                 <div className="grid gap-4 md:grid-cols-4 mb-8">
                     <MetricCard
                         label="Em Produção"
-                        value={1}
+                        value={statusCounts.running}
                         icon={<Zap className="h-4 w-4" />}
                     />
                     <MetricCard
                         label="Concluídos Hoje"
-                        value={5}
+                        value={completedToday}
                         icon={<Clock className="h-4 w-4" />}
                     />
                     <MetricCard
                         label="Taxa Sucesso"
-                        value="92%"
+                        value={`${successRate}%`}
+                        icon={<CheckCircle className="h-4 w-4" />}
                     />
                     <MetricCard
-                        label="Custo Hoje"
-                        value="$12.45"
-                        icon={<DollarSign className="h-4 w-4" />}
+                        label="Falhados"
+                        value={statusCounts.failed}
+                        icon={<XCircle className="h-4 w-4" />}
                     />
                 </div>
 
@@ -88,29 +82,35 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-semibold">Jobs Recentes</h2>
                         <Link href="/jobs" className="text-sm text-primary hover:underline">
-                            Ver todos →
+                            Ver todos ({statusCounts.all}) →
                         </Link>
                     </div>
 
-                    {isLoading ? (
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            <JobCardSkeleton />
-                            <JobCardSkeleton />
-                            <JobCardSkeleton />
+                    {recentJobs.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground">
+                            <p>Nenhum job criado ainda.</p>
+                            <Link href="/jobs/new">
+                                <Button variant="outline" className="mt-4">
+                                    Criar primeiro job
+                                </Button>
+                            </Link>
                         </div>
                     ) : (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {mockJobs.map((job) => (
-                                <JobCard
-                                    key={job.id}
-                                    id={job.id}
-                                    title={job.title}
-                                    recipe={job.recipe}
-                                    status={job.status}
-                                    progress={job.progress}
-                                    createdAt={job.createdAt}
-                                />
-                            ))}
+                            {recentJobs.map((job) => {
+                                const input = JSON.parse(job.input || "{}");
+                                return (
+                                    <JobCard
+                                        key={job.id}
+                                        id={job.id}
+                                        title={input.title || input.idea || job.recipeSlug || "Sem título"}
+                                        recipe={job.recipeSlug || "Receita"}
+                                        status={job.status as "pending" | "running" | "completed" | "failed" | "cancelled"}
+                                        progress={job.progress || 0}
+                                        createdAt={job.createdAt || ""}
+                                    />
+                                );
+                            })}
                         </div>
                     )}
                 </div>
@@ -118,3 +118,4 @@ export default function DashboardPage() {
         </AppShell>
     );
 }
+

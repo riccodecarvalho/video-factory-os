@@ -809,9 +809,31 @@ async function executeStepRender(
         stepKey: stepDef.key
     });
 
+    // Determine background image path
+    // Priority: 1) input.avatarPath 2) recipe-specific default
+    let backgroundImagePath = (input.avatarPath as string) || (input.backgroundImage as string);
+
+    // If no explicit path, check for recipe-specific avatar
+    if (!backgroundImagePath) {
+        const path = await import('path');
+        const fs = await import('fs');
+        // Check recipes/<recipe-slug>/assets/avatar.png
+        const recipeAvatarPath = path.join(process.cwd(), 'recipes', 'graciela', 'assets', 'avatar.png');
+        if (fs.existsSync(recipeAvatarPath)) {
+            backgroundImagePath = recipeAvatarPath;
+            logs.push({
+                timestamp: now(),
+                level: "info",
+                message: `Usando avatar da recipe: ${recipeAvatarPath}`,
+                stepKey: stepDef.key
+            });
+        }
+    }
+
     // Execute FFmpeg render
     const renderResult = await renderVideo({
         audioPath,
+        backgroundImagePath,
         outputPath,
         preset,
     });

@@ -15,8 +15,8 @@ build/
 *.db-journal
 
 # Jobs output (local artifacts)
-jobs/
-artifacts/
+/jobs/
+/artifacts/
 
 # Environment
 .env

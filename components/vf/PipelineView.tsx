@@ -49,6 +49,7 @@ const statusColors: Record<StepStatus, string> = {
 };
 
 const stepLabels: Record<string, string> = {
+    // English keys (legacy)
     title: "Gerar Títulos",
     brief: "Expandir Brief",
     script: "Gerar Roteiro",
@@ -56,7 +57,19 @@ const stepLabels: Record<string, string> = {
     tts: "Gerar Áudio (TTS)",
     render: "Renderizar Vídeo",
     export: "Exportar Pacote",
+    // PT-BR keys (Graciela v2)
+    ideacao: "Ideação",
+    titulo: "Gerar Título",
+    planejamento: "Planejamento",
+    roteiro: "Gerar Roteiro",
+    renderizacao: "Renderizar Vídeo",
+    exportacao: "Exportar Pacote",
+    miniaturas: "Gerar Miniaturas",
+    descricao: "Descrição YouTube",
+    tags: "Gerar Tags",
+    comunidade: "Post Comunidade",
 };
+
 
 function formatDuration(ms: number): string {
     if (ms < 1000) return `${ms}ms`;
