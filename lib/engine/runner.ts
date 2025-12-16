@@ -810,21 +810,40 @@ async function executeStepRender(
     });
 
     // Determine background image path
-    // Priority: 1) input.avatarPath 2) recipe-specific default
+    // Priority: 1) input.avatarPath 2) recipe-specific default (matching resolution)
     let backgroundImagePath = (input.avatarPath as string) || (input.backgroundImage as string);
 
-    // If no explicit path, check for recipe-specific avatar
+    // If no explicit path, check for recipe-specific avatar matching preset resolution
     if (!backgroundImagePath) {
         const path = await import('path');
         const fs = await import('fs');
-        // Check recipes/<recipe-slug>/assets/avatar.png
-        const recipeAvatarPath = path.join(process.cwd(), 'recipes', 'graciela', 'assets', 'avatar.png');
+
+        // Determine resolution suffix based on preset scale
+        let resolutionSuffix = '';
+        if (preset.scale.includes('1920') || preset.scale.includes('1080')) {
+            resolutionSuffix = '_1080p';
+        } else if (preset.scale.includes('1280') || preset.scale.includes('720')) {
+            resolutionSuffix = '_720p';
+        }
+
+        // Try resolution-specific avatar first, then fallback to default
+        const recipeAvatarPath = path.join(process.cwd(), 'recipes', 'graciela', 'assets', `avatar${resolutionSuffix}.png`);
+        const fallbackAvatarPath = path.join(process.cwd(), 'recipes', 'graciela', 'assets', 'avatar.png');
+
         if (fs.existsSync(recipeAvatarPath)) {
             backgroundImagePath = recipeAvatarPath;
             logs.push({
                 timestamp: now(),
                 level: "info",
-                message: `Usando avatar da recipe: ${recipeAvatarPath}`,
+                message: `Usando avatar da recipe (${resolutionSuffix || 'default'}): ${recipeAvatarPath}`,
+                stepKey: stepDef.key
+            });
+        } else if (fs.existsSync(fallbackAvatarPath)) {
+            backgroundImagePath = fallbackAvatarPath;
+            logs.push({
+                timestamp: now(),
+                level: "info",
+                message: `Usando avatar da recipe (fallback): ${fallbackAvatarPath}`,
                 stepKey: stepDef.key
             });
         }
