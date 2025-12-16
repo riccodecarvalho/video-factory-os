@@ -966,10 +966,20 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
         manifest.snapshots.config_by_step[stepDef.key] = config as ResolvedConfig;
     }
 
-    // 6. Create job steps
+    // 6. Create job steps (only if they don't exist - prevents duplicates on retry)
     const input = JSON.parse(job.input);
+    const existingSteps = await db.select().from(schema.jobSteps)
+        .where(eq(schema.jobSteps.jobId, jobId));
+    const existingStepKeys = new Set(existingSteps.map(s => s.stepKey));
+
     for (let i = 0; i < pipeline.length; i++) {
         const stepDef = pipeline[i];
+
+        // Skip if step already exists
+        if (existingStepKeys.has(stepDef.key)) {
+            continue;
+        }
+
         await db.insert(schema.jobSteps).values({
             id: uuid(),
             jobId,
@@ -978,7 +988,7 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
             inputHash: generateInputHash({ ...input, stepKey: stepDef.key }),
             status: "pending",
             attempts: 0,
-        }).onConflictDoNothing();
+        });
     }
 
     // 7. Execute steps sequentially
