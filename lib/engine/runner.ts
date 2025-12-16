@@ -28,8 +28,8 @@ import {
     type ValidationResult,
 } from "./providers";
 import { renderVideo, VideoPreset } from "./ffmpeg";
+import { getPreviousOutputKey, normalizeStepKey, getStepExecutorType } from "./step-mapper";
 import { exportJob } from "./export";
-import { normalizeStepKey, getStepExecutorType, getPreviousOutputKey } from "./step-mapper";
 
 type JobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 type StepStatus = "pending" | "running" | "success" | "failed" | "skipped";
@@ -675,9 +675,12 @@ async function executeStepTransform(
 
     logs.push({ timestamp: now(), level: "info", message: `Step Transform: ${stepDef.name}`, stepKey: stepDef.key });
 
-    // Get script from previousOutputs
+    // Get script from previousOutputs (roteiro or script)
+    // Uses getPreviousOutputKey for PT-BR/EN alias support
     let rawScript = "";
-    const scriptOutput = previousOutputs.script;
+    const scriptOutput = getPreviousOutputKey(previousOutputs, 'roteiro') ||
+        previousOutputs.roteiro ||
+        previousOutputs.script;
     if (typeof scriptOutput === "string") {
         rawScript = scriptOutput;
     } else if (scriptOutput && typeof scriptOutput === "object" && "output" in scriptOutput) {
@@ -685,7 +688,7 @@ async function executeStepTransform(
     }
 
     if (!rawScript) {
-        logs.push({ timestamp: now(), level: "error", message: "No script found in previousOutputs", stepKey: stepDef.key });
+        logs.push({ timestamp: now(), level: "error", message: "No script found in previousOutputs (checked roteiro and script)", stepKey: stepDef.key });
         return {
             key: stepDef.key,
             kind,
@@ -695,6 +698,7 @@ async function executeStepTransform(
             completed_at: now(),
             duration_ms: 0,
             response: { output: null },
+            error: { code: "MISSING_SCRIPT", message: "Roteiro não encontrado nos outputs anteriores" },
         };
     }
 
