@@ -505,3 +505,159 @@ export async function toggleProjectActive(id: string, isActive: boolean) {
     revalidatePath("/admin/projects");
 }
 
+// ============================================
+// PROJECT BINDINGS - Hub Central
+// ============================================
+
+export type ProjectBindingSlot = 'provider_llm' | 'provider_tts' | 'preset_voice' | 'preset_video' | 'recipe';
+
+export interface ProjectBinding {
+    slot: ProjectBindingSlot;
+    targetId: string;
+    targetName: string;
+    targetSlug: string;
+}
+
+export async function getProjectBindings(projectId: string): Promise<ProjectBinding[]> {
+    const db = getDb();
+
+    // Buscar bindings do projeto
+    const bindings = await db.select()
+        .from(schema.executionBindings)
+        .where(eq(schema.executionBindings.projectId, projectId));
+
+    // Carregar detalhes dos targets
+    const providers = await db.select().from(schema.providers);
+    const presetsVoice = await db.select().from(schema.presetsVoice);
+    const presetsVideo = await db.select().from(schema.presetsVideo);
+    const recipes = await db.select().from(schema.recipes);
+
+    const result: ProjectBinding[] = [];
+
+    for (const b of bindings) {
+        let targetName = '';
+        let targetSlug = '';
+        let slot: ProjectBindingSlot | null = null;
+
+        if (b.slot === 'provider') {
+            const provider = providers.find(p => p.id === b.targetId);
+            if (provider) {
+                targetName = provider.name;
+                targetSlug = provider.slug;
+                slot = provider.type === 'llm' ? 'provider_llm' : 'provider_tts';
+            }
+        } else if (b.slot === 'preset_voice') {
+            const preset = presetsVoice.find(p => p.id === b.targetId);
+            if (preset) {
+                targetName = preset.name;
+                targetSlug = preset.slug;
+                slot = 'preset_voice';
+            }
+        } else if (b.slot === 'preset_video') {
+            const preset = presetsVideo.find(p => p.id === b.targetId);
+            if (preset) {
+                targetName = preset.name;
+                targetSlug = preset.slug;
+                slot = 'preset_video';
+            }
+        }
+
+        if (slot) {
+            result.push({ slot, targetId: b.targetId, targetName, targetSlug });
+        }
+    }
+
+    // Buscar recipe ativo do projeto
+    const recipeBinding = bindings.find(b => b.stepKey === '*' && b.slot === 'recipe');
+    if (recipeBinding) {
+        const recipe = recipes.find(r => r.id === recipeBinding.targetId);
+        if (recipe) {
+            result.push({ slot: 'recipe', targetId: recipeBinding.targetId, targetName: recipe.name, targetSlug: recipe.slug });
+        }
+    }
+
+    return result;
+}
+
+export async function updateProjectBinding(projectId: string, slot: ProjectBindingSlot, targetId: string, recipeId?: string) {
+    const db = getDb();
+    const now = new Date().toISOString();
+
+    let dbSlot: string;
+    let stepKey = '*';
+
+    switch (slot) {
+        case 'provider_llm': dbSlot = 'provider'; stepKey = 'script'; break;
+        case 'provider_tts': dbSlot = 'provider'; stepKey = 'tts'; break;
+        case 'preset_voice': dbSlot = 'preset_voice'; stepKey = 'tts'; break;
+        case 'preset_video': dbSlot = 'preset_video'; stepKey = 'render'; break;
+        case 'recipe': dbSlot = 'recipe'; stepKey = '*'; break;
+        default: throw new Error(`Invalid slot: ${slot}`);
+    }
+
+    // Buscar recipe_id ativo se não fornecido
+    let effectiveRecipeId = recipeId;
+    if (!effectiveRecipeId) {
+        const recipes = await db.select().from(schema.recipes).where(eq(schema.recipes.isActive, true));
+        if (recipes.length > 0) effectiveRecipeId = recipes[0].id;
+        else throw new Error('No active recipe found');
+    }
+
+    // Buscar binding existente
+    const existing = await db.select().from(schema.executionBindings).where(
+        and(
+            eq(schema.executionBindings.projectId, projectId),
+            eq(schema.executionBindings.slot, dbSlot),
+            eq(schema.executionBindings.stepKey, stepKey)
+        )
+    );
+
+    if (existing.length > 0) {
+        await db.update(schema.executionBindings).set({ targetId, updatedAt: now }).where(eq(schema.executionBindings.id, existing[0].id));
+    } else {
+        await db.insert(schema.executionBindings).values({
+            id: uuid(),
+            scope: 'project',
+            projectId,
+            recipeId: effectiveRecipeId,
+            stepKey,
+            slot: dbSlot,
+            targetId,
+            priority: 0,
+            isActive: true,
+            createdAt: now,
+            updatedAt: now,
+        });
+    }
+
+    revalidatePath("/admin/projects");
+}
+
+export async function getAvailableProvidersForProject() {
+    const db = getDb();
+    const providers = await db.select().from(schema.providers).where(eq(schema.providers.isActive, true));
+
+    return {
+        llm: providers.filter(p => p.type === 'llm').map(p => ({ id: p.id, name: p.name, slug: p.slug, model: p.defaultModel })),
+        tts: providers.filter(p => p.type === 'tts').map(p => ({ id: p.id, name: p.name, slug: p.slug })),
+    };
+}
+
+export async function getAvailablePresetsForProject() {
+    const db = getDb();
+    const [voice, video] = await Promise.all([
+        db.select().from(schema.presetsVoice).where(eq(schema.presetsVoice.isActive, true)),
+        db.select().from(schema.presetsVideo).where(eq(schema.presetsVideo.isActive, true)),
+    ]);
+
+    return {
+        voice: voice.map(p => ({ id: p.id, name: p.name, slug: p.slug, voiceName: p.voiceName })),
+        video: video.map(p => ({ id: p.id, name: p.name, slug: p.slug, scale: p.scale })),
+    };
+}
+
+export async function getAvailableRecipesForProject() {
+    const db = getDb();
+    const recipes = await db.select().from(schema.recipes).where(eq(schema.recipes.isActive, true));
+    return recipes.map(r => ({ id: r.id, name: r.name, slug: r.slug }));
+}
