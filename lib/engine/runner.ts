@@ -86,6 +86,16 @@ interface ResolvedConfig {
         // Expanded fields
         pauseMappings?: Record<string, number>;
     };
+    preset_video?: {
+        id: string;
+        name: string;
+        source: string;
+        // Expanded fields
+        encoder?: string;
+        scale?: string;
+        fps?: number;
+        bitrate?: string;
+    };
     validators?: {
         items: Array<{
             id: string;
@@ -233,6 +243,34 @@ async function loadSsmlPreset(presetId: string) {
     const [preset] = await db.select().from(schema.presetsSsml).where(eq(schema.presetsSsml.id, presetId));
     return preset;
 }
+
+async function loadVideoPreset(presetId: string): Promise<VideoPreset | null> {
+    const db = getDb();
+    const [preset] = await db.select().from(schema.presetsVideo).where(eq(schema.presetsVideo.id, presetId));
+
+    if (!preset) return null;
+
+    return {
+        encoder: preset.encoder,
+        scale: preset.scale,
+        fps: preset.fps,
+        bitrate: preset.bitrate,
+        pixelFormat: preset.pixelFormat,
+        audioCodec: preset.audioCodec,
+        audioBitrate: preset.audioBitrate,
+    };
+}
+
+// Default preset for fallback when no preset configured
+const DEFAULT_VIDEO_PRESET: VideoPreset = {
+    encoder: 'h264_videotoolbox',
+    scale: '1280:720',
+    fps: 30,
+    bitrate: '4M',
+    pixelFormat: 'yuv420p',
+    audioCodec: 'aac',
+    audioBitrate: '192k',
+};
 
 async function loadValidators(validatorIds: string[]): Promise<ValidatorConfig[]> {
     if (validatorIds.length === 0) return [];
@@ -756,20 +794,14 @@ async function executeStepRender(
     const outputPath = `${artifactDir}/video.mp4`;
 
     // Load video preset from config or use defaults
-    const preset: VideoPreset = {
-        encoder: 'h264_videotoolbox',
-        scale: '1280:720',
-        fps: 30,
-        bitrate: '4M',
-        pixelFormat: 'yuv420p',
-        audioCodec: 'aac',
-        audioBitrate: '192k',
-    };
+    const videoPresetId = stepConfig.preset_video?.id;
+    const loadedPreset = videoPresetId ? await loadVideoPreset(videoPresetId) : null;
+    const preset: VideoPreset = loadedPreset || DEFAULT_VIDEO_PRESET;
 
     logs.push({
         timestamp: now(),
         level: "info",
-        message: `Renderizando vídeo: encoder=${preset.encoder}, scale=${preset.scale}`,
+        message: `Renderizando vídeo: encoder=${preset.encoder}, scale=${preset.scale}${loadedPreset ? ' (from DB)' : ' (fallback)'}`,
         stepKey: stepDef.key
     });
 

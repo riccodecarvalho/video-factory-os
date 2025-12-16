@@ -360,6 +360,47 @@ export async function getVideoPresets() {
     return db.select().from(schema.presetsVideo);
 }
 
+export async function createVideoPreset(data: Partial<typeof schema.presetsVideo.$inferInsert>) {
+    const db = getDb();
+    const now = new Date().toISOString();
+    const newPreset = {
+        id: uuid(),
+        slug: data.slug || `video-preset-${Date.now()}`,
+        name: data.name || "Novo Preset de Vídeo",
+        encoder: 'h264_videotoolbox',
+        scale: '1280:720',
+        fps: 30,
+        bitrate: '4M',
+        pixelFormat: 'yuv420p',
+        audioCodec: 'aac',
+        audioBitrate: '192k',
+        isActive: true,
+        createdAt: now,
+        ...data,
+    };
+    await db.insert(schema.presetsVideo).values(newPreset);
+    await auditCrud("created", "preset_video", newPreset.id, newPreset.name, undefined, newPreset);
+    revalidatePath("/admin/presets/video");
+    return newPreset;
+}
+
+export async function updateVideoPreset(id: string, data: Partial<typeof schema.presetsVideo.$inferInsert>) {
+    const db = getDb();
+    const [before] = await db.select().from(schema.presetsVideo).where(eq(schema.presetsVideo.id, id));
+    await db.update(schema.presetsVideo).set(data).where(eq(schema.presetsVideo.id, id));
+    const [after] = await db.select().from(schema.presetsVideo).where(eq(schema.presetsVideo.id, id));
+    await auditCrud("updated", "preset_video", id, after.name, before, after);
+    revalidatePath("/admin/presets/video");
+}
+
+export async function deleteVideoPreset(id: string) {
+    const db = getDb();
+    const [before] = await db.select().from(schema.presetsVideo).where(eq(schema.presetsVideo.id, id));
+    await db.delete(schema.presetsVideo).where(eq(schema.presetsVideo.id, id));
+    await auditCrud("deleted", "preset_video", id, before?.name || "unknown", before, undefined);
+    revalidatePath("/admin/presets/video");
+}
+
 export async function getEffectsPresets() {
     const db = getDb();
     return db.select().from(schema.presetsEffects);
