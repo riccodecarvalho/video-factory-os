@@ -27,6 +27,8 @@ import {
     Save,
     Loader2,
 } from "lucide-react";
+import { ContextBanner } from "@/components/ui/ContextBanner";
+import { LineNumberedTextarea } from "@/components/ui/LineNumberedTextarea";
 import {
     getPrompts,
     getPromptCategories,
@@ -289,20 +291,18 @@ export default function AdminPromptsPage() {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label>System Prompt</Label>
-                                            <Textarea
-                                                rows={6}
-                                                className="font-mono text-sm"
+                                            <Label>System Prompt (com números de linha)</Label>
+                                            <LineNumberedTextarea
+                                                rows={10}
                                                 value={editedPrompt.systemPrompt || ""}
                                                 onChange={(e) => setEditedPrompt({ ...editedPrompt, systemPrompt: e.target.value })}
                                             />
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label>User Template</Label>
-                                            <Textarea
-                                                rows={6}
-                                                className="font-mono text-sm"
+                                            <Label>User Template (com números de linha)</Label>
+                                            <LineNumberedTextarea
+                                                rows={10}
                                                 value={editedPrompt.userTemplate || ""}
                                                 onChange={(e) => setEditedPrompt({ ...editedPrompt, userTemplate: e.target.value })}
                                             />

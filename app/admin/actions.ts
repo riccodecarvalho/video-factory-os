@@ -406,6 +406,36 @@ export async function getEffectsPresets() {
     return db.select().from(schema.presetsEffects);
 }
 
+// Generic updatePreset for all preset types
+export async function updatePreset(type: PresetType, id: string, data: Record<string, unknown>) {
+    const db = getDb();
+    const now = new Date().toISOString();
+
+    // Clean data - remove fields that shouldn't be updated
+    const cleanData = Object.fromEntries(
+        Object.entries(data).filter(([k]) =>
+            !["id", "createdAt", "presetType"].includes(k)
+        )
+    );
+
+    switch (type) {
+        case "voice":
+            await db.update(schema.presetsVoice).set(cleanData).where(eq(schema.presetsVoice.id, id));
+            break;
+        case "video":
+            await db.update(schema.presetsVideo).set(cleanData).where(eq(schema.presetsVideo.id, id));
+            break;
+        case "effects":
+            await db.update(schema.presetsEffects).set(cleanData).where(eq(schema.presetsEffects.id, id));
+            break;
+        case "ssml":
+            await db.update(schema.presetsSsml).set(cleanData).where(eq(schema.presetsSsml.id, id));
+            break;
+    }
+
+    revalidatePath("/admin/presets");
+}
+
 // ============================================
 // PROJECTS
 // ============================================

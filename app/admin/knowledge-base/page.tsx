@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Sidebar } from "@/components/layout/Sidebar";
 import {
     PageHeader,
@@ -17,6 +16,9 @@ import {
     FiltersBar,
     EmptyState,
 } from "@/components/layout";
+import { ContextBanner } from "@/components/ui/ContextBanner";
+import { LineNumberedTextarea } from "@/components/ui/LineNumberedTextarea";
+import { TierExplainer } from "@/components/vf/TierExplainer";
 import { Plus, Save, Loader2, BookOpen, FileText, Lightbulb } from "lucide-react";
 import { getKnowledgeBase, getKnowledgeTiers, updateKnowledge, createKnowledge } from "../actions";
 
@@ -37,6 +39,7 @@ export default function AdminKnowledgeBasePage() {
     const [searchValue, setSearchValue] = useState("");
     const [isPending, startTransition] = useTransition();
     const [edited, setEdited] = useState<Partial<Knowledge>>({});
+    const [showTierGuide, setShowTierGuide] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -90,16 +93,42 @@ export default function AdminKnowledgeBasePage() {
                 <PageHeader
                     breadcrumb={[{ label: "Admin", href: "/admin" }, { label: "Knowledge Base" }]}
                     title="Knowledge Base"
-                    description="Documentos de contexto para prompts (tier1: sempre, tier2: sob demanda)"
+                    description="Documentos de contexto para prompts"
                     actions={
-                        <Button size="sm" className="gap-2" onClick={handleCreate} disabled={isPending}>
-                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                            Novo Documento
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setShowTierGuide(!showTierGuide)}
+                            >
+                                {showTierGuide ? "Ocultar Guia" : "Como usar Tiers?"}
+                            </Button>
+                            <Button size="sm" className="gap-2" onClick={handleCreate} disabled={isPending}>
+                                {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                                Novo Documento
+                            </Button>
+                        </div>
                     }
                 />
 
                 <div className="flex-1 p-6">
+                    <ContextBanner
+                        title="O que é Knowledge Base?"
+                        description="Documentos de contexto que são injetados nos prompts de IA. Organizados em Tiers para controlar uso de tokens."
+                        tips={[
+                            "Tier 1: Carrega SEMPRE — DNA do projeto, regras globais",
+                            "Tier 2: Carrega por FASE — regras de roteiro, estilos específicos",
+                            "Tier 3: Carrega SOB DEMANDA — exemplos, schemas, referências",
+                        ]}
+                        variant="help"
+                    />
+
+                    {showTierGuide && (
+                        <div className="mb-6">
+                            <TierExplainer />
+                        </div>
+                    )}
+
                     {tierCards.length > 0 && (
                         <SectionCards cards={tierCards} activeId={selectedTier} onSelect={setSelectedTier} className="mb-6" />
                     )}
@@ -117,7 +146,18 @@ export default function AdminKnowledgeBasePage() {
                                         key={item.id}
                                         title={item.name}
                                         subtitle={item.slug}
-                                        meta={item.tier}
+                                        meta={
+                                            <Badge
+                                                variant="outline"
+                                                className={
+                                                    item.tier === "tier1" ? "bg-red-500/10 text-red-600 border-red-500/20" :
+                                                        item.tier === "tier2" ? "bg-amber-500/10 text-amber-600 border-amber-500/20" :
+                                                            "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                                                }
+                                            >
+                                                {item.tier}
+                                            </Badge>
+                                        }
                                         isActive={selected?.id === item.id}
                                         onClick={() => handleSelect(item)}
                                     />
@@ -131,7 +171,16 @@ export default function AdminKnowledgeBasePage() {
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <h2 className="text-xl font-semibold">{selected.name}</h2>
-                                                <Badge variant="outline">{selected.tier}</Badge>
+                                                <Badge
+                                                    variant="outline"
+                                                    className={
+                                                        selected.tier === "tier1" ? "bg-red-500/10 text-red-600 border-red-500/20" :
+                                                            selected.tier === "tier2" ? "bg-amber-500/10 text-amber-600 border-amber-500/20" :
+                                                                "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                                                    }
+                                                >
+                                                    {selected.tier.replace("tier", "Tier ")}
+                                                </Badge>
                                             </div>
                                             <p className="text-sm text-muted-foreground">{selected.slug}</p>
                                         </div>
@@ -156,19 +205,26 @@ export default function AdminKnowledgeBasePage() {
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <Label>Tier</Label>
-                                                <Input value={edited.tier || ""} onChange={(e) => setEdited({ ...edited, tier: e.target.value })} />
+                                                <select
+                                                    className="w-full p-2 border rounded-md bg-background"
+                                                    value={edited.tier || "tier1"}
+                                                    onChange={(e) => setEdited({ ...edited, tier: e.target.value })}
+                                                >
+                                                    <option value="tier1">Tier 1 — Sempre carrega</option>
+                                                    <option value="tier2">Tier 2 — Por fase</option>
+                                                    <option value="tier3">Tier 3 — Sob demanda</option>
+                                                </select>
                                             </div>
                                             <div className="space-y-2">
-                                                <Label>Recipe Slug</Label>
-                                                <Input value={edited.recipeSlug || ""} onChange={(e) => setEdited({ ...edited, recipeSlug: e.target.value })} />
+                                                <Label>Recipe Slug (opcional)</Label>
+                                                <Input value={edited.recipeSlug || ""} onChange={(e) => setEdited({ ...edited, recipeSlug: e.target.value })} placeholder="graciela-youtube-long" />
                                             </div>
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label>Conteúdo</Label>
-                                            <Textarea
-                                                rows={12}
-                                                className="font-mono text-sm"
+                                            <Label>Conteúdo (com números de linha)</Label>
+                                            <LineNumberedTextarea
+                                                rows={16}
                                                 value={edited.content || ""}
                                                 onChange={(e) => setEdited({ ...edited, content: e.target.value })}
                                             />
