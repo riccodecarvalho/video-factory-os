@@ -27,6 +27,9 @@ import {
     type ValidatorConfig,
     type ValidationResult,
 } from "./providers";
+import { renderVideo, VideoPreset } from "./ffmpeg";
+import { exportJob } from "./export";
+import { normalizeStepKey, getStepExecutorType, getPreviousOutputKey } from "./step-mapper";
 
 type JobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 type StepStatus = "pending" | "running" | "success" | "failed" | "skipped";
@@ -731,11 +734,71 @@ async function executeStepRender(
 
     logs.push({ timestamp: now(), level: "info", message: `Step Render: ${stepDef.name}`, stepKey: stepDef.key });
 
-    // Stub render for now
-    await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
+    // Get audio from previous TTS step
+    const ttsOutput = getPreviousOutputKey(previousOutputs, 'tts') as { audioPath?: string } | undefined;
+    const audioPath = ttsOutput?.audioPath;
 
+    if (!audioPath) {
+        logs.push({ timestamp: now(), level: "error", message: "Nenhum áudio encontrado do step TTS", stepKey: stepDef.key });
+        return {
+            key: stepDef.key,
+            kind,
+            status: "failed",
+            config: stepConfig,
+            started_at: startedAt,
+            completed_at: now(),
+            error: { code: "NO_AUDIO", message: "Nenhum áudio encontrado do step TTS" },
+        };
+    }
+
+    // Create output directory
     const artifactDir = await ensureArtifactDir(jobId, stepDef.key);
     const outputPath = `${artifactDir}/video.mp4`;
+
+    // Load video preset from config or use defaults
+    const preset: VideoPreset = {
+        encoder: 'h264_videotoolbox',
+        scale: '1280:720',
+        fps: 30,
+        bitrate: '4M',
+        pixelFormat: 'yuv420p',
+        audioCodec: 'aac',
+        audioBitrate: '192k',
+    };
+
+    logs.push({
+        timestamp: now(),
+        level: "info",
+        message: `Renderizando vídeo: encoder=${preset.encoder}, scale=${preset.scale}`,
+        stepKey: stepDef.key
+    });
+
+    // Execute FFmpeg render
+    const renderResult = await renderVideo({
+        audioPath,
+        outputPath,
+        preset,
+    });
+
+    if (!renderResult.success) {
+        logs.push({ timestamp: now(), level: "error", message: `Render falhou: ${renderResult.error?.message}`, stepKey: stepDef.key });
+        return {
+            key: stepDef.key,
+            kind,
+            status: "failed",
+            config: stepConfig,
+            started_at: startedAt,
+            completed_at: now(),
+            error: renderResult.error,
+        };
+    }
+
+    logs.push({
+        timestamp: now(),
+        level: "info",
+        message: `Vídeo renderizado: ${Math.round((renderResult.fileSizeBytes || 0) / 1024 / 1024)}MB, ${Math.round(renderResult.durationSec || 0)}s`,
+        stepKey: stepDef.key
+    });
 
     return {
         key: stepDef.key,
@@ -744,9 +807,14 @@ async function executeStepRender(
         config: stepConfig,
         started_at: startedAt,
         completed_at: now(),
-        duration_ms: 500,
-        artifacts: [{ uri: outputPath, content_type: "video/mp4" }],
-        response: { output: { videoPath: outputPath } },
+        duration_ms: Date.now() - new Date(startedAt).getTime(),
+        artifacts: [{
+            uri: outputPath,
+            content_type: "video/mp4",
+            size_bytes: renderResult.fileSizeBytes,
+            duration_sec: renderResult.durationSec,
+        }],
+        response: { output: { videoPath: outputPath, durationSec: renderResult.durationSec } },
     };
 }
 
@@ -764,7 +832,44 @@ async function executeStepExport(
 
     logs.push({ timestamp: now(), level: "info", message: `Step Export: ${stepDef.name}`, stepKey: stepDef.key });
 
-    await new Promise(r => setTimeout(r, 100 + Math.random() * 100));
+    // Get artifacts directory
+    const baseArtifactPath = getArtifactPath(jobId, stepDef.key, '');
+
+    // Execute export
+    const exportResult = await exportJob({
+        jobId,
+        artifactsDir: baseArtifactPath,
+        previousOutputs,
+        manifest: {}, // Will be populated by caller
+    });
+
+    if (!exportResult.success) {
+        logs.push({ timestamp: now(), level: "error", message: `Export falhou: ${exportResult.error?.message}`, stepKey: stepDef.key });
+        return {
+            key: stepDef.key,
+            kind,
+            status: "failed",
+            config: stepConfig,
+            started_at: startedAt,
+            completed_at: now(),
+            error: exportResult.error,
+        };
+    }
+
+    logs.push({
+        timestamp: now(),
+        level: "info",
+        message: `Export concluído: ${Math.round((exportResult.totalSizeBytes || 0) / 1024 / 1024)}MB total`,
+        stepKey: stepDef.key
+    });
+
+    const artifacts = [];
+    if (exportResult.manifestPath) {
+        artifacts.push({ uri: exportResult.manifestPath, content_type: "application/json" });
+    }
+    if (exportResult.thumbnailPath) {
+        artifacts.push({ uri: exportResult.thumbnailPath, content_type: "image/jpeg" });
+    }
 
     return {
         key: stepDef.key,
@@ -773,8 +878,16 @@ async function executeStepExport(
         config: stepConfig,
         started_at: startedAt,
         completed_at: now(),
-        duration_ms: 100,
-        response: { output: { exported: true } },
+        duration_ms: Date.now() - new Date(startedAt).getTime(),
+        artifacts,
+        response: {
+            output: {
+                exported: true,
+                exportPath: exportResult.exportPath,
+                thumbnailPath: exportResult.thumbnailPath,
+                manifestPath: exportResult.manifestPath,
+            }
+        },
     };
 }
 

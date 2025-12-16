@@ -77,7 +77,7 @@ export function SplitView({
 interface SplitViewListItemProps {
     title: string;
     subtitle?: string;
-    meta?: string;
+    meta?: React.ReactNode;
     isActive?: boolean;
     onClick?: () => void;
     className?: string;

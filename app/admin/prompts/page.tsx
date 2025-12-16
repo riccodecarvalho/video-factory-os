@@ -50,6 +50,7 @@ export default function AdminPromptsPage() {
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
     const [searchValue, setSearchValue] = useState("");
+    const [versionFilter, setVersionFilter] = useState<"all" | "v1" | "v2+" | "inactive">("all");
     const [isPending, startTransition] = useTransition();
     const [editedPrompt, setEditedPrompt] = useState<Partial<Prompt>>({});
 
@@ -99,6 +100,26 @@ export default function AdminPromptsPage() {
         icon: categoryIcons[id] || FileText,
     }));
 
+    // Filter prompts by version
+    const filteredPrompts = prompts.filter(prompt => {
+        if (versionFilter === "all") return true;
+        if (versionFilter === "v1") return prompt.version === 1;
+        if (versionFilter === "v2+") return prompt.version >= 2;
+        if (versionFilter === "inactive") return !prompt.isActive;
+        return true;
+    });
+
+    // Version badge helper
+    const getVersionBadge = (prompt: Prompt) => {
+        if (!prompt.isActive) {
+            return <Badge variant="secondary" className="bg-muted text-muted-foreground">LEGADO v{prompt.version}</Badge>;
+        }
+        if (prompt.version >= 2) {
+            return <Badge className="bg-green-500/10 text-green-600 border-green-500/20">NOVO v{prompt.version}</Badge>;
+        }
+        return <Badge variant="outline">v{prompt.version}</Badge>;
+    };
+
     return (
         <div className="flex min-h-screen bg-background">
             <Sidebar />
@@ -134,6 +155,40 @@ export default function AdminPromptsPage() {
                         onSearchChange={setSearchValue}
                         searchPlaceholder="Buscar prompts..."
                         className="mb-4"
+                        actions={
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    variant={versionFilter === "all" ? "default" : "outline"}
+                                    onClick={() => setVersionFilter("all")}
+                                >
+                                    Todos
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant={versionFilter === "v2+" ? "default" : "outline"}
+                                    onClick={() => setVersionFilter("v2+")}
+                                    className={versionFilter === "v2+" ? "bg-green-600 hover:bg-green-700" : ""}
+                                >
+                                    v2+ (Novos)
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant={versionFilter === "v1" ? "default" : "outline"}
+                                    onClick={() => setVersionFilter("v1")}
+                                >
+                                    v1
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant={versionFilter === "inactive" ? "default" : "outline"}
+                                    onClick={() => setVersionFilter("inactive")}
+                                    className={versionFilter === "inactive" ? "bg-muted-foreground" : ""}
+                                >
+                                    Inativos
+                                </Button>
+                            </div>
+                        }
                     />
 
                     <SplitView
@@ -149,15 +204,22 @@ export default function AdminPromptsPage() {
                         }
                         list={
                             <div>
-                                {prompts.map((prompt) => (
-                                    <SplitViewListItem
+                                {filteredPrompts.map((prompt) => (
+                                    <div
                                         key={prompt.id}
-                                        title={prompt.name}
-                                        subtitle={prompt.slug}
-                                        meta={`v${prompt.version}`}
-                                        isActive={selectedPrompt?.id === prompt.id}
-                                        onClick={() => handleSelectPrompt(prompt)}
-                                    />
+                                        className={`
+                                            ${!prompt.isActive ? "opacity-50 bg-muted/30" : ""}
+                                            ${prompt.version >= 2 && prompt.isActive ? "border-l-4 border-green-500" : ""}
+                                        `}
+                                    >
+                                        <SplitViewListItem
+                                            title={prompt.name}
+                                            subtitle={prompt.slug}
+                                            meta={getVersionBadge(prompt)}
+                                            isActive={selectedPrompt?.id === prompt.id}
+                                            onClick={() => handleSelectPrompt(prompt)}
+                                        />
+                                    </div>
                                 ))}
                             </div>
                         }
