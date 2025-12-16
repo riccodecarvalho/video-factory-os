@@ -26,8 +26,6 @@ import {
 import { ContextBanner } from "@/components/ui/ContextBanner";
 import { Plus, Save, Loader2, Cpu, Mic, Database, HelpCircle } from "lucide-react";
 import { getProviders, getProviderTypes, updateProvider, createProvider } from "../actions";
-import { getUsedBy } from "../execution-map/actions";
-import { UsedBySection } from "@/components/vf";
 
 type Provider = Awaited<ReturnType<typeof getProviders>>[0];
 
@@ -39,168 +37,173 @@ const typeIcons: Record<string, typeof Cpu> = {
 };
 
 // =============================================
-// CLAUDE MODELS - DADOS COMPLETOS 2025
+// CLAUDE MODELS - COMPLETO OUT/2025
 // Fonte: https://platform.claude.com/docs/en/about-claude/models/overview
 // =============================================
 const CLAUDE_MODELS = [
-    // Claude 4.5 (Lançado Set 2025 - mais recente)
-    { value: "claude-sonnet-4-5-20250514", label: "Claude 4.5 Sonnet (mais recente)", maxOutput: 64000, contextWindow: 200000 },
+    // Claude 4.5 (Nov 2025 - mais recente)
+    { value: "claude-opus-4-5-20251101", label: "Claude 4.5 Opus (mais capaz - Nov 2025)", maxOutput: 32000, contextWindow: 200000 },
+    { value: "claude-sonnet-4-5-20250514", label: "Claude 4.5 Sonnet (melhor custo-benefício)", maxOutput: 64000, contextWindow: 200000 },
 
-    // Claude 4 (Lançado 2025)
+    // Claude 4 (Mai 2025)
+    { value: "claude-opus-4-20250514", label: "Claude 4 Opus", maxOutput: 32000, contextWindow: 200000 },
     { value: "claude-sonnet-4-20250514", label: "Claude 4 Sonnet", maxOutput: 64000, contextWindow: 200000 },
-    { value: "claude-opus-4-20250514", label: "Claude 4 Opus (mais capaz)", maxOutput: 32000, contextWindow: 200000 },
 
-    // Claude 3.5 (2024)
-    { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet", maxOutput: 8192, contextWindow: 200000 },
+    // Claude 3.5 (Out 2024)
+    { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet (v2)", maxOutput: 8192, contextWindow: 200000 },
     { value: "claude-3-5-haiku-20241022", label: "Claude 3.5 Haiku (rápido)", maxOutput: 8192, contextWindow: 200000 },
 
-    // Claude 3 (2024)
+    // Claude 3 (Mar 2024)
     { value: "claude-3-opus-20240229", label: "Claude 3 Opus", maxOutput: 4096, contextWindow: 200000 },
     { value: "claude-3-sonnet-20240229", label: "Claude 3 Sonnet", maxOutput: 4096, contextWindow: 200000 },
-    { value: "claude-3-haiku-20240307", label: "Claude 3 Haiku (mais rápido)", maxOutput: 4096, contextWindow: 200000 },
+    { value: "claude-3-haiku-20240307", label: "Claude 3 Haiku", maxOutput: 4096, contextWindow: 200000 },
 ];
 
 const TEMPERATURE_OPTIONS = [
-    { value: "0.0", label: "0.0 — Determinístico (sempre igual)" },
+    { value: "0.0", label: "0.0 — Determinístico" },
     { value: "0.1", label: "0.1 — Muito preciso" },
     { value: "0.2", label: "0.2 — Preciso" },
     { value: "0.3", label: "0.3 — Moderado" },
     { value: "0.5", label: "0.5 — Equilibrado" },
-    { value: "0.7", label: "0.7 — Criativo (recomendado para roteiros)" },
+    { value: "0.7", label: "0.7 — Criativo (recomendado)" },
     { value: "0.8", label: "0.8 — Muito criativo" },
-    { value: "1.0", label: "1.0 — Máxima criatividade" },
+    { value: "1.0", label: "1.0 — Máximo" },
 ];
 
-// Max tokens dinâmico por modelo
 const getMaxTokensOptions = (model: string) => {
     const modelInfo = CLAUDE_MODELS.find(m => m.value === model);
     const maxOutput = modelInfo?.maxOutput || 64000;
 
-    const options = [
-        { value: "1024", label: "1.024 (respostas curtas)" },
-        { value: "2048", label: "2.048 (respostas médias)" },
+    const allOptions = [
+        { value: "1024", label: "1.024" },
+        { value: "2048", label: "2.048" },
         { value: "4096", label: "4.096 (padrão)" },
-        { value: "8192", label: "8.192 (respostas longas)" },
-        { value: "16000", label: "16.000 (roteiros médios)" },
-        { value: "32000", label: "32.000 (roteiros longos)" },
+        { value: "8192", label: "8.192" },
+        { value: "16000", label: "16.000" },
+        { value: "32000", label: "32.000" },
+        { value: "64000", label: "64.000 (máx Claude 4.5 Sonnet)" },
     ];
 
-    if (maxOutput >= 64000) {
-        options.push({ value: "64000", label: "64.000 (máximo Claude 4+)" });
-    }
-
-    return options.filter(o => parseInt(o.value) <= maxOutput);
+    return allOptions.filter(o => parseInt(o.value) <= maxOutput);
 };
 
 // =============================================
-// AZURE VOICES - LISTA COMPLETA ESPANHOL/PORTUGUÊS
-// Fonte: https://learn.microsoft.com/azure/ai-services/speech-service/language-support
+// AZURE VOICES - LISTA COMPLETA INCLUINDO MULTILINGUAL
+// Fonte: Azure TTS Language Support + vozes do seu DB
 // =============================================
 const AZURE_VOICES = [
-    // Espanhol México
-    { value: "es-MX-DaliaNeural", label: "🇲🇽 Dalia (México - Feminina - Narrativa)", gender: "Female" },
-    { value: "es-MX-JorgeNeural", label: "🇲🇽 Jorge (México - Masculina)", gender: "Male" },
-    { value: "es-MX-CarlotaNeural", label: "🇲🇽 Carlota (México - Feminina)", gender: "Female" },
-    { value: "es-MX-LibertoNeural", label: "🇲🇽 Liberto (México - Masculina - Idoso)", gender: "Male" },
-    { value: "es-MX-LucianoNeural", label: "🇲🇽 Luciano (México - Masculina - Jovem)", gender: "Male" },
-    { value: "es-MX-MarinaNeural", label: "🇲🇽 Marina (México - Feminina)", gender: "Female" },
-    { value: "es-MX-NuriaNeural", label: "🇲🇽 Nuria (México - Feminina - Criança)", gender: "Female" },
-    { value: "es-MX-RenataNeural", label: "🇲🇽 Renata (México - Feminina)", gender: "Female" },
-    { value: "es-MX-YagoNeural", label: "🇲🇽 Yago (México - Masculina)", gender: "Male" },
+    // === MULTILINGUAL (falam múltiplos idiomas) ===
+    { value: "es-ES-XimenaMultilingualNeural", label: "🌐 Ximena Multilingual (ES) — 41 idiomas" },
+    { value: "es-ES-IsidoraMultilingualNeural", label: "🌐 Isidora Multilingual (ES) — 41 idiomas" },
+    { value: "es-ES-ArabellaMultilingualNeural", label: "🌐 Arabella Multilingual (ES) — 41 idiomas" },
+    { value: "pt-BR-ThalitaMultilingualNeural", label: "🌐 Thalita Multilingual (BR) — 41 idiomas" },
+    { value: "en-US-AvaMultilingualNeural", label: "🌐 Ava Multilingual (US) — 41 idiomas" },
+    { value: "en-US-AndrewMultilingualNeural", label: "🌐 Andrew Multilingual (US) — 41 idiomas" },
+    { value: "en-US-EmmaMultilingualNeural", label: "🌐 Emma Multilingual (US) — 41 idiomas" },
+    { value: "en-US-BrianMultilingualNeural", label: "🌐 Brian Multilingual (US) — 41 idiomas" },
 
-    // Espanhol Espanha
-    { value: "es-ES-ElviraNeural", label: "🇪🇸 Elvira (Espanha - Feminina)", gender: "Female" },
-    { value: "es-ES-AlvaroNeural", label: "🇪🇸 Álvaro (Espanha - Masculina)", gender: "Male" },
-    { value: "es-ES-AbrilNeural", label: "🇪🇸 Abril (Espanha - Feminina)", gender: "Female" },
-    { value: "es-ES-ArnauNeural", label: "🇪🇸 Arnau (Espanha - Masculina)", gender: "Male" },
-    { value: "es-ES-DarioNeural", label: "🇪🇸 Dario (Espanha - Masculina)", gender: "Male" },
-    { value: "es-ES-EliasNeural", label: "🇪🇸 Elías (Espanha - Masculina)", gender: "Male" },
-    { value: "es-ES-EstrellaNeural", label: "🇪🇸 Estrella (Espanha - Feminina)", gender: "Female" },
-    { value: "es-ES-IreneNeural", label: "🇪🇸 Irene (Espanha - Feminina)", gender: "Female" },
-    { value: "es-ES-LaiaNeural", label: "🇪🇸 Laia (Espanha - Feminina)", gender: "Female" },
-    { value: "es-ES-LiaNeural", label: "🇪🇸 Lía (Espanha - Feminina)", gender: "Female" },
-    { value: "es-ES-NilNeural", label: "🇪🇸 Nil (Espanha - Masculina)", gender: "Male" },
-    { value: "es-ES-SaulNeural", label: "🇪🇸 Saúl (Espanha - Masculina)", gender: "Male" },
-    { value: "es-ES-TeoNeural", label: "🇪🇸 Teo (Espanha - Masculina)", gender: "Male" },
-    { value: "es-ES-TrianaNeural", label: "🇪🇸 Triana (Espanha - Feminina)", gender: "Female" },
-    { value: "es-ES-VeraNeural", label: "🇪🇸 Vera (Espanha - Feminina)", gender: "Female" },
+    // === ESPANHOL MÉXICO ===
+    { value: "es-MX-DaliaNeural", label: "🇲🇽 Dalia (México - F)" },
+    { value: "es-MX-JorgeNeural", label: "🇲🇽 Jorge (México - M)" },
+    { value: "es-MX-BeatrizNeural", label: "🇲🇽 Beatriz (México - F)" },
+    { value: "es-MX-CandelaNeural", label: "🇲🇽 Candela (México - F)" },
+    { value: "es-MX-CarlotaNeural", label: "🇲🇽 Carlota (México - F)" },
+    { value: "es-MX-CecilioNeural", label: "🇲🇽 Cecilio (México - M)" },
+    { value: "es-MX-GerardoNeural", label: "🇲🇽 Gerardo (México - M)" },
+    { value: "es-MX-LarissaNeural", label: "🇲🇽 Larissa (México - F)" },
+    { value: "es-MX-LibertoNeural", label: "🇲🇽 Liberto (México - M)" },
+    { value: "es-MX-LucianoNeural", label: "🇲🇽 Luciano (México - M)" },
+    { value: "es-MX-MarinaNeural", label: "🇲🇽 Marina (México - F)" },
+    { value: "es-MX-NuriaNeural", label: "🇲🇽 Nuria (México - F Criança)" },
+    { value: "es-MX-PelayoNeural", label: "🇲🇽 Pelayo (México - M)" },
+    { value: "es-MX-RenataNeural", label: "🇲🇽 Renata (México - F)" },
+    { value: "es-MX-YagoNeural", label: "🇲🇽 Yago (México - M)" },
 
-    // Espanhol Argentina
-    { value: "es-AR-ElenaNeural", label: "🇦🇷 Elena (Argentina - Feminina)", gender: "Female" },
-    { value: "es-AR-TomasNeural", label: "🇦🇷 Tomás (Argentina - Masculina)", gender: "Male" },
+    // === ESPANHOL ESPANHA ===
+    { value: "es-ES-ElviraNeural", label: "🇪🇸 Elvira (Espanha - F)" },
+    { value: "es-ES-AlvaroNeural", label: "🇪🇸 Álvaro (Espanha - M)" },
+    { value: "es-ES-AbrilNeural", label: "🇪🇸 Abril (Espanha - F)" },
+    { value: "es-ES-ArnauNeural", label: "🇪🇸 Arnau (Espanha - M)" },
+    { value: "es-ES-DarioNeural", label: "🇪🇸 Dario (Espanha - M)" },
+    { value: "es-ES-EliasNeural", label: "🇪🇸 Elías (Espanha - M)" },
+    { value: "es-ES-EstrellaNeural", label: "🇪🇸 Estrella (Espanha - F)" },
+    { value: "es-ES-IreneNeural", label: "🇪🇸 Irene (Espanha - F)" },
+    { value: "es-ES-LaiaNeural", label: "🇪🇸 Laia (Espanha - F)" },
+    { value: "es-ES-LiaNeural", label: "🇪🇸 Lía (Espanha - F)" },
+    { value: "es-ES-NilNeural", label: "🇪🇸 Nil (Espanha - M)" },
+    { value: "es-ES-SaulNeural", label: "🇪🇸 Saúl (Espanha - M)" },
+    { value: "es-ES-TeoNeural", label: "🇪🇸 Teo (Espanha - M)" },
+    { value: "es-ES-TrianaNeural", label: "🇪🇸 Triana (Espanha - F)" },
+    { value: "es-ES-VeraNeural", label: "🇪🇸 Vera (Espanha - F)" },
 
-    // Espanhol Colômbia
-    { value: "es-CO-SalomeNeural", label: "🇨🇴 Salomé (Colômbia - Feminina)", gender: "Female" },
-    { value: "es-CO-GonzaloNeural", label: "🇨🇴 Gonzalo (Colômbia - Masculina)", gender: "Male" },
+    // === ESPANHOL LATAM ===
+    { value: "es-AR-ElenaNeural", label: "🇦🇷 Elena (Argentina - F)" },
+    { value: "es-AR-TomasNeural", label: "🇦🇷 Tomás (Argentina - M)" },
+    { value: "es-CO-SalomeNeural", label: "🇨🇴 Salomé (Colômbia - F)" },
+    { value: "es-CO-GonzaloNeural", label: "🇨🇴 Gonzalo (Colômbia - M)" },
+    { value: "es-CL-CatalinaNeural", label: "🇨🇱 Catalina (Chile - F)" },
+    { value: "es-CL-LorenzoNeural", label: "🇨🇱 Lorenzo (Chile - M)" },
+    { value: "es-PE-CamilaNeural", label: "🇵🇪 Camila (Peru - F)" },
+    { value: "es-PE-AlexNeural", label: "🇵🇪 Alex (Peru - M)" },
+    { value: "es-VE-PaolaNeural", label: "🇻🇪 Paola (Venezuela - F)" },
+    { value: "es-VE-SebastianNeural", label: "🇻🇪 Sebastián (Venezuela - M)" },
 
-    // Espanhol Chile
-    { value: "es-CL-CatalinaNeural", label: "🇨🇱 Catalina (Chile - Feminina)", gender: "Female" },
-    { value: "es-CL-LorenzoNeural", label: "🇨🇱 Lorenzo (Chile - Masculina)", gender: "Male" },
+    // === PORTUGUÊS BRASIL ===
+    { value: "pt-BR-FranciscaNeural", label: "🇧🇷 Francisca (Brasil - F)" },
+    { value: "pt-BR-AntonioNeural", label: "🇧🇷 Antonio (Brasil - M)" },
+    { value: "pt-BR-BrendaNeural", label: "🇧🇷 Brenda (Brasil - F)" },
+    { value: "pt-BR-DonatoNeural", label: "🇧🇷 Donato (Brasil - M)" },
+    { value: "pt-BR-ElzaNeural", label: "🇧🇷 Elza (Brasil - F)" },
+    { value: "pt-BR-FabioNeural", label: "🇧🇷 Fabio (Brasil - M)" },
+    { value: "pt-BR-GiovannaNeural", label: "🇧🇷 Giovanna (Brasil - F)" },
+    { value: "pt-BR-HumbertoNeural", label: "🇧🇷 Humberto (Brasil - M)" },
+    { value: "pt-BR-JulioNeural", label: "🇧🇷 Julio (Brasil - M)" },
+    { value: "pt-BR-LeilaNeural", label: "🇧🇷 Leila (Brasil - F)" },
+    { value: "pt-BR-LeticiaNeural", label: "🇧🇷 Letícia (Brasil - F)" },
+    { value: "pt-BR-ManuelaNeural", label: "🇧🇷 Manuela (Brasil - F)" },
+    { value: "pt-BR-NicolauNeural", label: "🇧🇷 Nicolau (Brasil - M)" },
+    { value: "pt-BR-ThalitaNeural", label: "🇧🇷 Thalita (Brasil - F Conversacional)" },
+    { value: "pt-BR-ValerioNeural", label: "🇧🇷 Valério (Brasil - M)" },
+    { value: "pt-BR-YaraNeural", label: "🇧🇷 Yara (Brasil - F)" },
 
-    // Português Brasil
-    { value: "pt-BR-FranciscaNeural", label: "🇧🇷 Francisca (Brasil - Feminina)", gender: "Female" },
-    { value: "pt-BR-AntonioNeural", label: "🇧🇷 Antonio (Brasil - Masculina)", gender: "Male" },
-    { value: "pt-BR-BrendaNeural", label: "🇧🇷 Brenda (Brasil - Feminina)", gender: "Female" },
-    { value: "pt-BR-DonatoNeural", label: "🇧🇷 Donato (Brasil - Masculina)", gender: "Male" },
-    { value: "pt-BR-ElzaNeural", label: "🇧🇷 Elza (Brasil - Feminina)", gender: "Female" },
-    { value: "pt-BR-FabioNeural", label: "🇧🇷 Fabio (Brasil - Masculina)", gender: "Male" },
-    { value: "pt-BR-GiovannaNeural", label: "🇧🇷 Giovanna (Brasil - Feminina)", gender: "Female" },
-    { value: "pt-BR-HumbertoNeural", label: "🇧🇷 Humberto (Brasil - Masculina)", gender: "Male" },
-    { value: "pt-BR-JulioNeural", label: "🇧🇷 Julio (Brasil - Masculina)", gender: "Male" },
-    { value: "pt-BR-LeilaNeural", label: "🇧🇷 Leila (Brasil - Feminina)", gender: "Female" },
-    { value: "pt-BR-LeticiaNeural", label: "🇧🇷 Letícia (Brasil - Feminina)", gender: "Female" },
-    { value: "pt-BR-ManuelaNeural", label: "🇧🇷 Manuela (Brasil - Feminina)", gender: "Female" },
-    { value: "pt-BR-NicolauNeural", label: "🇧🇷 Nicolau (Brasil - Masculina)", gender: "Male" },
-    { value: "pt-BR-ValerioNeural", label: "🇧🇷 Valério (Brasil - Masculina)", gender: "Male" },
-    { value: "pt-BR-YaraNeural", label: "🇧🇷 Yara (Brasil - Feminina)", gender: "Female" },
-    { value: "pt-BR-ThalitaNeural", label: "🇧🇷 Thalita (Brasil - Feminina - Conversacional)", gender: "Female" },
+    // === PORTUGUÊS PORTUGAL ===
+    { value: "pt-PT-RaquelNeural", label: "🇵🇹 Raquel (Portugal - F)" },
+    { value: "pt-PT-DuarteNeural", label: "🇵🇹 Duarte (Portugal - M)" },
 
-    // Português Portugal
-    { value: "pt-PT-RaquelNeural", label: "🇵🇹 Raquel (Portugal - Feminina)", gender: "Female" },
-    { value: "pt-PT-DuarteNeural", label: "🇵🇹 Duarte (Portugal - Masculina)", gender: "Male" },
-
-    // Inglês EUA
-    { value: "en-US-JennyNeural", label: "🇺🇸 Jenny (EUA - Feminina)", gender: "Female" },
-    { value: "en-US-GuyNeural", label: "🇺🇸 Guy (EUA - Masculina)", gender: "Male" },
-    { value: "en-US-AriaNeural", label: "🇺🇸 Aria (EUA - Feminina)", gender: "Female" },
-    { value: "en-US-DavisNeural", label: "🇺🇸 Davis (EUA - Masculina)", gender: "Male" },
+    // === INGLÊS ===
+    { value: "en-US-JennyNeural", label: "🇺🇸 Jenny (EUA - F)" },
+    { value: "en-US-GuyNeural", label: "🇺🇸 Guy (EUA - M)" },
+    { value: "en-US-AriaNeural", label: "🇺🇸 Aria (EUA - F)" },
+    { value: "en-US-DavisNeural", label: "🇺🇸 Davis (EUA - M)" },
+    { value: "en-GB-SoniaNeural", label: "🇬🇧 Sonia (UK - F)" },
+    { value: "en-GB-RyanNeural", label: "🇬🇧 Ryan (UK - M)" },
 ];
 
 const AZURE_OUTPUT_FORMATS = [
-    { value: "audio-16khz-32kbitrate-mono-mp3", label: "MP3 32kbps (baixa qualidade)" },
-    { value: "audio-16khz-64kbitrate-mono-mp3", label: "MP3 64kbps (média)" },
-    { value: "audio-16khz-128kbitrate-mono-mp3", label: "MP3 128kbps (padrão)" },
-    { value: "audio-24khz-48kbitrate-mono-mp3", label: "MP3 48kbps 24kHz" },
+    { value: "audio-16khz-64kbitrate-mono-mp3", label: "MP3 64kbps 16kHz" },
+    { value: "audio-16khz-128kbitrate-mono-mp3", label: "MP3 128kbps 16kHz (padrão)" },
     { value: "audio-24khz-96kbitrate-mono-mp3", label: "MP3 96kbps 24kHz" },
-    { value: "audio-24khz-160kbitrate-mono-mp3", label: "MP3 160kbps (alta qualidade)" },
+    { value: "audio-24khz-160kbitrate-mono-mp3", label: "MP3 160kbps 24kHz (alta)" },
     { value: "audio-48khz-192kbitrate-mono-mp3", label: "MP3 192kbps 48kHz (máxima)" },
-    { value: "riff-16khz-16bit-mono-pcm", label: "WAV 16kHz (sem compressão)" },
     { value: "riff-24khz-16bit-mono-pcm", label: "WAV 24kHz (sem compressão)" },
-    { value: "riff-48khz-16bit-mono-pcm", label: "WAV 48kHz (estúdio)" },
 ];
 
 const RATE_OPTIONS = [
-    { value: "-50%", label: "-50% (Muito lento)" },
-    { value: "-30%", label: "-30% (Bem lento)" },
-    { value: "-20%", label: "-20% (Lento)" },
-    { value: "-10%", label: "-10% (Pouco lento)" },
-    { value: "0%", label: "0% (Normal)" },
-    { value: "+10%", label: "+10% (Pouco rápido)" },
-    { value: "+20%", label: "+20% (Rápido)" },
-    { value: "+30%", label: "+30% (Bem rápido)" },
-    { value: "+50%", label: "+50% (Muito rápido)" },
+    { value: "-50%", label: "-50% — Muito lento" },
+    { value: "-30%", label: "-30% — Lento" },
+    { value: "-20%", label: "-20% — Pouco lento" },
+    { value: "0%", label: "0% — Normal" },
+    { value: "+20%", label: "+20% — Rápido" },
+    { value: "+30%", label: "+30% — Bem rápido" },
+    { value: "+50%", label: "+50% — Muito rápido" },
 ];
 
 const PITCH_OPTIONS = [
-    { value: "-50%", label: "-50% (Muito grave)" },
-    { value: "-30%", label: "-30% (Bem grave)" },
-    { value: "-15%", label: "-15% (Grave)" },
-    { value: "-5%", label: "-5% (Pouco grave)" },
-    { value: "0%", label: "0% (Normal)" },
-    { value: "+5%", label: "+5% (Pouco agudo)" },
-    { value: "+15%", label: "+15% (Agudo)" },
-    { value: "+30%", label: "+30% (Bem agudo)" },
-    { value: "+50%", label: "+50% (Muito agudo)" },
+    { value: "-30%", label: "-30% — Grave" },
+    { value: "-15%", label: "-15% — Pouco grave" },
+    { value: "0%", label: "0% — Normal" },
+    { value: "+15%", label: "+15% — Agudo" },
+    { value: "+30%", label: "+30% — Bem agudo" },
 ];
 
 export default function AdminProvidersPage() {
@@ -211,19 +214,25 @@ export default function AdminProvidersPage() {
     const [searchValue, setSearchValue] = useState("");
     const [isPending, startTransition] = useTransition();
     const [edited, setEdited] = useState<Partial<Provider>>({});
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         loadData();
     }, [selectedType, searchValue]);
 
     const loadData = () => {
+        setError(null);
         startTransition(async () => {
-            const [data, typesData] = await Promise.all([
-                getProviders(searchValue, selectedType),
-                getProviderTypes(),
-            ]);
-            setProviders(data);
-            setTypes(typesData);
+            try {
+                const [data, typesData] = await Promise.all([
+                    getProviders(searchValue, selectedType),
+                    getProviderTypes(),
+                ]);
+                setProviders(data);
+                setTypes(typesData);
+            } catch (e) {
+                setError(String(e));
+            }
         });
     };
 
@@ -235,17 +244,25 @@ export default function AdminProvidersPage() {
     const handleSave = () => {
         if (!selected) return;
         startTransition(async () => {
-            await updateProvider(selected.id, edited);
-            loadData();
+            try {
+                await updateProvider(selected.id, edited);
+                loadData();
+            } catch (e) {
+                setError(String(e));
+            }
         });
     };
 
     const handleCreate = () => {
         startTransition(async () => {
-            const newItem = await createProvider();
-            loadData();
-            setSelected(newItem as Provider);
-            setEdited(newItem);
+            try {
+                const newItem = await createProvider();
+                loadData();
+                setSelected(newItem as Provider);
+                setEdited(newItem);
+            } catch (e) {
+                setError(String(e));
+            }
         });
     };
 
@@ -256,7 +273,6 @@ export default function AdminProvidersPage() {
         icon: typeIcons[id] || Database,
     }));
 
-    // Parse config JSON
     const getConfig = (): Record<string, unknown> => {
         try {
             return typeof edited.config === "string"
@@ -273,7 +289,6 @@ export default function AdminProvidersPage() {
         setEdited({ ...edited, config: JSON.stringify(config) });
     };
 
-    // Helper para campo com explicação
     const FieldWithHelp = ({ label, help, children }: { label: string; help: string; children: React.ReactNode }) => (
         <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -294,7 +309,7 @@ export default function AdminProvidersPage() {
 
         return (
             <div className="space-y-4">
-                <FieldWithHelp label="Modelo" help="Modelo Claude a ser usado">
+                <FieldWithHelp label="Modelo Claude" help="Selecione ou digite manualmente">
                     <Select
                         value={currentModel}
                         onValueChange={(v) => setEdited({ ...edited, defaultModel: v })}
@@ -303,26 +318,7 @@ export default function AdminProvidersPage() {
                             <SelectValue placeholder="Selecione o modelo" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="" disabled>— Claude 4.5 (2025) —</SelectItem>
-                            {CLAUDE_MODELS.filter(m => m.value.includes("4-5")).map((m) => (
-                                <SelectItem key={m.value} value={m.value}>
-                                    {m.label}
-                                </SelectItem>
-                            ))}
-                            <SelectItem value="" disabled>— Claude 4 (2025) —</SelectItem>
-                            {CLAUDE_MODELS.filter(m => m.value.includes("-4-") && !m.value.includes("4-5")).map((m) => (
-                                <SelectItem key={m.value} value={m.value}>
-                                    {m.label}
-                                </SelectItem>
-                            ))}
-                            <SelectItem value="" disabled>— Claude 3.5 (2024) —</SelectItem>
-                            {CLAUDE_MODELS.filter(m => m.value.includes("3-5")).map((m) => (
-                                <SelectItem key={m.value} value={m.value}>
-                                    {m.label}
-                                </SelectItem>
-                            ))}
-                            <SelectItem value="" disabled>— Claude 3 (2024) —</SelectItem>
-                            {CLAUDE_MODELS.filter(m => m.value.includes("3-") && !m.value.includes("3-5")).map((m) => (
+                            {CLAUDE_MODELS.map((m) => (
                                 <SelectItem key={m.value} value={m.value}>
                                     {m.label}
                                 </SelectItem>
@@ -332,31 +328,28 @@ export default function AdminProvidersPage() {
                 </FieldWithHelp>
 
                 {modelInfo && (
-                    <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 text-sm">
-                        <p><strong>Context Window:</strong> {modelInfo.contextWindow.toLocaleString()} tokens</p>
+                    <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 text-sm grid grid-cols-2 gap-2">
+                        <p><strong>Context:</strong> {modelInfo.contextWindow.toLocaleString()} tokens</p>
                         <p><strong>Max Output:</strong> {modelInfo.maxOutput.toLocaleString()} tokens</p>
                     </div>
                 )}
 
-                <div className="p-3 bg-muted/30 rounded-lg border">
-                    <p className="text-xs mb-2">💡 <strong>Ou digite manualmente:</strong></p>
+                <FieldWithHelp label="Ou digite manualmente" help="Para modelos não listados">
                     <Input
                         value={edited.defaultModel || ""}
                         onChange={(e) => setEdited({ ...edited, defaultModel: e.target.value })}
-                        placeholder="claude-sonnet-4-5-20250514"
+                        placeholder="claude-opus-4-5-20251101"
                         className="font-mono text-sm"
                     />
-                </div>
+                </FieldWithHelp>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <FieldWithHelp label="Temperature" help="Criatividade da resposta">
+                    <FieldWithHelp label="Temperature" help="Criatividade">
                         <Select
                             value={String(config.temperature || "0.7")}
                             onValueChange={(v) => updateConfig("temperature", parseFloat(v))}
                         >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
                                 {TEMPERATURE_OPTIONS.map((t) => (
                                     <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
@@ -365,14 +358,12 @@ export default function AdminProvidersPage() {
                         </Select>
                     </FieldWithHelp>
 
-                    <FieldWithHelp label="Max Tokens" help="Tamanho máximo da resposta">
+                    <FieldWithHelp label="Max Tokens" help="Tamanho resposta">
                         <Select
                             value={String(config.maxTokens || "4096")}
                             onValueChange={(v) => updateConfig("maxTokens", parseInt(v))}
                         >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
                                 {getMaxTokensOptions(currentModel).map((t) => (
                                     <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
@@ -387,63 +378,47 @@ export default function AdminProvidersPage() {
 
     const renderTTSConfig = () => {
         const config = getConfig();
+        const currentVoice = String(config.defaultVoice || "");
+
         return (
             <div className="space-y-4">
-                <FieldWithHelp label="Voz Padrão" help="Voz Azure para narração">
+                {currentVoice && (
+                    <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20 text-sm">
+                        <p><strong>Voz atual:</strong> {currentVoice}</p>
+                    </div>
+                )}
+
+                <FieldWithHelp label="Voz Azure" help="Selecione ou digite">
                     <Select
-                        value={String(config.defaultVoice || "")}
+                        value={currentVoice}
                         onValueChange={(v) => updateConfig("defaultVoice", v)}
                     >
                         <SelectTrigger>
                             <SelectValue placeholder="Selecione uma voz" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="" disabled>— Espanhol México —</SelectItem>
-                            {AZURE_VOICES.filter(v => v.value.startsWith("es-MX")).map((v) => (
-                                <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                            ))}
-                            <SelectItem value="" disabled>— Espanhol Espanha —</SelectItem>
-                            {AZURE_VOICES.filter(v => v.value.startsWith("es-ES")).map((v) => (
-                                <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                            ))}
-                            <SelectItem value="" disabled>— Espanhol Latam —</SelectItem>
-                            {AZURE_VOICES.filter(v => v.value.startsWith("es-") && !v.value.startsWith("es-MX") && !v.value.startsWith("es-ES")).map((v) => (
-                                <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                            ))}
-                            <SelectItem value="" disabled>— Português Brasil —</SelectItem>
-                            {AZURE_VOICES.filter(v => v.value.startsWith("pt-BR")).map((v) => (
-                                <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                            ))}
-                            <SelectItem value="" disabled>— Português Portugal —</SelectItem>
-                            {AZURE_VOICES.filter(v => v.value.startsWith("pt-PT")).map((v) => (
-                                <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                            ))}
-                            <SelectItem value="" disabled>— Inglês —</SelectItem>
-                            {AZURE_VOICES.filter(v => v.value.startsWith("en-")).map((v) => (
+                            {AZURE_VOICES.map((v) => (
                                 <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </FieldWithHelp>
 
-                <div className="p-3 bg-muted/30 rounded-lg border">
-                    <p className="text-xs mb-2">💡 <strong>Ou digite manualmente:</strong> Qualquer voz Azure válida</p>
+                <FieldWithHelp label="Ou digite manualmente" help="Qualquer voz Azure válida">
                     <Input
-                        value={String(config.defaultVoice || "")}
+                        value={currentVoice}
                         onChange={(e) => updateConfig("defaultVoice", e.target.value)}
-                        placeholder="es-MX-DaliaNeural"
+                        placeholder="es-ES-XimenaMultilingualNeural"
                         className="font-mono text-sm"
                     />
-                </div>
+                </FieldWithHelp>
 
                 <FieldWithHelp label="Formato de Saída" help="Qualidade do áudio">
                     <Select
                         value={String(config.outputFormat || "audio-24khz-160kbitrate-mono-mp3")}
                         onValueChange={(v) => updateConfig("outputFormat", v)}
                     >
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                             {AZURE_OUTPUT_FORMATS.map((f) => (
                                 <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
@@ -453,14 +428,12 @@ export default function AdminProvidersPage() {
                 </FieldWithHelp>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <FieldWithHelp label="Rate (Velocidade)" help="Velocidade da fala">
+                    <FieldWithHelp label="Rate" help="Velocidade">
                         <Select
                             value={String(config.rate || "0%")}
                             onValueChange={(v) => updateConfig("rate", v)}
                         >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
                                 {RATE_OPTIONS.map((r) => (
                                     <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
@@ -469,14 +442,12 @@ export default function AdminProvidersPage() {
                         </Select>
                     </FieldWithHelp>
 
-                    <FieldWithHelp label="Pitch (Tom)" help="Tom grave/agudo">
+                    <FieldWithHelp label="Pitch" help="Tom">
                         <Select
                             value={String(config.pitch || "0%")}
                             onValueChange={(v) => updateConfig("pitch", v)}
                         >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
                                 {PITCH_OPTIONS.map((p) => (
                                     <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
@@ -501,19 +472,24 @@ export default function AdminProvidersPage() {
                     actions={
                         <Button size="sm" className="gap-2" onClick={handleCreate} disabled={isPending}>
                             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                            Novo Provider
+                            Novo
                         </Button>
                     }
                 />
 
                 <div className="flex-1 p-6">
+                    {error && (
+                        <div className="mb-4 p-4 bg-red-500/10 rounded-lg border border-red-500/20 text-red-500">
+                            <strong>Erro:</strong> {error}
+                        </div>
+                    )}
+
                     <ContextBanner
                         title="O que são Providers?"
-                        description="Providers são os serviços de IA: Claude gera textos, Azure Speech converte em áudio."
+                        description="Providers são os serviços de IA que geram conteúdo (Claude) e áudio (Azure TTS)."
                         tips={[
-                            "Claude 4.5 Sonnet: Até 64.000 tokens de output, contexto de 200k",
-                            "Azure TTS: 400+ vozes neurais em 140 idiomas",
-                            "Selecione na lista ou digite manualmente para flexibilidade",
+                            "Claude 4.5 Opus: mais capaz | Sonnet: melhor custo-benefício",
+                            "70+ vozes Azure incluindo Multilingual (falam 41 idiomas)",
                         ]}
                         variant="info"
                     />
@@ -564,12 +540,12 @@ export default function AdminProvidersPage() {
                                             <FieldWithHelp label="Nome" help="Nome amigável">
                                                 <Input value={edited.name || ""} onChange={(e) => setEdited({ ...edited, name: e.target.value })} />
                                             </FieldWithHelp>
-                                            <FieldWithHelp label="Tipo" help="LLM para texto, TTS para áudio">
+                                            <FieldWithHelp label="Tipo" help="LLM ou TTS">
                                                 <Select value={edited.type || ""} onValueChange={(v) => setEdited({ ...edited, type: v })}>
                                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="llm">LLM (Geração de Texto)</SelectItem>
-                                                        <SelectItem value="tts">TTS (Texto para Áudio)</SelectItem>
+                                                        <SelectItem value="llm">LLM (Texto)</SelectItem>
+                                                        <SelectItem value="tts">TTS (Áudio)</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </FieldWithHelp>
@@ -588,10 +564,6 @@ export default function AdminProvidersPage() {
                                                 {selected.isActive ? "ATIVO" : "INATIVO"}
                                             </Badge>
                                         </div>
-                                    </div>
-
-                                    <div className="mt-6 pt-6 border-t">
-                                        <UsedBySection entityId={selected.id} entityType="provider" getUsedBy={getUsedBy} />
                                     </div>
                                 </SplitViewDetail>
                             ) : (

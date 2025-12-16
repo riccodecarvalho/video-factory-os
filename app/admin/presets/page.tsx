@@ -38,52 +38,114 @@ const typeIcons: Record<string, typeof Sliders> = {
 };
 
 // =============================================
-// VOZES AZURE TTS - LISTA COMPLETA
+// AZURE VOICES - LISTA COMPLETA COM MULTILINGUAL
+// Inclui todas as vozes que você pode ter no DB
 // =============================================
 const VOICE_NAMES = [
-    // Espanhol México
-    { value: "es-MX-DaliaNeural", label: "🇲🇽 Dalia (México - Feminina)" },
-    { value: "es-MX-JorgeNeural", label: "🇲🇽 Jorge (México - Masculina)" },
-    { value: "es-MX-CarlotaNeural", label: "🇲🇽 Carlota (México - Feminina)" },
-    { value: "es-MX-LibertoNeural", label: "🇲🇽 Liberto (México - Masculina)" },
-    { value: "es-MX-NuriaNeural", label: "🇲🇽 Nuria (México - Feminina)" },
-    // Espanhol Espanha
-    { value: "es-ES-ElviraNeural", label: "🇪🇸 Elvira (Espanha - Feminina)" },
-    { value: "es-ES-AlvaroNeural", label: "🇪🇸 Álvaro (Espanha - Masculina)" },
-    // Espanhol Latam
-    { value: "es-AR-ElenaNeural", label: "🇦🇷 Elena (Argentina - Feminina)" },
-    { value: "es-AR-TomasNeural", label: "🇦🇷 Tomás (Argentina - Masculina)" },
-    { value: "es-CO-SalomeNeural", label: "🇨🇴 Salomé (Colômbia - Feminina)" },
-    // Português Brasil
-    { value: "pt-BR-FranciscaNeural", label: "🇧🇷 Francisca (Brasil - Feminina)" },
-    { value: "pt-BR-AntonioNeural", label: "🇧🇷 Antonio (Brasil - Masculina)" },
-    { value: "pt-BR-ThalitaNeural", label: "🇧🇷 Thalita (Brasil - Conversacional)" },
-    // Inglês
-    { value: "en-US-JennyNeural", label: "🇺🇸 Jenny (EUA - Feminina)" },
-    { value: "en-US-GuyNeural", label: "🇺🇸 Guy (EUA - Masculina)" },
+    // === MULTILINGUAL (41 idiomas) ===
+    { value: "es-ES-XimenaMultilingualNeural", label: "🌐 Ximena Multilingual (ES)" },
+    { value: "es-ES-IsidoraMultilingualNeural", label: "🌐 Isidora Multilingual (ES)" },
+    { value: "es-ES-ArabellaMultilingualNeural", label: "🌐 Arabella Multilingual (ES)" },
+    { value: "pt-BR-ThalitaMultilingualNeural", label: "🌐 Thalita Multilingual (BR)" },
+    { value: "en-US-AvaMultilingualNeural", label: "🌐 Ava Multilingual (US)" },
+    { value: "en-US-AndrewMultilingualNeural", label: "🌐 Andrew Multilingual (US)" },
+    { value: "en-US-EmmaMultilingualNeural", label: "🌐 Emma Multilingual (US)" },
+    { value: "en-US-BrianMultilingualNeural", label: "🌐 Brian Multilingual (US)" },
+
+    // === ESPANHOL MÉXICO ===
+    { value: "es-MX-DaliaNeural", label: "🇲🇽 Dalia (México)" },
+    { value: "es-MX-JorgeNeural", label: "🇲🇽 Jorge (México)" },
+    { value: "es-MX-BeatrizNeural", label: "🇲🇽 Beatriz (México)" },
+    { value: "es-MX-CandelaNeural", label: "🇲🇽 Candela (México)" },
+    { value: "es-MX-CarlotaNeural", label: "🇲🇽 Carlota (México)" },
+    { value: "es-MX-CecilioNeural", label: "🇲🇽 Cecilio (México)" },
+    { value: "es-MX-GerardoNeural", label: "🇲🇽 Gerardo (México)" },
+    { value: "es-MX-LarissaNeural", label: "🇲🇽 Larissa (México)" },
+    { value: "es-MX-LibertoNeural", label: "🇲🇽 Liberto (México)" },
+    { value: "es-MX-LucianoNeural", label: "🇲🇽 Luciano (México)" },
+    { value: "es-MX-MarinaNeural", label: "🇲🇽 Marina (México)" },
+    { value: "es-MX-NuriaNeural", label: "🇲🇽 Nuria (México Criança)" },
+    { value: "es-MX-PelayoNeural", label: "🇲🇽 Pelayo (México)" },
+    { value: "es-MX-RenataNeural", label: "🇲🇽 Renata (México)" },
+    { value: "es-MX-YagoNeural", label: "🇲🇽 Yago (México)" },
+
+    // === ESPANHOL ESPANHA ===
+    { value: "es-ES-ElviraNeural", label: "🇪🇸 Elvira (Espanha)" },
+    { value: "es-ES-AlvaroNeural", label: "🇪🇸 Álvaro (Espanha)" },
+    { value: "es-ES-AbrilNeural", label: "🇪🇸 Abril (Espanha)" },
+    { value: "es-ES-ArnauNeural", label: "🇪🇸 Arnau (Espanha)" },
+    { value: "es-ES-DarioNeural", label: "🇪🇸 Dario (Espanha)" },
+    { value: "es-ES-EliasNeural", label: "🇪🇸 Elías (Espanha)" },
+    { value: "es-ES-EstrellaNeural", label: "🇪🇸 Estrella (Espanha)" },
+    { value: "es-ES-IreneNeural", label: "🇪🇸 Irene (Espanha)" },
+    { value: "es-ES-LaiaNeural", label: "🇪🇸 Laia (Espanha)" },
+    { value: "es-ES-LiaNeural", label: "🇪🇸 Lía (Espanha)" },
+    { value: "es-ES-NilNeural", label: "🇪🇸 Nil (Espanha)" },
+    { value: "es-ES-SaulNeural", label: "🇪🇸 Saúl (Espanha)" },
+    { value: "es-ES-TeoNeural", label: "🇪🇸 Teo (Espanha)" },
+    { value: "es-ES-TrianaNeural", label: "🇪🇸 Triana (Espanha)" },
+    { value: "es-ES-VeraNeural", label: "🇪🇸 Vera (Espanha)" },
+
+    // === ESPANHOL LATAM ===
+    { value: "es-AR-ElenaNeural", label: "🇦🇷 Elena (Argentina)" },
+    { value: "es-AR-TomasNeural", label: "🇦🇷 Tomás (Argentina)" },
+    { value: "es-CO-SalomeNeural", label: "🇨🇴 Salomé (Colômbia)" },
+    { value: "es-CO-GonzaloNeural", label: "🇨🇴 Gonzalo (Colômbia)" },
+    { value: "es-CL-CatalinaNeural", label: "🇨🇱 Catalina (Chile)" },
+    { value: "es-CL-LorenzoNeural", label: "🇨🇱 Lorenzo (Chile)" },
+
+    // === PORTUGUÊS BRASIL ===
+    { value: "pt-BR-FranciscaNeural", label: "🇧🇷 Francisca (Brasil)" },
+    { value: "pt-BR-AntonioNeural", label: "🇧🇷 Antonio (Brasil)" },
+    { value: "pt-BR-BrendaNeural", label: "🇧🇷 Brenda (Brasil)" },
+    { value: "pt-BR-DonatoNeural", label: "🇧🇷 Donato (Brasil)" },
+    { value: "pt-BR-ElzaNeural", label: "🇧🇷 Elza (Brasil)" },
+    { value: "pt-BR-FabioNeural", label: "🇧🇷 Fabio (Brasil)" },
+    { value: "pt-BR-GiovannaNeural", label: "🇧🇷 Giovanna (Brasil)" },
+    { value: "pt-BR-HumbertoNeural", label: "🇧🇷 Humberto (Brasil)" },
+    { value: "pt-BR-JulioNeural", label: "🇧🇷 Julio (Brasil)" },
+    { value: "pt-BR-LeilaNeural", label: "🇧🇷 Leila (Brasil)" },
+    { value: "pt-BR-LeticiaNeural", label: "🇧🇷 Letícia (Brasil)" },
+    { value: "pt-BR-ManuelaNeural", label: "🇧🇷 Manuela (Brasil)" },
+    { value: "pt-BR-NicolauNeural", label: "🇧🇷 Nicolau (Brasil)" },
+    { value: "pt-BR-ThalitaNeural", label: "🇧🇷 Thalita (Brasil)" },
+    { value: "pt-BR-ValerioNeural", label: "🇧🇷 Valério (Brasil)" },
+    { value: "pt-BR-YaraNeural", label: "🇧🇷 Yara (Brasil)" },
+
+    // === PORTUGUÊS PORTUGAL ===
+    { value: "pt-PT-RaquelNeural", label: "🇵🇹 Raquel (Portugal)" },
+    { value: "pt-PT-DuarteNeural", label: "🇵🇹 Duarte (Portugal)" },
+
+    // === INGLÊS ===
+    { value: "en-US-JennyNeural", label: "🇺🇸 Jenny (EUA)" },
+    { value: "en-US-GuyNeural", label: "🇺🇸 Guy (EUA)" },
+    { value: "en-US-AriaNeural", label: "🇺🇸 Aria (EUA)" },
+    { value: "en-US-DavisNeural", label: "🇺🇸 Davis (EUA)" },
 ];
 
-// RATE: Schema usa REAL 0.5-2.0 (não % string)
+// RATE: Schema usa REAL 0.5-2.0
 const RATE_OPTIONS = [
-    { value: "0.5", label: "0.5x — Metade da velocidade" },
-    { value: "0.7", label: "0.7x — Bem lento" },
-    { value: "0.8", label: "0.8x — Lento" },
-    { value: "0.9", label: "0.9x — Pouco lento" },
+    { value: "0.5", label: "0.5x — Metade" },
+    { value: "0.7", label: "0.7x — Lento" },
+    { value: "0.8", label: "0.8x — Pouco lento" },
+    { value: "0.9", label: "0.9x — Quase normal" },
     { value: "1.0", label: "1.0x — Normal" },
     { value: "1.1", label: "1.1x — Pouco rápido" },
     { value: "1.2", label: "1.2x — Rápido" },
     { value: "1.3", label: "1.3x — Bem rápido" },
     { value: "1.5", label: "1.5x — Muito rápido" },
-    { value: "2.0", label: "2.0x — Dobro da velocidade" },
+    { value: "2.0", label: "2.0x — Dobro" },
 ];
 
-// PITCH: Schema usa TEXT como '-50%' a '+50%'
+// PITCH: Schema usa TEXT '-50%' a '+50%'
 const PITCH_OPTIONS = [
-    { value: "-30%", label: "-30% — Bem grave" },
-    { value: "-20%", label: "-20% — Grave" },
-    { value: "-10%", label: "-10% — Pouco grave" },
+    { value: "-30%", label: "-30% — Grave" },
+    { value: "-20%", label: "-20% — Pouco grave" },
+    { value: "-10%", label: "-10%" },
+    { value: "-8%", label: "-8%" },
     { value: "0%", label: "0% — Normal" },
-    { value: "+10%", label: "+10% — Pouco agudo" },
+    { value: "+8%", label: "+8%" },
+    { value: "+10%", label: "+10%" },
     { value: "+20%", label: "+20% — Agudo" },
     { value: "+30%", label: "+30% — Bem agudo" },
 ];
@@ -92,8 +154,8 @@ const VOICE_STYLES = [
     { value: "", label: "Nenhum (padrão)" },
     { value: "narration-professional", label: "Narração profissional" },
     { value: "newscast", label: "Âncora de notícias" },
-    { value: "customerservice", label: "Atendimento ao cliente" },
-    { value: "chat", label: "Conversa casual" },
+    { value: "customerservice", label: "Atendimento" },
+    { value: "chat", label: "Conversa" },
     { value: "cheerful", label: "Alegre" },
     { value: "empathetic", label: "Empático" },
     { value: "sad", label: "Triste" },
@@ -113,22 +175,22 @@ const STYLE_DEGREE_OPTIONS = [
 ];
 
 const VIDEO_RESOLUTIONS = [
-    { value: "1280:720", label: "720p HD (1280x720)" },
-    { value: "1920:1080", label: "1080p Full HD (1920x1080)" },
-    { value: "2560:1440", label: "1440p 2K (2560x1440)" },
-    { value: "3840:2160", label: "4K UHD (3840x2160)" },
+    { value: "1280:720", label: "720p HD" },
+    { value: "1920:1080", label: "1080p Full HD" },
+    { value: "2560:1440", label: "1440p 2K" },
+    { value: "3840:2160", label: "4K UHD" },
 ];
 
 const VIDEO_ENCODERS = [
-    { value: "libx264", label: "libx264 (CPU - compatível)" },
-    { value: "h264_videotoolbox", label: "VideoToolbox (Mac GPU - rápido)" },
+    { value: "libx264", label: "libx264 (CPU)" },
+    { value: "h264_videotoolbox", label: "VideoToolbox (Mac GPU)" },
 ];
 
 const VIDEO_BITRATES = [
-    { value: "2M", label: "2 Mbps — baixa qualidade" },
-    { value: "4M", label: "4 Mbps — boa qualidade" },
-    { value: "8M", label: "8 Mbps — alta qualidade" },
-    { value: "12M", label: "12 Mbps — máxima qualidade" },
+    { value: "2M", label: "2 Mbps — baixa" },
+    { value: "4M", label: "4 Mbps — boa" },
+    { value: "8M", label: "8 Mbps — alta" },
+    { value: "12M", label: "12 Mbps — máxima" },
     { value: "16M", label: "16 Mbps — 4K" },
 ];
 
@@ -146,20 +208,26 @@ export default function AdminPresetsPage() {
     const [searchValue, setSearchValue] = useState("");
     const [isPending, startTransition] = useTransition();
     const [edited, setEdited] = useState<Record<string, unknown>>({});
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         loadData();
     }, [selectedType, searchValue]);
 
     const loadData = () => {
+        setError(null);
         startTransition(async () => {
-            const type = selectedType === "all" ? undefined : selectedType as PresetType;
-            const [data, countsData] = await Promise.all([
-                getPresets(type, searchValue),
-                getPresetCounts(),
-            ]);
-            setPresets(data);
-            setCounts(countsData);
+            try {
+                const type = selectedType === "all" ? undefined : selectedType as PresetType;
+                const [data, countsData] = await Promise.all([
+                    getPresets(type, searchValue),
+                    getPresetCounts(),
+                ]);
+                setPresets(data);
+                setCounts(countsData);
+            } catch (e) {
+                setError(String(e));
+            }
         });
     };
 
@@ -171,8 +239,12 @@ export default function AdminPresetsPage() {
     const handleSave = () => {
         if (!selected) return;
         startTransition(async () => {
-            await updatePreset(selected.presetType as PresetType, selected.id, edited);
-            loadData();
+            try {
+                await updatePreset(selected.presetType as PresetType, selected.id, edited);
+                loadData();
+            } catch (e) {
+                setError(String(e));
+            }
         });
     };
 
@@ -196,113 +268,139 @@ export default function AdminPresetsPage() {
         </div>
     );
 
-    const renderVoiceForm = () => (
-        <div className="space-y-4">
-            <FieldWithHelp label="Voz Azure" help="Voz neural do Azure TTS">
-                <Select
-                    value={String(edited.voiceName || "")}
-                    onValueChange={(v) => setEdited({ ...edited, voiceName: v })}
-                >
-                    <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma voz" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {VOICE_NAMES.map((v) => (
-                            <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </FieldWithHelp>
+    // Encontrar a voz atual na lista ou usar manual
+    const findVoiceLabel = (voiceName: string) => {
+        const found = VOICE_NAMES.find(v => v.value === voiceName);
+        return found ? found.label : voiceName;
+    };
 
-            <FieldWithHelp label="Idioma" help="Código do idioma (pode digitar)">
-                <Input
-                    value={String(edited.language || "")}
-                    onChange={(e) => setEdited({ ...edited, language: e.target.value })}
-                    placeholder="es-MX, pt-BR, en-US..."
-                />
-            </FieldWithHelp>
+    const renderVoiceForm = () => {
+        const currentVoice = String(edited.voiceName || "");
+        const voiceInList = VOICE_NAMES.some(v => v.value === currentVoice);
 
-            <div className="grid grid-cols-2 gap-4">
-                <FieldWithHelp label="Rate (Velocidade)" help="Multiplicador de velocidade">
+        return (
+            <div className="space-y-4">
+                {/* Mostra valor atual */}
+                <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20 text-sm grid grid-cols-2 gap-2">
+                    <p><strong>Voz:</strong> {findVoiceLabel(currentVoice) || "não definida"}</p>
+                    <p><strong>Idioma:</strong> {String(edited.language || "—")}</p>
+                    <p><strong>Velocidade:</strong> {String(edited.rate || 1.0)}x</p>
+                    <p><strong>Tom:</strong> {String(edited.pitch || "0%")}</p>
+                </div>
+
+                <FieldWithHelp label="Voz Azure" help="Selecione ou digite abaixo">
                     <Select
-                        value={String(edited.rate || "1.0")}
-                        onValueChange={(v) => setEdited({ ...edited, rate: parseFloat(v) })}
+                        value={voiceInList ? currentVoice : ""}
+                        onValueChange={(v) => setEdited({ ...edited, voiceName: v })}
                     >
                         <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder={currentVoice || "Selecione"} />
                         </SelectTrigger>
                         <SelectContent>
-                            {RATE_OPTIONS.map((r) => (
-                                <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                            {VOICE_NAMES.map((v) => (
+                                <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </FieldWithHelp>
 
-                <FieldWithHelp label="Pitch (Tom)" help="Ajuste de tom grave/agudo">
-                    <Select
-                        value={String(edited.pitch || "0%")}
-                        onValueChange={(v) => setEdited({ ...edited, pitch: v })}
-                    >
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {PITCH_OPTIONS.map((p) => (
-                                <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                <FieldWithHelp label="Ou digite manualmente" help="Qualquer voz Azure válida">
+                    <Input
+                        value={currentVoice}
+                        onChange={(e) => setEdited({ ...edited, voiceName: e.target.value })}
+                        placeholder="es-ES-XimenaMultilingualNeural"
+                        className="font-mono text-sm"
+                    />
                 </FieldWithHelp>
+
+                <FieldWithHelp label="Idioma" help="Código do idioma">
+                    <Input
+                        value={String(edited.language || "")}
+                        onChange={(e) => setEdited({ ...edited, language: e.target.value })}
+                        placeholder="es-ES, pt-BR, en-US..."
+                    />
+                </FieldWithHelp>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <FieldWithHelp label="Rate (Velocidade)" help="0.5x a 2.0x">
+                        <Select
+                            value={String(edited.rate || "1.0")}
+                            onValueChange={(v) => setEdited({ ...edited, rate: parseFloat(v) })}
+                        >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                {RATE_OPTIONS.map((r) => (
+                                    <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </FieldWithHelp>
+
+                    <FieldWithHelp label="Pitch (Tom)" help="-30% a +30%">
+                        <Select
+                            value={String(edited.pitch || "0%")}
+                            onValueChange={(v) => setEdited({ ...edited, pitch: v })}
+                        >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                {PITCH_OPTIONS.map((p) => (
+                                    <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </FieldWithHelp>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <FieldWithHelp label="Estilo" help="Emoção/entonação">
+                        <Select
+                            value={String(edited.style || "")}
+                            onValueChange={(v) => setEdited({ ...edited, style: v || null })}
+                        >
+                            <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                            <SelectContent>
+                                {VOICE_STYLES.map((s) => (
+                                    <SelectItem key={s.value || "none"} value={s.value}>{s.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </FieldWithHelp>
+
+                    <FieldWithHelp label="Intensidade" help="0.5 a 2.0">
+                        <Select
+                            value={String(edited.styleDegree || "1.0")}
+                            onValueChange={(v) => setEdited({ ...edited, styleDegree: parseFloat(v) })}
+                        >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                {STYLE_DEGREE_OPTIONS.map((d) => (
+                                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </FieldWithHelp>
+                </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <FieldWithHelp label="Estilo de Voz" help="Emoção/entonação">
-                    <Select
-                        value={String(edited.style || "")}
-                        onValueChange={(v) => setEdited({ ...edited, style: v || null })}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Nenhum" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {VOICE_STYLES.map((s) => (
-                                <SelectItem key={s.value || "none"} value={s.value || "none"}>{s.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </FieldWithHelp>
-
-                <FieldWithHelp label="Intensidade Estilo" help="Força do estilo (0.5-2.0)">
-                    <Select
-                        value={String(edited.styleDegree || "1.0")}
-                        onValueChange={(v) => setEdited({ ...edited, styleDegree: parseFloat(v) })}
-                    >
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {STYLE_DEGREE_OPTIONS.map((d) => (
-                                <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </FieldWithHelp>
-            </div>
-        </div>
-    );
+        );
+    };
 
     const renderVideoForm = () => (
         <div className="space-y-4">
+            {/* Mostra valores atuais */}
+            <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20 text-sm grid grid-cols-2 gap-2">
+                <p><strong>Resolução:</strong> {String(edited.scale || "—")}</p>
+                <p><strong>Encoder:</strong> {String(edited.encoder || "—")}</p>
+                <p><strong>Bitrate:</strong> {String(edited.bitrate || "—")}</p>
+                <p><strong>FPS:</strong> {String(edited.fps || "—")}</p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
                 <FieldWithHelp label="Resolução" help="Tamanho do vídeo">
                     <Select
                         value={String(edited.scale || "1920:1080")}
                         onValueChange={(v) => setEdited({ ...edited, scale: v })}
                     >
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                             {VIDEO_RESOLUTIONS.map((r) => (
                                 <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
@@ -311,14 +409,12 @@ export default function AdminPresetsPage() {
                     </Select>
                 </FieldWithHelp>
 
-                <FieldWithHelp label="Encoder" help="Processador de vídeo">
+                <FieldWithHelp label="Encoder" help="CPU vs GPU">
                     <Select
                         value={String(edited.encoder || "libx264")}
                         onValueChange={(v) => setEdited({ ...edited, encoder: v })}
                     >
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                             {VIDEO_ENCODERS.map((e) => (
                                 <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>
@@ -334,9 +430,7 @@ export default function AdminPresetsPage() {
                         value={String(edited.bitrate || "4M")}
                         onValueChange={(v) => setEdited({ ...edited, bitrate: v })}
                     >
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                             {VIDEO_BITRATES.map((b) => (
                                 <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
@@ -350,9 +444,7 @@ export default function AdminPresetsPage() {
                         value={String(edited.fps || "30")}
                         onValueChange={(v) => setEdited({ ...edited, fps: parseInt(v) })}
                     >
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                             {VIDEO_FPS.map((f) => (
                                 <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
@@ -404,17 +496,22 @@ export default function AdminPresetsPage() {
                 <PageHeader
                     breadcrumb={[{ label: "Admin", href: "/admin" }, { label: "Presets" }]}
                     title="Presets"
-                    description="Configurações reutilizáveis para voz e vídeo"
+                    description="Configurações de voz e vídeo"
                 />
 
                 <div className="flex-1 p-6">
+                    {error && (
+                        <div className="mb-4 p-4 bg-red-500/10 rounded-lg border border-red-500/20 text-red-500">
+                            <strong>Erro:</strong> {error}
+                        </div>
+                    )}
+
                     <ContextBanner
                         title="O que são Presets?"
-                        description="Presets são configurações prontas que o sistema usa para gerar áudio (TTS) e vídeo (FFmpeg)."
+                        description="Presets são configurações prontas para áudio (TTS) e vídeo (FFmpeg)."
                         tips={[
-                            "Voice: Define voz Azure, velocidade, tom e estilo de narração",
-                            "Video: Define resolução, encoder, bitrate e FPS",
-                            "Cada job referencia um preset de voz e um de vídeo",
+                            "Voice: Voz Azure, velocidade, tom, estilo",
+                            "Video: Resolução, encoder, bitrate, FPS",
                         ]}
                         variant="info"
                     />
@@ -428,7 +525,7 @@ export default function AdminPresetsPage() {
                     <SplitView
                         isLoading={isPending && presets.length === 0}
                         isEmpty={presets.length === 0}
-                        emptyState={<EmptyState variant="empty" title="Nenhum preset" description="Execute o seed para criar presets" />}
+                        emptyState={<EmptyState variant="empty" title="Nenhum preset" description="Execute seed" />}
                         list={
                             <div>
                                 {presets.map((item) => (
@@ -461,22 +558,12 @@ export default function AdminPresetsPage() {
                                     </div>
 
                                     <div className="space-y-6">
-                                        <FieldWithHelp label="Nome do Preset" help="Nome amigável">
+                                        <FieldWithHelp label="Nome" help="Nome amigável">
                                             <Input
                                                 value={String(edited.name || "")}
                                                 onChange={(e) => setEdited({ ...edited, name: e.target.value })}
                                             />
                                         </FieldWithHelp>
-
-                                        {/* Valores atuais visíveis */}
-                                        {selected.presetType === "voice" && (
-                                            <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 text-sm grid grid-cols-2 gap-2">
-                                                <p><strong>Voz:</strong> {String(edited.voiceName || "não definida")}</p>
-                                                <p><strong>Idioma:</strong> {String(edited.language || "—")}</p>
-                                                <p><strong>Velocidade:</strong> {String(edited.rate || 1.0)}x</p>
-                                                <p><strong>Tom:</strong> {String(edited.pitch || "0%")}</p>
-                                            </div>
-                                        )}
 
                                         <div className="border-t pt-4">
                                             <h3 className="font-medium mb-4">
