@@ -24,6 +24,7 @@
         "@radix-ui/react-select": "^2.2.6",
         "@radix-ui/react-slot": "^1.1.1",
         "@radix-ui/react-tabs": "^1.1.13",
+        "adm-zip": "^0.5.16",
         "better-sqlite3": "^11.7.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -39,6 +40,7 @@
         "zod": "^3.25.76"
     },
     "devDependencies": {
+        "@types/adm-zip": "^0.5.7",
         "@types/better-sqlite3": "^7.6.12",
         "@types/fluent-ffmpeg": "^2.1.28",
         "@types/node": "^22.10.2",

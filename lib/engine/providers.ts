@@ -317,8 +317,8 @@ export async function executeTTS(request: TTSRequest): Promise<TTSResponse> {
             };
         }
 
-        // 3. Download audio file
-        console.log(`[TTS] Downloading audio from: ${resultUrl}`);
+        // 3. Download ZIP file
+        console.log(`[TTS] Downloading ZIP from: ${resultUrl}`);
 
         const audioResponse = await fetch(resultUrl);
         if (!audioResponse.ok) {
@@ -334,23 +334,50 @@ export async function executeTTS(request: TTSRequest): Promise<TTSResponse> {
         // Save audio file
         const fs = await import("fs/promises");
         const path = await import("path");
+        const AdmZip = (await import("adm-zip")).default;
 
         // Ensure directory exists
         const dir = path.dirname(request.outputPath);
         await fs.mkdir(dir, { recursive: true });
 
-        // Write file
+        // Download to temp file first
         const arrayBuffer = await audioResponse.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        await fs.writeFile(request.outputPath, buffer);
+        const zipBuffer = Buffer.from(arrayBuffer);
+        const tempZipPath = `${request.outputPath}.zip`;
+        await fs.writeFile(tempZipPath, zipBuffer);
+
+        // Extract MP3 from ZIP
+        const zip = new AdmZip(tempZipPath);
+        const zipEntries = zip.getEntries();
+
+        // Find the MP3 file (usually 0001.mp3)
+        const mp3Entry = zipEntries.find(e => e.entryName.endsWith('.mp3'));
+
+        if (!mp3Entry) {
+            await fs.unlink(tempZipPath).catch(() => { });
+            return {
+                success: false,
+                error: {
+                    code: "NO_MP3_IN_ZIP",
+                    message: "ZIP não contém arquivo MP3"
+                }
+            };
+        }
+
+        // Extract MP3 to output path
+        const mp3Data = mp3Entry.getData();
+        await fs.writeFile(request.outputPath, mp3Data);
+
+        // Cleanup temp ZIP
+        await fs.unlink(tempZipPath).catch(() => { });
 
         // Get file stats
         const stats = await fs.stat(request.outputPath);
 
         // Estimate duration (rough: 192kbps = 24000 bytes/sec)
-        const durationSec = Math.round(buffer.length / 24000);
+        const durationSec = Math.round(mp3Data.length / 24000);
 
-        console.log(`[TTS] Audio saved: ${request.outputPath} (${stats.size} bytes, ~${durationSec}s)`);
+        console.log(`[TTS] Audio extracted: ${request.outputPath} (${stats.size} bytes, ~${durationSec}s)`);
 
         return {
             success: true,
