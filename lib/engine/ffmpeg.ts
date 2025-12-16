@@ -31,10 +31,11 @@ async function getFFmpeg(): Promise<typeof import('fluent-ffmpeg')> {
             console.log('[FFmpeg] Using system ffmpeg');
         }
 
-        // Configurar ffprobe path
+        // Configurar ffprobe path usando require para evitar problemas de bundling
         try {
-            const ffprobeInstaller = await import('@ffprobe-installer/ffprobe');
-            ffmpeg.setFfprobePath(ffprobeInstaller.path);
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const ffprobePath = require('@ffprobe-installer/ffprobe').path;
+            ffmpeg.setFfprobePath(ffprobePath);
         } catch {
             console.log('[FFmpeg] Using system ffprobe');
         }
