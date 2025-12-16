@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import {
     Select,
     SelectContent,
@@ -25,7 +24,7 @@ import {
     EmptyState,
 } from "@/components/layout";
 import { ContextBanner } from "@/components/ui/ContextBanner";
-import { Plus, Save, Loader2, Cpu, Mic, Database } from "lucide-react";
+import { Plus, Save, Loader2, Cpu, Mic, Database, HelpCircle } from "lucide-react";
 import { getProviders, getProviderTypes, updateProvider, createProvider } from "../actions";
 import { getUsedBy } from "../execution-map/actions";
 import { UsedBySection } from "@/components/vf";
@@ -39,27 +38,81 @@ const typeIcons: Record<string, typeof Cpu> = {
     image: Database,
 };
 
-// Opções disponíveis por tipo de provider
+// =============================================
+// OPÇÕES CONFIGURÁVEIS — MODELOS CLAUDE ATUALIZADOS
+// =============================================
+
 const CLAUDE_MODELS = [
-    { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet (Latest)" },
+    // Claude 4.5 (mais recente)
+    { value: "claude-sonnet-4-5-20250514", label: "Claude 4.5 Sonnet (mais recente)" },
+    // Claude 4
+    { value: "claude-sonnet-4-20250514", label: "Claude 4 Sonnet" },
+    { value: "claude-opus-4-20250514", label: "Claude 4 Opus (mais capaz)" },
+    // Claude 3.5
+    { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet" },
+    { value: "claude-3-5-haiku-20241022", label: "Claude 3.5 Haiku (rápido)" },
+    // Claude 3
     { value: "claude-3-opus-20240229", label: "Claude 3 Opus" },
     { value: "claude-3-sonnet-20240229", label: "Claude 3 Sonnet" },
-    { value: "claude-3-haiku-20240307", label: "Claude 3 Haiku (Fast)" },
+    { value: "claude-3-haiku-20240307", label: "Claude 3 Haiku (mais rápido)" },
+];
+
+const TEMPERATURE_OPTIONS = [
+    { value: "0.0", label: "0.0 (Determinístico - sempre igual)" },
+    { value: "0.1", label: "0.1 (Muito preciso)" },
+    { value: "0.3", label: "0.3 (Preciso)" },
+    { value: "0.5", label: "0.5 (Equilibrado)" },
+    { value: "0.7", label: "0.7 (Criativo - recomendado)" },
+    { value: "0.9", label: "0.9 (Muito criativo)" },
+    { value: "1.0", label: "1.0 (Máxima criatividade)" },
+];
+
+const MAX_TOKENS_OPTIONS = [
+    { value: "2048", label: "2.048 (respostas curtas)" },
+    { value: "4096", label: "4.096 (padrão)" },
+    { value: "8192", label: "8.192 (respostas longas)" },
+    { value: "16000", label: "16.000 (roteiros médios)" },
+    { value: "32000", label: "32.000 (roteiros longos)" },
+    { value: "64000", label: "64.000 (roteiros muito longos)" },
+    { value: "128000", label: "128.000 (máximo Claude 3.5)" },
 ];
 
 const AZURE_VOICES = [
-    { value: "es-MX-DaliaNeural", label: "Dalia (MX Feminina)" },
-    { value: "es-MX-JorgeNeural", label: "Jorge (MX Masculina)" },
-    { value: "es-ES-ElviraNeural", label: "Elvira (ES Feminina)" },
-    { value: "es-AR-ElenaNeural", label: "Elena (AR Feminina)" },
-    { value: "pt-BR-FranciscaNeural", label: "Francisca (BR Feminina)" },
-    { value: "pt-BR-AntonioNeural", label: "Antonio (BR Masculina)" },
+    { value: "es-MX-DaliaNeural", label: "Dalia (México - Feminina)" },
+    { value: "es-MX-JorgeNeural", label: "Jorge (México - Masculina)" },
+    { value: "es-ES-ElviraNeural", label: "Elvira (Espanha - Feminina)" },
+    { value: "es-AR-ElenaNeural", label: "Elena (Argentina - Feminina)" },
+    { value: "pt-BR-FranciscaNeural", label: "Francisca (Brasil - Feminina)" },
+    { value: "pt-BR-AntonioNeural", label: "Antonio (Brasil - Masculina)" },
+    { value: "en-US-JennyNeural", label: "Jenny (EUA - Feminina)" },
+    { value: "en-US-GuyNeural", label: "Guy (EUA - Masculina)" },
 ];
 
 const AZURE_OUTPUT_FORMATS = [
-    { value: "audio-16khz-128kbitrate-mono-mp3", label: "MP3 128kbps" },
-    { value: "audio-24khz-160kbitrate-mono-mp3", label: "MP3 160kbps (HQ)" },
-    { value: "riff-24khz-16bit-mono-pcm", label: "WAV 24kHz" },
+    { value: "audio-16khz-128kbitrate-mono-mp3", label: "MP3 128kbps (padrão)" },
+    { value: "audio-24khz-160kbitrate-mono-mp3", label: "MP3 160kbps (alta qualidade)" },
+    { value: "audio-48khz-192kbitrate-mono-mp3", label: "MP3 192kbps (máxima qualidade)" },
+    { value: "riff-24khz-16bit-mono-pcm", label: "WAV 24kHz (sem compressão)" },
+];
+
+const RATE_OPTIONS = [
+    { value: "-30%", label: "-30% (Bem lento)" },
+    { value: "-20%", label: "-20% (Lento)" },
+    { value: "-10%", label: "-10% (Pouco lento)" },
+    { value: "0%", label: "0% (Normal)" },
+    { value: "+10%", label: "+10% (Pouco rápido)" },
+    { value: "+20%", label: "+20% (Rápido)" },
+    { value: "+30%", label: "+30% (Bem rápido)" },
+];
+
+const PITCH_OPTIONS = [
+    { value: "-15%", label: "-15% (Bem grave)" },
+    { value: "-10%", label: "-10% (Grave)" },
+    { value: "-5%", label: "-5% (Pouco grave)" },
+    { value: "0%", label: "0% (Normal)" },
+    { value: "+5%", label: "+5% (Pouco agudo)" },
+    { value: "+10%", label: "+10% (Agudo)" },
+    { value: "+15%", label: "+15% (Bem agudo)" },
 ];
 
 export default function AdminProvidersPage() {
@@ -116,7 +169,7 @@ export default function AdminProvidersPage() {
     }));
 
     // Parse config JSON
-    const getConfig = () => {
+    const getConfig = (): Record<string, unknown> => {
         try {
             return typeof edited.config === "string"
                 ? JSON.parse(edited.config || "{}")
@@ -132,62 +185,92 @@ export default function AdminProvidersPage() {
         setEdited({ ...edited, config: JSON.stringify(config) });
     };
 
+    // Helper para campo com explicação
+    const FieldWithHelp = ({ label, help, children }: { label: string; help: string; children: React.ReactNode }) => (
+        <div className="space-y-2">
+            <div className="flex items-center gap-2">
+                <Label>{label}</Label>
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <HelpCircle className="w-3 h-3" />
+                    {help}
+                </span>
+            </div>
+            {children}
+        </div>
+    );
+
     const renderLLMConfig = () => {
         const config = getConfig();
         return (
             <div className="space-y-4">
+                <FieldWithHelp label="Modelo" help="Modelo Claude a ser usado">
+                    <Select
+                        value={edited.defaultModel || String(config.model || "")}
+                        onValueChange={(v) => setEdited({ ...edited, defaultModel: v })}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecione o modelo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {CLAUDE_MODELS.map((m) => (
+                                <SelectItem key={m.value} value={m.value}>
+                                    {m.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </FieldWithHelp>
+
+                <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <p className="text-xs">
+                        💡 <strong>Ou digite manualmente:</strong> Se quiser usar um modelo que não está na lista
+                    </p>
+                    <Input
+                        className="mt-2"
+                        value={edited.defaultModel || ""}
+                        onChange={(e) => setEdited({ ...edited, defaultModel: e.target.value })}
+                        placeholder="claude-sonnet-4-5-20250514"
+                    />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>Modelo</Label>
+                    <FieldWithHelp label="Temperature" help="Criatividade da resposta">
                         <Select
-                            value={edited.defaultModel || ""}
-                            onValueChange={(v) => setEdited({ ...edited, defaultModel: v })}
+                            value={String(config.temperature || "0.7")}
+                            onValueChange={(v) => updateConfig("temperature", parseFloat(v))}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Selecione o modelo" />
+                                <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {CLAUDE_MODELS.map((m) => (
-                                    <SelectItem key={m.value} value={m.value}>
-                                        {m.label}
-                                    </SelectItem>
+                                {TEMPERATURE_OPTIONS.map((t) => (
+                                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Max Tokens</Label>
-                        <Input
-                            type="number"
-                            value={config.maxTokens || 4096}
-                            onChange={(e) => updateConfig("maxTokens", parseInt(e.target.value))}
-                            min={1000}
-                            max={200000}
-                        />
-                        <p className="text-xs text-muted-foreground">1.000 - 200.000</p>
-                    </div>
-                </div>
+                    </FieldWithHelp>
 
-                <div className="space-y-2">
-                    <Label>Temperature: {(config.temperature || 0.7).toFixed(1)}</Label>
-                    <Slider
-                        value={[config.temperature || 0.7]}
-                        onValueChange={([v]) => updateConfig("temperature", v)}
-                        min={0}
-                        max={1}
-                        step={0.1}
-                        className="py-2"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Preciso</span>
-                        <span>Criativo</span>
-                    </div>
+                    <FieldWithHelp label="Max Tokens" help="Tamanho máximo da resposta">
+                        <Select
+                            value={String(config.maxTokens || "4096")}
+                            onValueChange={(v) => updateConfig("maxTokens", parseInt(v))}
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {MAX_TOKENS_OPTIONS.map((t) => (
+                                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </FieldWithHelp>
                 </div>
 
                 <div className="p-3 bg-muted/30 rounded-lg">
                     <p className="text-xs text-muted-foreground">
-                        💡 <strong>Dica:</strong> Use temperature baixa (0.1-0.3) para tarefas precisas
-                        e alta (0.7-1.0) para geração criativa de conteúdo.
+                        💡 <strong>Dica:</strong> Use temperature baixa (0.1-0.3) para tarefas precisas como parsing.
+                        Use alta (0.7-1.0) para geração criativa como roteiros.
                     </p>
                 </div>
             </div>
@@ -198,77 +281,86 @@ export default function AdminProvidersPage() {
         const config = getConfig();
         return (
             <div className="space-y-4">
+                <FieldWithHelp label="Voz Padrão" help="Voz Azure para narração">
+                    <Select
+                        value={String(config.defaultVoice || "")}
+                        onValueChange={(v) => updateConfig("defaultVoice", v)}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma voz" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {AZURE_VOICES.map((v) => (
+                                <SelectItem key={v.value} value={v.value}>
+                                    {v.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </FieldWithHelp>
+
+                <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <p className="text-xs">
+                        💡 <strong>Ou digite manualmente:</strong> Qualquer voz Azure válida
+                    </p>
+                    <Input
+                        className="mt-2"
+                        value={String(config.defaultVoice || "")}
+                        onChange={(e) => updateConfig("defaultVoice", e.target.value)}
+                        placeholder="es-MX-DaliaNeural"
+                    />
+                </div>
+
+                <FieldWithHelp label="Formato de Saída" help="Qualidade do áudio">
+                    <Select
+                        value={String(config.outputFormat || "audio-16khz-128kbitrate-mono-mp3")}
+                        onValueChange={(v) => updateConfig("outputFormat", v)}
+                    >
+                        <SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {AZURE_OUTPUT_FORMATS.map((f) => (
+                                <SelectItem key={f.value} value={f.value}>
+                                    {f.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </FieldWithHelp>
+
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>Voz Padrão</Label>
+                    <FieldWithHelp label="Rate (Velocidade)" help="Velocidade da fala">
                         <Select
-                            value={config.defaultVoice || ""}
-                            onValueChange={(v) => updateConfig("defaultVoice", v)}
+                            value={String(config.rate || "0%")}
+                            onValueChange={(v) => updateConfig("rate", v)}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Selecione a voz" />
+                                <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {AZURE_VOICES.map((v) => (
-                                    <SelectItem key={v.value} value={v.value}>
-                                        {v.label}
-                                    </SelectItem>
+                                {RATE_OPTIONS.map((r) => (
+                                    <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Formato de Saída</Label>
+                    </FieldWithHelp>
+
+                    <FieldWithHelp label="Pitch (Tom)" help="Tom grave/agudo">
                         <Select
-                            value={config.outputFormat || "audio-16khz-128kbitrate-mono-mp3"}
-                            onValueChange={(v) => updateConfig("outputFormat", v)}
+                            value={String(config.pitch || "0%")}
+                            onValueChange={(v) => updateConfig("pitch", v)}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Formato" />
+                                <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {AZURE_OUTPUT_FORMATS.map((f) => (
-                                    <SelectItem key={f.value} value={f.value}>
-                                        {f.label}
-                                    </SelectItem>
+                                {PITCH_OPTIONS.map((p) => (
+                                    <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Rate (Velocidade): {(config.rate || 0)}%</Label>
-                    <Slider
-                        value={[config.rate || 0]}
-                        onValueChange={([v]) => updateConfig("rate", v)}
-                        min={-50}
-                        max={50}
-                        step={5}
-                        className="py-2"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>-50% (Lento)</span>
-                        <span>Normal</span>
-                        <span>+50% (Rápido)</span>
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Pitch (Tom): {(config.pitch || 0)}%</Label>
-                    <Slider
-                        value={[config.pitch || 0]}
-                        onValueChange={([v]) => updateConfig("pitch", v)}
-                        min={-20}
-                        max={20}
-                        step={5}
-                        className="py-2"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Grave</span>
-                        <span>Normal</span>
-                        <span>Agudo</span>
-                    </div>
+                    </FieldWithHelp>
                 </div>
             </div>
         );
@@ -282,7 +374,7 @@ export default function AdminProvidersPage() {
                 <PageHeader
                     breadcrumb={[{ label: "Admin", href: "/admin" }, { label: "Providers" }]}
                     title="Providers"
-                    description="LLM, TTS e outros serviços externos"
+                    description="Serviços externos: LLM (Claude) e TTS (Azure)"
                     actions={
                         <Button size="sm" className="gap-2" onClick={handleCreate} disabled={isPending}>
                             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
@@ -294,11 +386,11 @@ export default function AdminProvidersPage() {
                 <div className="flex-1 p-6">
                     <ContextBanner
                         title="O que são Providers?"
-                        description="Providers são serviços externos usados pelo pipeline: Claude para geração de texto, Azure para TTS, etc."
+                        description="Providers são os serviços de IA que o sistema usa: Claude gera textos, Azure Speech converte em áudio."
                         tips={[
-                            "Claude (LLM): Gera roteiros, títulos e descrições",
-                            "Azure Speech (TTS): Converte texto em áudio",
-                            "Configure modelo, temperatura e tokens conforme necessidade",
+                            "LLM (Claude): Gera roteiros, títulos, descrições, tags",
+                            "TTS (Azure): Converte o roteiro em áudio narrado",
+                            "Você pode ter vários providers do mesmo tipo com configs diferentes",
                         ]}
                         variant="info"
                     />
@@ -354,12 +446,10 @@ export default function AdminProvidersPage() {
                                     <div className="space-y-6">
                                         {/* Campos básicos */}
                                         <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label>Nome</Label>
+                                            <FieldWithHelp label="Nome" help="Nome amigável do provider">
                                                 <Input value={edited.name || ""} onChange={(e) => setEdited({ ...edited, name: e.target.value })} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Tipo</Label>
+                                            </FieldWithHelp>
+                                            <FieldWithHelp label="Tipo" help="LLM para texto, TTS para áudio">
                                                 <Select
                                                     value={edited.type || ""}
                                                     onValueChange={(v) => setEdited({ ...edited, type: v })}
@@ -368,12 +458,12 @@ export default function AdminProvidersPage() {
                                                         <SelectValue placeholder="Tipo" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="llm">LLM (Texto)</SelectItem>
-                                                        <SelectItem value="tts">TTS (Áudio)</SelectItem>
+                                                        <SelectItem value="llm">LLM (Geração de Texto)</SelectItem>
+                                                        <SelectItem value="tts">TTS (Texto para Áudio)</SelectItem>
                                                         <SelectItem value="image">Imagem</SelectItem>
                                                     </SelectContent>
                                                 </Select>
-                                            </div>
+                                            </FieldWithHelp>
                                         </div>
 
                                         {/* Config específica por tipo */}
@@ -388,10 +478,9 @@ export default function AdminProvidersPage() {
                                             {selected.type === "tts" && renderTTSConfig()}
 
                                             {selected.type !== "llm" && selected.type !== "tts" && (
-                                                <div className="space-y-2">
-                                                    <Label>Base URL</Label>
+                                                <FieldWithHelp label="Base URL" help="Endpoint da API">
                                                     <Input value={edited.baseUrl || ""} onChange={(e) => setEdited({ ...edited, baseUrl: e.target.value })} />
-                                                </div>
+                                                </FieldWithHelp>
                                             )}
                                         </div>
 
