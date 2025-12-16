@@ -997,6 +997,21 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
     let lastError: string | null = null;
     let jobFailed = false;
 
+    // Load outputs from already completed steps (for resume)
+    const allSteps = await db.select().from(schema.jobSteps)
+        .where(eq(schema.jobSteps.jobId, jobId));
+
+    for (const step of allSteps) {
+        if (step.status === "success" && step.outputRefs) {
+            try {
+                const outputRefs = JSON.parse(step.outputRefs);
+                if (outputRefs.output) {
+                    previousOutputs[step.stepKey] = outputRefs.output;
+                }
+            } catch { /* ignore parse errors */ }
+        }
+    }
+
     for (let i = 0; i < pipeline.length; i++) {
         if (jobFailed) break;
 
@@ -1011,9 +1026,19 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
         const step = steps.find(s => s.stepKey === stepDef.key);
         if (!step) continue;
 
-        // Check if cancelled
+        // SKIP steps already completed (for resume functionality)
+        if (step.status === "success") {
+            console.log(`[Runner] Skipping completed step: ${stepDef.key}`);
+            continue;
+        }
+
+        // Check if cancelled BEFORE starting step
         const [currentJob] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, jobId));
         if (currentJob?.status === "cancelled") {
+            // Mark remaining steps as skipped
+            await db.update(schema.jobSteps).set({
+                status: "skipped",
+            }).where(eq(schema.jobSteps.id, step.id));
             break;
         }
 
