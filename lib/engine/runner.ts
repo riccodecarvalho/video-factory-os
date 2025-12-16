@@ -1005,8 +1005,15 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
         if (step.status === "success" && step.outputRefs) {
             try {
                 const outputRefs = JSON.parse(step.outputRefs);
+                // Support both formats: {output: {...}} and direct {...audioPath...}
                 if (outputRefs.output) {
                     previousOutputs[step.stepKey] = outputRefs.output;
+                } else if (outputRefs.audioPath || outputRefs.videoPath) {
+                    // TTS/Render formato direto
+                    previousOutputs[step.stepKey] = outputRefs;
+                } else {
+                    // Fallback: use the entire outputRefs as output
+                    previousOutputs[step.stepKey] = outputRefs;
                 }
             } catch { /* ignore parse errors */ }
         }
