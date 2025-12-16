@@ -23,13 +23,20 @@ async function getFFmpeg(): Promise<typeof import('fluent-ffmpeg')> {
         // Dynamic import para evitar problemas com webpack
         const ffmpeg = (await import('fluent-ffmpeg')).default;
 
-        // Tentar obter o path do ffmpeg do sistema ou do installer
+        // Configurar ffmpeg path
         try {
             const ffmpegInstaller = await import('@ffmpeg-installer/ffmpeg');
             ffmpeg.setFfmpegPath(ffmpegInstaller.path);
         } catch {
-            // Fallback: usar ffmpeg do sistema
             console.log('[FFmpeg] Using system ffmpeg');
+        }
+
+        // Configurar ffprobe path
+        try {
+            const ffprobeInstaller = await import('@ffprobe-installer/ffprobe');
+            ffmpeg.setFfprobePath(ffprobeInstaller.path);
+        } catch {
+            console.log('[FFmpeg] Using system ffprobe');
         }
 
         ffmpegModule = ffmpeg;
