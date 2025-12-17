@@ -81,30 +81,48 @@ export async function createJob(recipeId: string, projectId: string, input: Reco
     const timestamp = Date.now();
 
     // PRE-CALCULATE names based on timestamp (LLM ignores calculation instructions)
+    // Names common for 55+ audience in Mexico/LATAM (born 1950-1970)
     const protagonistNames = [
+        // Classic Mexican/LATAM names for women 55+
         "Adelaida", "Adela", "Adriana", "Agustina", "Aída", "Alba", "Alejandra", "Alicia", "Amalia", "Amelia",
         "Amparo", "Ana", "Andrea", "Ángela", "Angélica", "Antonia", "Araceli", "Ariadna", "Aurora", "Aurelia",
-        "Bárbara", "Beatriz", "Benigna", "Berenice", "Bernardina", "Blanca", "Brígida", "Brunilda", "Camila", "Cándida",
-        "Caridad", "Carlota", "Carmela", "Carolina", "Catalina", "Cecilia", "Celestina", "Clara", "Claudia", "Clementina",
-        "Concepción", "Consuelo", "Cristina", "Dalia", "Daniela", "Delfina", "Diana", "Dolores", "Dominga", "Domitila",
-        "Edelmira", "Elena", "Elisa", "Elvira", "Emilia", "Emma", "Enriqueta", "Ernestina", "Estela", "Estefanía",
-        "Eugenia", "Eulalia", "Eva", "Evangelina", "Fabiola", "Felipa", "Fernanda", "Florencia", "Florinda", "Francisca",
-        "Gabriela", "Genoveva", "Georgina", "Gertrudis", "Gloria", "Griselda", "Guadalupe", "Guillermina", "Helena", "Herminia",
-        "Hilda", "Hortensia", "Ignacia", "Inés", "Irene", "Iris", "Isabel", "Isidora", "Jacinta", "Jimena",
-        "Josefa", "Josefina", "Juana", "Julia", "Juliana", "Laura", "Leonor", "Leticia", "Lucía", "Luisa"
+        "Bárbara", "Beatriz", "Benigna", "Berenice", "Bernardina", "Blanca", "Brígida", "Brunilda", "Candelaria", "Cándida",
+        "Caridad", "Carlota", "Carmela", "Carmen", "Carolina", "Catalina", "Cecilia", "Celestina", "Clara", "Claudia",
+        "Clementina", "Concepción", "Consuelo", "Cristina", "Dalia", "Daniela", "Delfina", "Diana", "Dolores", "Dominga",
+        "Domitila", "Edelmira", "Elena", "Elisa", "Elvira", "Emilia", "Emma", "Enriqueta", "Ernestina", "Esperanza",
+        "Estela", "Estefanía", "Eugenia", "Eulalia", "Eva", "Evangelina", "Fabiola", "Felipa", "Fernanda", "Florencia",
+        "Florinda", "Francisca", "Gabriela", "Genoveva", "Georgina", "Gertrudis", "Gloria", "Griselda", "Guadalupe", "Guillermina",
+        "Helena", "Herminia", "Hilda", "Hortensia", "Ignacia", "Inés", "Irene", "Iris", "Isabel", "Isidora",
+        "Jacinta", "Jimena", "Josefa", "Josefina", "Juana", "Julia", "Juliana", "Laura", "Leonor", "Leticia",
+        "Lidia", "Lilia", "Lorena", "Lourdes", "Lucía", "Lucinda", "Luisa", "Luz", "Magdalena", "Manuela",
+        "Marcela", "Margarita", "María", "Maricela", "Marina", "Marta", "Matilde", "Mercedes", "Micaela", "Milagros",
+        "Minerva", "Mónica", "Natividad", "Nélida", "Noemí", "Norma", "Ofelia", "Olga", "Otilia", "Patricia",
+        "Paula", "Paulina", "Petra", "Pilar", "Rafaela", "Ramona", "Raquel", "Rebeca", "Remedios", "Rocío",
+        "Rosa", "Rosalba", "Rosalía", "Rosario", "Ruth", "Salomé", "Sandra", "Sara", "Silvia", "Socorro",
+        "Sofía", "Soledad", "Susana", "Teresa", "Tomasa", "Trinidad", "Valentina", "Verónica", "Victoria", "Yolanda"
     ];
 
     // SEPARATED by gender - LLM will choose based on story context (nuera vs yerno, etc.)
+    // Antagonist names - younger generation names (children/in-laws of 55+ protagonists)
     const antagonistMaleNames = [
-        "Alejandro", "Alberto", "Antonio", "Carlos", "Diego", "Eduardo", "Enrique", "Fernando", "Francisco", "Gabriel",
-        "Gerardo", "Guillermo", "Gustavo", "Héctor", "Ignacio", "Javier", "Joaquín", "Jorge", "José", "Juan",
-        "Julio", "Luis", "Manuel", "Marcos", "Martín", "Miguel", "Pablo", "Pedro", "Rafael", "Roberto"
+        // Classic Mexican male names
+        "Alejandro", "Alberto", "Alfonso", "Alfredo", "Antonio", "Armando", "Arturo", "Carlos", "César", "Cristóbal",
+        "Daniel", "David", "Diego", "Eduardo", "Emilio", "Enrique", "Ernesto", "Felipe", "Fernando", "Francisco",
+        "Gabriel", "Gerardo", "Gilberto", "Gonzalo", "Guillermo", "Gustavo", "Héctor", "Hugo", "Ignacio", "Iván",
+        "Jaime", "Javier", "Jesús", "Joaquín", "Jorge", "José", "Juan", "Julio", "Leonardo", "Lorenzo",
+        "Luis", "Manuel", "Marcos", "Mario", "Martín", "Miguel", "Nicolás", "Óscar", "Pablo", "Pedro",
+        "Rafael", "Ramón", "Raúl", "Ricardo", "Roberto", "Rodrigo", "Rubén", "Salvador", "Samuel", "Sergio",
+        "Tomás", "Vicente", "Víctor"
     ];
 
     const antagonistFemaleNames = [
-        "Valentina", "Camila", "Mariana", "Lucía", "Sofía", "Isabella", "Renata", "Victoria", "Gabriela", "Andrea",
-        "Patricia", "Fernanda", "Carolina", "Alejandra", "Daniela", "Mónica", "Adriana", "Verónica", "Paula", "Claudia",
-        "Silvia", "Elena", "Teresa", "Marta", "Susana", "Rosa", "Carmen", "Dolores", "Pilar", "Beatriz"
+        // Names for antagonist women (nueras, hijas, etc.) - mix of generations
+        "Adriana", "Alejandra", "Alicia", "Ana", "Andrea", "Angélica", "Beatriz", "Camila", "Carolina", "Catalina",
+        "Claudia", "Cristina", "Daniela", "Diana", "Elena", "Elizabeth", "Erika", "Fernanda", "Gabriela", "Gloria",
+        "Guadalupe", "Isabella", "Jessica", "Karla", "Laura", "Leticia", "Liliana", "Lorena", "Lucía", "Marcela",
+        "Margarita", "María", "Mariana", "Marina", "Marta", "Mónica", "Nancy", "Natalia", "Norma", "Patricia",
+        "Paula", "Paola", "Pilar", "Rebeca", "Renata", "Rosa", "Sandra", "Silvia", "Sofía", "Susana",
+        "Teresa", "Valentina", "Vanessa", "Verónica", "Victoria", "Virginia", "Ximena", "Yolanda"
     ];
 
     const protagonistIndex = timestamp % protagonistNames.length;
