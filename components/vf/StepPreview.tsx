@@ -163,7 +163,7 @@ export function StepPreview({ jobId, stepKey, status, className }: StepPreviewPr
 
             {/* Preview Panel */}
             {isExpanded && (
-                <div className="mt-2 border rounded-lg bg-muted/30 overflow-hidden">
+                <div className="mt-2 border rounded-lg bg-muted/30 overflow-hidden max-w-full">
                     {loading ? (
                         <div className="p-4 text-center text-sm text-muted-foreground">
                             Carregando...
@@ -229,8 +229,8 @@ export function StepPreview({ jobId, stepKey, status, className }: StepPreviewPr
                                     )}
                                 </TabsContent>
 
-                                <TabsContent value="raw" className="m-0">
-                                    <pre className="p-3 text-xs overflow-auto max-h-48 bg-background/50">
+                                <TabsContent value="raw" className="m-0 overflow-hidden">
+                                    <pre className="p-3 text-xs overflow-x-auto overflow-y-auto max-h-48 bg-background/50 break-all whitespace-pre-wrap">
                                         {content.text.substring(0, 2000)}
                                         {content.text.length > 2000 && "\n\n... (truncado)"}
                                     </pre>
