@@ -120,10 +120,12 @@ export async function executeLLM(request: LLMRequest): Promise<LLMResponse> {
     }
 
     // Render user template with variables
+    // Supports both {{key}} and {{ key }} (with optional spaces)
     let userMessage = request.prompt.userTemplate;
     for (const [key, value] of Object.entries(request.variables)) {
-        const placeholder = `{{${key}}}`;
-        userMessage = userMessage.replace(new RegExp(placeholder, 'g'), String(value));
+        // Match: {{ key }}, {{key}}, {{ key}}, {key }}, etc.
+        const placeholder = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+        userMessage = userMessage.replace(placeholder, String(value));
     }
 
     // Get model from prompt or provider config

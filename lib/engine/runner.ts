@@ -654,6 +654,7 @@ async function executeStepTTS(
 
     stepManifest.status = "success";
     stepManifest.completed_at = now();
+    stepManifest.duration_ms = Date.now() - new Date(startedAt).getTime();
     stepManifest.response = {
         output: { audioPath: ttsResult.artifactUri, durationSec: ttsResult.durationSec },
     };
