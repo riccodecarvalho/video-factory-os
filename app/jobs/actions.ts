@@ -89,29 +89,36 @@ export async function createJob(recipeId: string, projectId: string, input: Reco
         "Concepción", "Consuelo", "Cristina", "Dalia", "Daniela", "Delfina", "Diana", "Dolores", "Dominga", "Domitila",
         "Edelmira", "Elena", "Elisa", "Elvira", "Emilia", "Emma", "Enriqueta", "Ernestina", "Estela", "Estefanía",
         "Eugenia", "Eulalia", "Eva", "Evangelina", "Fabiola", "Felipa", "Fernanda", "Florencia", "Florinda", "Francisca",
-        "Gabriela", "Genoveva", "Georgina", "Gertrudis", "Gloria", "Graciela", "Griselda", "Guadalupe", "Guillermina", "Helena",
-        "Herminia", "Hilda", "Hortensia", "Ignacia", "Inés", "Irene", "Iris", "Isabel", "Isidora", "Jacinta",
-        "Jimena", "Josefa", "Josefina", "Juana", "Julia", "Juliana", "Laura", "Leonor", "Leticia", "Lucía"
+        "Gabriela", "Genoveva", "Georgina", "Gertrudis", "Gloria", "Griselda", "Guadalupe", "Guillermina", "Helena", "Herminia",
+        "Hilda", "Hortensia", "Ignacia", "Inés", "Irene", "Iris", "Isabel", "Isidora", "Jacinta", "Jimena",
+        "Josefa", "Josefina", "Juana", "Julia", "Juliana", "Laura", "Leonor", "Leticia", "Lucía", "Luisa"
     ];
 
-    const antagonistNames = [
+    // SEPARATED by gender - LLM will choose based on story context (nuera vs yerno, etc.)
+    const antagonistMaleNames = [
         "Alejandro", "Alberto", "Antonio", "Carlos", "Diego", "Eduardo", "Enrique", "Fernando", "Francisco", "Gabriel",
         "Gerardo", "Guillermo", "Gustavo", "Héctor", "Ignacio", "Javier", "Joaquín", "Jorge", "José", "Juan",
-        "Julio", "Luis", "Manuel", "Marcos", "Martín", "Miguel", "Pablo", "Pedro", "Rafael", "Roberto",
-        "Adela", "Amalia", "Beatriz", "Catalina", "Dora", "Estela", "Eunice", "Fabiola", "Genoveva", "Hilda",
-        "Irma", "Lidia", "Lilia", "Lucinda", "Marcelina", "Mirtha", "Nélida", "Noemí", "Ofelia", "Olga"
+        "Julio", "Luis", "Manuel", "Marcos", "Martín", "Miguel", "Pablo", "Pedro", "Rafael", "Roberto"
+    ];
+
+    const antagonistFemaleNames = [
+        "Valentina", "Camila", "Mariana", "Lucía", "Sofía", "Isabella", "Renata", "Victoria", "Gabriela", "Andrea",
+        "Patricia", "Fernanda", "Carolina", "Alejandra", "Daniela", "Mónica", "Adriana", "Verónica", "Paula", "Claudia",
+        "Silvia", "Elena", "Teresa", "Marta", "Susana", "Rosa", "Carmen", "Dolores", "Pilar", "Beatriz"
     ];
 
     const protagonistIndex = timestamp % protagonistNames.length;
-    const antagonistIndex = Math.floor(timestamp / 1000) % antagonistNames.length;
+    const antagonistMaleIndex = Math.floor(timestamp / 1000) % antagonistMaleNames.length;
+    const antagonistFemaleIndex = Math.floor(timestamp / 100) % antagonistFemaleNames.length;
 
     const enrichedInput = {
         ...input,
         timestamp: timestamp.toString(),
         duracao: input.duracao || input.duration || "60",
-        // PRE-CALCULATED NAMES - LLM MUST USE THESE
+        // PRE-CALCULATED NAMES - LLM chooses based on story context
         nombre_protagonista: protagonistNames[protagonistIndex],
-        nombre_antagonista: antagonistNames[antagonistIndex],
+        nombre_antagonista_masculino: antagonistMaleNames[antagonistMaleIndex],
+        nombre_antagonista_femenino: antagonistFemaleNames[antagonistFemaleIndex],
     };
 
     const now = new Date().toISOString();
