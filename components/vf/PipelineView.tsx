@@ -12,6 +12,7 @@ import {
     RotateCcw,
     Clock,
 } from "lucide-react";
+import { StepPreview } from "./StepPreview";
 
 type StepStatus = "pending" | "running" | "success" | "failed" | "skipped";
 
@@ -27,6 +28,7 @@ export interface PipelineStep {
 
 interface PipelineViewProps {
     steps: PipelineStep[];
+    jobId?: string;
     currentStep?: string | null;
     onRetry?: (stepKey: string) => void;
     className?: string;
@@ -77,7 +79,7 @@ function formatDuration(ms: number): string {
     return `${(ms / 60000).toFixed(1)}min`;
 }
 
-export function PipelineView({ steps, currentStep, onRetry, className }: PipelineViewProps) {
+export function PipelineView({ steps, jobId, currentStep, onRetry, className }: PipelineViewProps) {
     return (
         <div className={cn("space-y-1", className)}>
             <h3 className="text-sm font-medium mb-3">Pipeline</h3>
@@ -89,86 +91,98 @@ export function PipelineView({ steps, currentStep, onRetry, className }: Pipelin
                     const label = stepLabels[step.stepKey] || step.stepKey;
 
                     return (
-                        <div
-                            key={step.id}
-                            className={cn(
-                                "flex items-center gap-3 p-2 rounded-md transition-colors",
-                                isActive && "bg-primary/5 border border-primary/20",
-                                step.status === "failed" && "bg-status-error/5"
-                            )}
-                        >
-                            {/* Icon */}
-                            <Icon
+                        <div key={step.id} className="space-y-0">
+                            <div
                                 className={cn(
-                                    "w-4 h-4 shrink-0",
-                                    colorClass,
-                                    step.status === "running" && "animate-spin"
+                                    "flex items-center gap-3 p-2 rounded-md transition-colors",
+                                    isActive && "bg-primary/5 border border-primary/20",
+                                    step.status === "failed" && "bg-status-error/5"
                                 )}
-                            />
-
-                            {/* Label + Meta + Error */}
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{label}</p>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span>Step {index + 1}</span>
-                                    {step.durationMs && (
-                                        <>
-                                            <span>•</span>
-                                            <span className="flex items-center gap-1">
-                                                <Clock className="w-3 h-3" />
-                                                {formatDuration(step.durationMs)}
-                                            </span>
-                                        </>
+                            >
+                                {/* Icon */}
+                                <Icon
+                                    className={cn(
+                                        "w-4 h-4 shrink-0",
+                                        colorClass,
+                                        step.status === "running" && "animate-spin"
                                     )}
-                                    {(step.attempts || 0) > 1 && (
-                                        <>
-                                            <span>•</span>
-                                            <span>Tentativa {step.attempts}</span>
-                                        </>
+                                />
+
+                                {/* Label + Meta + Error */}
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{label}</p>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <span>Step {index + 1}</span>
+                                        {step.durationMs && (
+                                            <>
+                                                <span>•</span>
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" />
+                                                    {formatDuration(step.durationMs)}
+                                                </span>
+                                            </>
+                                        )}
+                                        {(step.attempts || 0) > 1 && (
+                                            <>
+                                                <span>•</span>
+                                                <span>Tentativa {step.attempts}</span>
+                                            </>
+                                        )}
+                                    </div>
+                                    {/* Error message display */}
+                                    {step.status === "failed" && step.lastError && (
+                                        <p className="text-xs text-status-error mt-1 truncate" title={step.lastError}>
+                                            ⚠ {step.lastError}
+                                        </p>
                                     )}
                                 </div>
-                                {/* Error message display */}
-                                {step.status === "failed" && step.lastError && (
-                                    <p className="text-xs text-status-error mt-1 truncate" title={step.lastError}>
-                                        ⚠ {step.lastError}
-                                    </p>
+
+                                {/* Status Badge */}
+                                <Badge
+                                    variant="outline"
+                                    className={cn(
+                                        "text-xs shrink-0",
+                                        step.status === "success" && "bg-status-success/10 text-status-success border-status-success/30",
+                                        step.status === "running" && "bg-status-running/10 text-status-running border-status-running/30",
+                                        step.status === "failed" && "bg-status-error/10 text-status-error border-status-error/30"
+                                    )}
+                                >
+                                    {step.status}
+                                </Badge>
+
+                                {/* Retry button */}
+                                {step.status === "failed" && onRetry && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => onRetry(step.stepKey)}
+                                        className="shrink-0"
+                                    >
+                                        <RotateCcw className="w-4 h-4" />
+                                    </Button>
                                 )}
                             </div>
 
-                            {/* Status Badge */}
-                            <Badge
-                                variant="outline"
-                                className={cn(
-                                    "text-xs shrink-0",
-                                    step.status === "success" && "bg-status-success/10 text-status-success border-status-success/30",
-                                    step.status === "running" && "bg-status-running/10 text-status-running border-status-running/30",
-                                    step.status === "failed" && "bg-status-error/10 text-status-error border-status-error/30"
-                                )}
-                            >
-                                {step.status}
-                            </Badge>
-
-                            {/* Retry button */}
-                            {step.status === "failed" && onRetry && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => onRetry(step.stepKey)}
-                                    className="shrink-0"
-                                >
-                                    <RotateCcw className="w-4 h-4" />
-                                </Button>
+                            {/* Step Preview - expandable output view */}
+                            {jobId && step.status === "success" && (
+                                <StepPreview
+                                    jobId={jobId}
+                                    stepKey={step.stepKey}
+                                    status={step.status}
+                                />
                             )}
                         </div>
                     );
                 })}
             </div>
 
-            {steps.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                    Nenhum step executado ainda
-                </p>
-            )}
-        </div>
+            {
+                steps.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                        Nenhum step executado ainda
+                    </p>
+                )
+            }
+        </div >
     );
 }

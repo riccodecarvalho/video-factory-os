@@ -358,6 +358,7 @@ function JobsPageContent() {
                                         <TabsContent value="pipeline">
                                             <PipelineView
                                                 steps={jobSteps as any}
+                                                jobId={selectedJob.id}
                                                 currentStep={selectedJob.currentStep}
                                                 onRetry={handleRetryStep}
                                             />

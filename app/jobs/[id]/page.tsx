@@ -179,6 +179,7 @@ export default async function JobDetailPage({ params }: { params: { id: string }
                                     attempts: s.attempts || 0,
                                     lastError: s.lastError,
                                 }))}
+                                jobId={params.id}
                                 currentStep={currentStep}
                             />
                         </CardContent>
