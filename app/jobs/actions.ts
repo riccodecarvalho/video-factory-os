@@ -78,10 +78,40 @@ export async function createJob(recipeId: string, projectId: string, input: Reco
     if (!recipe) throw new Error("Recipe não encontrada");
 
     // Inject timestamp for anti-repetition (used by v3 prompts)
+    const timestamp = Date.now();
+
+    // PRE-CALCULATE names based on timestamp (LLM ignores calculation instructions)
+    const protagonistNames = [
+        "Adelaida", "Adela", "Adriana", "Agustina", "Aída", "Alba", "Alejandra", "Alicia", "Amalia", "Amelia",
+        "Amparo", "Ana", "Andrea", "Ángela", "Angélica", "Antonia", "Araceli", "Ariadna", "Aurora", "Aurelia",
+        "Bárbara", "Beatriz", "Benigna", "Berenice", "Bernardina", "Blanca", "Brígida", "Brunilda", "Camila", "Cándida",
+        "Caridad", "Carlota", "Carmela", "Carolina", "Catalina", "Cecilia", "Celestina", "Clara", "Claudia", "Clementina",
+        "Concepción", "Consuelo", "Cristina", "Dalia", "Daniela", "Delfina", "Diana", "Dolores", "Dominga", "Domitila",
+        "Edelmira", "Elena", "Elisa", "Elvira", "Emilia", "Emma", "Enriqueta", "Ernestina", "Estela", "Estefanía",
+        "Eugenia", "Eulalia", "Eva", "Evangelina", "Fabiola", "Felipa", "Fernanda", "Florencia", "Florinda", "Francisca",
+        "Gabriela", "Genoveva", "Georgina", "Gertrudis", "Gloria", "Graciela", "Griselda", "Guadalupe", "Guillermina", "Helena",
+        "Herminia", "Hilda", "Hortensia", "Ignacia", "Inés", "Irene", "Iris", "Isabel", "Isidora", "Jacinta",
+        "Jimena", "Josefa", "Josefina", "Juana", "Julia", "Juliana", "Laura", "Leonor", "Leticia", "Lucía"
+    ];
+
+    const antagonistNames = [
+        "Alejandro", "Alberto", "Antonio", "Carlos", "Diego", "Eduardo", "Enrique", "Fernando", "Francisco", "Gabriel",
+        "Gerardo", "Guillermo", "Gustavo", "Héctor", "Ignacio", "Javier", "Joaquín", "Jorge", "José", "Juan",
+        "Julio", "Luis", "Manuel", "Marcos", "Martín", "Miguel", "Pablo", "Pedro", "Rafael", "Roberto",
+        "Adela", "Amalia", "Beatriz", "Catalina", "Dora", "Estela", "Eunice", "Fabiola", "Genoveva", "Hilda",
+        "Irma", "Lidia", "Lilia", "Lucinda", "Marcelina", "Mirtha", "Nélida", "Noemí", "Ofelia", "Olga"
+    ];
+
+    const protagonistIndex = timestamp % protagonistNames.length;
+    const antagonistIndex = Math.floor(timestamp / 1000) % antagonistNames.length;
+
     const enrichedInput = {
         ...input,
-        timestamp: Date.now().toString(), // Forces variation in name/hook/escalada selection
-        duracao: input.duracao || input.duration || "60", // Default 60 min
+        timestamp: timestamp.toString(),
+        duracao: input.duracao || input.duration || "60",
+        // PRE-CALCULATED NAMES - LLM MUST USE THESE
+        nombre_protagonista: protagonistNames[protagonistIndex],
+        nombre_antagonista: antagonistNames[antagonistIndex],
     };
 
     const now = new Date().toISOString();
