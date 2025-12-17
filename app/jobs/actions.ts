@@ -77,6 +77,13 @@ export async function createJob(recipeId: string, projectId: string, input: Reco
     const [recipe] = await db.select().from(schema.recipes).where(eq(schema.recipes.id, recipeId));
     if (!recipe) throw new Error("Recipe não encontrada");
 
+    // Inject timestamp for anti-repetition (used by v3 prompts)
+    const enrichedInput = {
+        ...input,
+        timestamp: Date.now().toString(), // Forces variation in name/hook/escalada selection
+        duracao: input.duracao || input.duration || "60", // Default 60 min
+    };
+
     const now = new Date().toISOString();
     const newJob = {
         id: uuid(),
@@ -84,7 +91,7 @@ export async function createJob(recipeId: string, projectId: string, input: Reco
         recipeId: recipe.id,
         recipeSlug: recipe.slug,
         recipeVersion: recipe.version,
-        input: JSON.stringify(input),
+        input: JSON.stringify(enrichedInput),
         status: "pending",
         progress: 0,
         createdAt: now,
