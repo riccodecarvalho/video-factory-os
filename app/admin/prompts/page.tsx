@@ -111,15 +111,20 @@ export default function AdminPromptsPage() {
         return true;
     });
 
-    // Version badge helper
-    const getVersionBadge = (prompt: Prompt) => {
+    // Status badge helper
+    const getStatusBadge = (prompt: Prompt) => {
         if (!prompt.isActive) {
-            return <Badge variant="secondary" className="bg-muted text-muted-foreground">LEGADO v{prompt.version}</Badge>;
+            return (
+                <div className="flex gap-2">
+                    <Badge variant="secondary" className="bg-muted text-muted-foreground hover:bg-muted">INATIVO</Badge>
+                </div>
+            );
         }
-        if (prompt.version >= 2) {
-            return <Badge className="bg-green-500/10 text-green-600 border-green-500/20">NOVO v{prompt.version}</Badge>;
-        }
-        return <Badge variant="outline">v{prompt.version}</Badge>;
+        return (
+            <div className="flex gap-2">
+                <Badge className="bg-green-600 hover:bg-green-700">ATIVO</Badge>
+            </div>
+        );
     };
 
     return (
@@ -216,8 +221,13 @@ export default function AdminPromptsPage() {
                                     >
                                         <SplitViewListItem
                                             title={prompt.name}
-                                            subtitle={prompt.slug}
-                                            meta={getVersionBadge(prompt)}
+                                            subtitle={
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant="outline" className="text-[10px] h-5 px-1 py-0">v{prompt.version}</Badge>
+                                                    <span className="text-xs text-muted-foreground">{prompt.slug}</span>
+                                                </div>
+                                            }
+                                            meta={getStatusBadge(prompt)}
                                             isActive={selectedPrompt?.id === prompt.id}
                                             onClick={() => handleSelectPrompt(prompt)}
                                         />
