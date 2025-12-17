@@ -19,7 +19,7 @@ import {
 import { ContextBanner } from "@/components/ui/ContextBanner";
 import { LineNumberedTextarea } from "@/components/ui/LineNumberedTextarea";
 import { TierExplainer } from "@/components/vf/TierExplainer";
-import { Plus, Save, Loader2, BookOpen, FileText, Lightbulb } from "lucide-react";
+import { Plus, Save, Loader2, BookOpen, FileText, Lightbulb, Download } from "lucide-react";
 import { getKnowledgeBase, getKnowledgeTiers, updateKnowledge, createKnowledge } from "../actions";
 
 type Knowledge = Awaited<ReturnType<typeof getKnowledgeBase>>[0];
@@ -76,6 +76,19 @@ export default function AdminKnowledgeBasePage() {
             setSelected(newItem as Knowledge);
             setEdited(newItem);
         });
+    };
+
+    const handleDownload = () => {
+        if (!selected) return;
+        const blob = new Blob([selected.content], { type: "text/markdown" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${selected.slug}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     const tierCards = Object.entries(tiers).map(([id, count]) => ({
@@ -195,6 +208,9 @@ export default function AdminKnowledgeBasePage() {
                                         <Button size="sm" onClick={handleSave} disabled={isPending}>
                                             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                                             Salvar
+                                        </Button>
+                                        <Button size="sm" variant="outline" onClick={handleDownload} title="Download .md">
+                                            <Download className="w-4 h-4" />
                                         </Button>
                                     </div>
 

@@ -26,6 +26,7 @@ import {
     BarChart3,
     Save,
     Loader2,
+    Download,
 } from "lucide-react";
 import { ContextBanner } from "@/components/ui/ContextBanner";
 import { LineNumberedTextarea } from "@/components/ui/LineNumberedTextarea";
@@ -92,6 +93,20 @@ export default function AdminPromptsPage() {
             setSelectedPrompt(newPrompt as Prompt);
             setEditedPrompt(newPrompt);
         });
+    };
+
+    const handleDownload = () => {
+        if (!selectedPrompt) return;
+        const content = `# SYSTEM PROMPT\n${selectedPrompt.systemPrompt || ""}\n\n---\n\n# USER TEMPLATE\n${selectedPrompt.userTemplate}`;
+        const blob = new Blob([content], { type: "text/markdown" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${selectedPrompt.slug}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     // Build category cards
@@ -252,6 +267,9 @@ export default function AdminPromptsPage() {
                                         <Button size="sm" className="gap-2" onClick={handleSave} disabled={isPending}>
                                             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                                             Salvar
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="gap-2" onClick={handleDownload} title="Download .md">
+                                            <Download className="w-4 h-4" />
                                         </Button>
                                     </div>
 
