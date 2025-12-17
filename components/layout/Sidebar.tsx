@@ -6,19 +6,22 @@ import { cn } from "@/lib/utils";
 import {
     LayoutDashboard,
     Play,
-    ListChecks,
     Settings,
     FileText,
-    Sliders,
     BookOpen,
     Server,
     ShieldCheck,
     ChevronRight,
     Settings2,
     Building2,
+    Mic,
+    Video,
+    ChefHat,
+    FolderOpen,
+    Library,
 } from "lucide-react";
 
-// Navigation structure
+// Main navigation (top level)
 const navigation = [
     {
         name: "Dashboard",
@@ -36,15 +39,21 @@ const navigation = [
     },
 ];
 
-const adminNavigation = [
-    { name: "Projects", href: "/admin/projects", icon: Building2 },
-    { name: "Execution Map", href: "/admin/execution-map", icon: Settings2 },
-    { name: "Prompts", href: "/admin/prompts", icon: FileText },
-    { name: "Presets", href: "/admin/presets", icon: Sliders },
-    { name: "Recipes", href: "/admin/recipes", icon: BookOpen },
-    { name: "Providers", href: "/admin/providers", icon: Server },
-    { name: "Validators", href: "/admin/validators", icon: ShieldCheck },
-    { name: "Knowledge Base", href: "/admin/knowledge-base", icon: BookOpen },
+// Projects section - where you CONFIGURE per project
+const projectsNavigation = [
+    { name: "Projects", href: "/admin/projects", icon: Building2, description: "Hub de configuração" },
+    { name: "Execution Map", href: "/admin/execution-map", icon: Settings2, description: "Visualizar bindings" },
+];
+
+// Library section - where you CREATE global items
+const libraryNavigation = [
+    { name: "Prompts", href: "/admin/prompts", icon: FileText, description: "Templates de IA" },
+    { name: "Vozes", href: "/admin/presets", icon: Mic, description: "Presets de voz", filter: "voice" },
+    { name: "Vídeo", href: "/admin/presets?type=video", icon: Video, description: "Presets de vídeo" },
+    { name: "Recipes", href: "/admin/recipes", icon: ChefHat, description: "Pipelines" },
+    { name: "Validators", href: "/admin/validators", icon: ShieldCheck, description: "Regras" },
+    { name: "Knowledge Base", href: "/admin/knowledge-base", icon: BookOpen, description: "Documentos" },
+    { name: "Providers", href: "/admin/providers", icon: Server, description: "LLM e TTS" },
 ];
 
 interface SidebarProps {
@@ -56,8 +65,32 @@ export function Sidebar({ className }: SidebarProps) {
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
-        return pathname.startsWith(href);
+        // Handle query params
+        const basePath = href.split("?")[0];
+        return pathname.startsWith(basePath);
     };
+
+    const NavItem = ({ item }: { item: { name: string; href: string; icon: React.ElementType } }) => (
+        <Link
+            href={item.href}
+            className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                isActive(item.href)
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+        >
+            <item.icon className="w-4 h-4" />
+            {item.name}
+        </Link>
+    );
+
+    const SectionHeader = ({ icon: Icon, label }: { icon: React.ElementType; label: string }) => (
+        <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <Icon className="w-3 h-3" />
+            {label}
+        </div>
+    );
 
     return (
         <aside
@@ -118,26 +151,22 @@ export function Sidebar({ className }: SidebarProps) {
                     ))}
                 </div>
 
-                {/* Admin Section */}
+                {/* Projects Section - CONFIGURAÇÃO */}
                 <div className="mt-6">
-                    <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Admin
-                    </div>
+                    <SectionHeader icon={FolderOpen} label="Projetos" />
                     <div className="space-y-1">
-                        {adminNavigation.map((item) => (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={cn(
-                                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                                    isActive(item.href)
-                                        ? "bg-primary/10 text-primary"
-                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                                )}
-                            >
-                                <item.icon className="w-4 h-4" />
-                                {item.name}
-                            </Link>
+                        {projectsNavigation.map((item) => (
+                            <NavItem key={item.name} item={item} />
+                        ))}
+                    </div>
+                </div>
+
+                {/* Library Section - CADASTRO */}
+                <div className="mt-6">
+                    <SectionHeader icon={Library} label="Biblioteca" />
+                    <div className="space-y-1">
+                        {libraryNavigation.map((item) => (
+                            <NavItem key={item.name} item={item} />
                         ))}
                     </div>
                 </div>
