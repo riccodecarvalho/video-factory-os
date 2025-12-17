@@ -151,7 +151,7 @@ const PITCH_OPTIONS = [
 ];
 
 const VOICE_STYLES = [
-    { value: "", label: "Nenhum (padrão)" },
+    { value: "none", label: "Nenhum (padrão)" },
     { value: "narration-professional", label: "Narração profissional" },
     { value: "newscast", label: "Âncora de notícias" },
     { value: "customerservice", label: "Atendimento" },
@@ -354,13 +354,13 @@ export default function AdminPresetsPage() {
                 <div className="grid grid-cols-2 gap-4">
                     <FieldWithHelp label="Estilo" help="Emoção/entonação">
                         <Select
-                            value={String(edited.style || "")}
-                            onValueChange={(v) => setEdited({ ...edited, style: v || null })}
+                            value={String(edited.style || "none")}
+                            onValueChange={(v) => setEdited({ ...edited, style: v === "none" ? null : v })}
                         >
                             <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
                             <SelectContent>
                                 {VOICE_STYLES.map((s) => (
-                                    <SelectItem key={s.value || "none"} value={s.value}>{s.label}</SelectItem>
+                                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
