@@ -19,6 +19,9 @@ export async function getJobs(status?: string, search?: string, projectId?: stri
     const results = await db.select().from(schema.jobs).orderBy(desc(schema.jobs.createdAt));
 
     return results.filter(j => {
+        // Filter out soft-deleted jobs
+        if (j.deletedAt) return false;
+
         const matchesStatus = !status || status === "all" || j.status === status;
         const matchesProject = !projectId || projectId === "all" || j.projectId === projectId;
         const input = JSON.parse(j.input || "{}");
@@ -33,13 +36,16 @@ export async function getJobStatusCounts() {
     const db = getDb();
     const jobs = await db.select().from(schema.jobs);
 
-    const counts = jobs.reduce((acc, j) => {
+    // Filter out deleted jobs for counts
+    const activeJobs = jobs.filter(j => !j.deletedAt);
+
+    const counts = activeJobs.reduce((acc, j) => {
         acc[j.status] = (acc[j.status] || 0) + 1;
         return acc;
     }, {} as Record<string, number>);
 
     return {
-        all: jobs.length,
+        all: activeJobs.length,
         pending: counts.pending || 0,
         running: counts.running || 0,
         completed: counts.completed || 0,
@@ -224,6 +230,19 @@ export async function cancelJob(jobId: string) {
             }).where(eq(schema.jobSteps.id, step.id));
         }
     }
+
+    revalidatePath("/jobs");
+    return { success: true };
+}
+
+export async function deleteJob(jobId: string) {
+    const db = getDb();
+
+    // Soft delete - just set deletedAt timestamp
+    await db.update(schema.jobs).set({
+        deletedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    }).where(eq(schema.jobs.id, jobId));
 
     revalidatePath("/jobs");
     return { success: true };

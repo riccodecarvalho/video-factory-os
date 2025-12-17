@@ -31,6 +31,7 @@ import {
     CheckCircle2,
     AlertCircle,
     Circle,
+    Trash2,
 } from "lucide-react";
 import {
     getJobs,
@@ -40,6 +41,7 @@ import {
     startJob,
     retryStep,
     cancelJob,
+    deleteJob,
 } from "./actions";
 import { getProjects } from "@/app/admin/actions";
 
@@ -340,6 +342,23 @@ function JobsPageContent() {
                                                 <Button size="sm" variant="destructive" className="gap-2" onClick={handleCancelJob}>
                                                     <XCircle className="w-4 h-4" />
                                                     Cancelar
+                                                </Button>
+                                            )}
+                                            {selectedJob.status !== "running" && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="gap-2 text-muted-foreground hover:text-destructive"
+                                                    onClick={async () => {
+                                                        if (confirm("Tem certeza que deseja excluir este job?")) {
+                                                            await deleteJob(selectedJob.id);
+                                                            router.push("/jobs");
+                                                            loadJobs();
+                                                        }
+                                                    }}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                    Excluir
                                                 </Button>
                                             )}
                                         </div>

@@ -282,6 +282,7 @@ export const jobs = sqliteTable('jobs', {
     startedAt: text('started_at'),
     completedAt: text('completed_at'),
     updatedAt: text('updated_at').notNull().default('CURRENT_TIMESTAMP'),
+    deletedAt: text('deleted_at'), // Soft delete - null = active, timestamp = deleted
 });
 
 // ============================================
