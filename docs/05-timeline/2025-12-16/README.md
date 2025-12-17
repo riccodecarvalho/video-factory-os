@@ -1,25 +1,52 @@
 # Timeline 2025-12-16
 
-**SHA Âncora:** `a585cd7`
+**SHA Âncora:** `5a25c55`
 
 ## 🎯 Eventos do Dia
 
-### 🚀 MVP Pipeline Funcional - Primeiro Teste Completo
+### 🚀 MVP Pipeline Funcional + Admin UX Completo
 
 **Status:** ✅ FUNCIONAL
 
-O pipeline completo executou pela primeira vez com sucesso:
-- ideacao → titulo → planejamento → roteiro → parse_ssml → tts → renderizacao
+---
 
-### Correções Implementadas
+## 📊 Commits do Dia
 
-| Hora | Evento | Commit |
-|------|--------|--------|
-| 00:25 | Fix prompts: migração de conteúdo real | `3a2407b` |
-| 00:36 | Fix TTS: extração MP3 do ZIP Azure | `d465993` |
-| 00:41 | Fix FFprobe: instalação e config | `13900ef` |
-| 00:46 | Fix Webpack: externals para ffmpeg | `5ca582f` |
-| 00:49 | Fix previousOutputs: formatos diretos | `d193469` |
+| Hora | Commit | Descrição |
+|------|--------|-----------|
+| 00:25 | `3a2407b` | Fix prompts: migração conteúdo real |
+| 00:36 | `d465993` | Fix TTS: extração MP3 do ZIP Azure |
+| 00:41 | `13900ef` | Fix FFprobe: instalação e config |
+| 00:46 | `5ca582f` | Fix Webpack: externals ffmpeg |
+| 00:49 | `d193469` | Fix previousOutputs: formatos diretos |
+| 16:00 | `9e93d2e` | **Admin UX melhorias completas** |
+| 16:30 | `db5d515` | Admin UX refinamentos feedback |
+| 17:00 | `8621758` | Providers/Presets dados completos |
+| 17:30 | `1fad1a7` | **Admin UX completo** - Providers/Presets |
+| 18:00 | `88acda2` | **Projects como Hub Central** |
+| 21:25 | `482a10f` | Fix SelectItem value vazio |
+| 21:27 | `5a25c55` | **Sidebar reorganizada** PROJETOS/BIBLIOTECA |
+
+---
+
+## ✅ O Que Foi Cumprido
+
+### Admin UX/UI (Plano Completo)
+- [x] **Providers**: Claude 4.5 Opus, 70+ vozes Azure, max tokens dinâmico
+- [x] **Presets**: Rate numérico (0.5-2.0), vozes Multilingual, valores visíveis
+- [x] **Recipes**: Editor visual de pipeline com reordenação
+- [x] **Validators**: Templates prontos, editor visual de patterns
+- [x] **Prompts**: LineNumberedTextarea, ContextBanner
+- [x] **Projects**: Hub central com tabs (Providers, Presets, Recipe)
+
+### Arquitetura de Informação
+- [x] **Sidebar reorganizada**: grupos PROJETOS e BIBLIOTECA
+- [x] **ADR-010**: Projects como hub central documentado
+
+### Bugs Corrigidos
+- [x] SelectItem value vazio em VOICE_STYLES
+- [x] Rate como número (não string %)
+- [x] Cache webpack corrompido
 
 ---
 
@@ -32,15 +59,18 @@ O pipeline completo executou pela primeira vez com sucesso:
 ## 🔜 Handover para Próxima Sessão
 
 ### O que foi feito:
-1. **MVP Pipeline testado** - Todas as etapas executaram
-2. **8 prompts Graciela** com conteúdo real migrado
-3. **Sistema robusto de jobs**: resume, cancel, skip completos
-4. **Azure TTS** funcionando (ZIP→MP3 extraction)
-5. **FFmpeg/FFprobe** configurados corretamente
+1. **Admin UX completo** - Todas as páginas melhoradas
+2. **Projects como Hub** - Configuração centralizada por projeto
+3. **Sidebar clara** - PROJETOS vs BIBLIOTECA
+4. **70+ vozes Azure** incluindo Multilingual
+5. **Claude 4.5 Opus** adicionado
 
 ### Próximas prioridades:
-1. **UI de Progresso** - % por step, tempo restante, indicador visual
-2. **Botão Resume** - Expor resumeJob na UI
-3. **Steps restantes** - miniaturas, descricao, tags, comunidade
+1. **Testar pipeline completo** com novas configurações
+2. **UI de Progresso** - % por step, tempo restante
+3. **Steps restantes** - miniaturas, descricao, tags
 4. **Exportação** - Verificar step export funciona
-5. **Testes E2E** - Rodar pipeline completo novamente
+
+---
+
+**Última atualização:** 2025-12-16 22:30
