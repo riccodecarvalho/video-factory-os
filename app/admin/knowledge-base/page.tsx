@@ -146,17 +146,25 @@ export default function AdminKnowledgeBasePage() {
                                         key={item.id}
                                         title={item.name}
                                         subtitle={item.slug}
+                                        className={!item.isActive ? "opacity-50" : ""}
                                         meta={
-                                            <Badge
-                                                variant="outline"
-                                                className={
-                                                    item.tier === "tier1" ? "bg-red-500/10 text-red-600 border-red-500/20" :
-                                                        item.tier === "tier2" ? "bg-amber-500/10 text-amber-600 border-amber-500/20" :
-                                                            "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                                                }
-                                            >
-                                                {item.tier}
-                                            </Badge>
+                                            <div className="flex gap-1">
+                                                {!item.isActive && (
+                                                    <Badge variant="outline" className="bg-muted text-muted-foreground text-xs">
+                                                        INATIVO
+                                                    </Badge>
+                                                )}
+                                                <Badge
+                                                    variant="outline"
+                                                    className={
+                                                        item.tier === "tier1" ? "bg-red-500/10 text-red-600 border-red-500/20" :
+                                                            item.tier === "tier2" ? "bg-amber-500/10 text-amber-600 border-amber-500/20" :
+                                                                "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                                                    }
+                                                >
+                                                    {item.tier}
+                                                </Badge>
+                                            </div>
                                         }
                                         isActive={selected?.id === item.id}
                                         onClick={() => handleSelect(item)}

@@ -661,3 +661,67 @@ export async function getAvailableRecipesForProject() {
     const recipes = await db.select().from(schema.recipes).where(eq(schema.recipes.isActive, true));
     return recipes.map(r => ({ id: r.id, name: r.name, slug: r.slug }));
 }
+
+// ============================================
+// PROJECT PROMPTS - Via Recipe Bindings
+// ============================================
+
+export interface ProjectPrompt {
+    stepKey: string;
+    promptId: string;
+    promptSlug: string;
+    promptName: string;
+    isActive: boolean;
+}
+
+export async function getProjectPrompts(projectId: string): Promise<ProjectPrompt[]> {
+    const db = getDb();
+
+    // 1. Buscar a recipe vinculada ao projeto
+    const projectBindings = await db.select()
+        .from(schema.executionBindings)
+        .where(
+            and(
+                eq(schema.executionBindings.projectId, projectId),
+                eq(schema.executionBindings.slot, 'recipe'),
+                eq(schema.executionBindings.stepKey, '*')
+            )
+        );
+
+    if (projectBindings.length === 0) return [];
+
+    const recipeId = projectBindings[0].targetId;
+
+    // 2. Buscar todos os bindings de prompts dessa recipe
+    const promptBindings = await db.select()
+        .from(schema.executionBindings)
+        .where(
+            and(
+                eq(schema.executionBindings.recipeId, recipeId),
+                eq(schema.executionBindings.slot, 'prompt'),
+                eq(schema.executionBindings.isActive, true)
+            )
+        );
+
+    // 3. Buscar detalhes dos prompts
+    const prompts = await db.select().from(schema.prompts);
+
+    const result: ProjectPrompt[] = [];
+
+    for (const binding of promptBindings) {
+        const prompt = prompts.find(p => p.id === binding.targetId);
+        if (prompt) {
+            result.push({
+                stepKey: binding.stepKey,
+                promptId: prompt.id,
+                promptSlug: prompt.slug,
+                promptName: prompt.name,
+                isActive: prompt.isActive ?? true,
+            });
+        }
+    }
+
+    // Ordenar por step key
+    return result.sort((a, b) => a.stepKey.localeCompare(b.stepKey));
+}
+

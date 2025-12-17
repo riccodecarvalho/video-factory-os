@@ -25,7 +25,7 @@ import {
     EmptyState,
 } from "@/components/layout";
 import { ContextBanner } from "@/components/ui/ContextBanner";
-import { Plus, Save, Loader2, Building2, Power, Cpu, Mic, Video, ChefHat, HelpCircle } from "lucide-react";
+import { Plus, Save, Loader2, Building2, Power, Cpu, Mic, Video, ChefHat, HelpCircle, FileText } from "lucide-react";
 import {
     getProjects,
     updateProject,
@@ -36,8 +36,10 @@ import {
     getAvailableProvidersForProject,
     getAvailablePresetsForProject,
     getAvailableRecipesForProject,
+    getProjectPrompts,
     type ProjectBindingSlot,
     type ProjectBinding,
+    type ProjectPrompt,
 } from "../actions";
 
 type Project = Awaited<ReturnType<typeof getProjects>>[0];
@@ -70,6 +72,7 @@ export default function AdminProjectsPage() {
     const [providers, setProviders] = useState<AvailableProviders>({ llm: [], tts: [] });
     const [presets, setPresets] = useState<AvailablePresets>({ voice: [], video: [] });
     const [recipes, setRecipes] = useState<AvailableRecipe[]>([]);
+    const [projectPrompts, setProjectPrompts] = useState<ProjectPrompt[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -105,8 +108,12 @@ export default function AdminProjectsPage() {
 
     const loadProjectBindings = async (projectId: string) => {
         try {
-            const data = await getProjectBindings(projectId);
-            setBindings(data);
+            const [bindingsData, promptsData] = await Promise.all([
+                getProjectBindings(projectId),
+                getProjectPrompts(projectId),
+            ]);
+            setBindings(bindingsData);
+            setProjectPrompts(promptsData);
         } catch (e) {
             console.error('Error loading bindings:', e);
         }
@@ -315,8 +322,9 @@ export default function AdminProjectsPage() {
                                     <ConfigSummary />
 
                                     <Tabs defaultValue="config" className="w-full">
-                                        <TabsList className="grid w-full grid-cols-4">
+                                        <TabsList className="grid w-full grid-cols-5">
                                             <TabsTrigger value="config">⚙️ Configuração</TabsTrigger>
+                                            <TabsTrigger value="prompts">📝 Prompts</TabsTrigger>
                                             <TabsTrigger value="providers">🤖 Providers</TabsTrigger>
                                             <TabsTrigger value="presets">🎛️ Presets</TabsTrigger>
                                             <TabsTrigger value="geral">📋 Geral</TabsTrigger>
@@ -344,6 +352,42 @@ export default function AdminProjectsPage() {
                                             <div className="p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                                                 <p className="text-sm">💡 Configure os <strong>Providers</strong> e <strong>Presets</strong> nas abas ao lado.</p>
                                             </div>
+                                        </TabsContent>
+
+                                        <TabsContent value="prompts" className="space-y-4 pt-4">
+                                            <div className="text-sm text-muted-foreground mb-4">
+                                                Prompts vinculados via Recipe ({projectPrompts.length} total)
+                                            </div>
+                                            {projectPrompts.length === 0 ? (
+                                                <div className="text-center py-8 text-muted-foreground">
+                                                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                                    <p>Nenhum prompt vinculado</p>
+                                                    <p className="text-xs">Selecione uma Recipe primeiro</p>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    {projectPrompts.map((prompt) => (
+                                                        <div
+                                                            key={prompt.promptId}
+                                                            className={`flex items-center justify-between p-3 rounded-lg border ${prompt.isActive ? 'bg-background' : 'bg-muted/30 opacity-60'
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <Badge variant="outline" className="font-mono text-xs">
+                                                                    {prompt.stepKey}
+                                                                </Badge>
+                                                                <div>
+                                                                    <div className="font-medium text-sm">{prompt.promptName}</div>
+                                                                    <div className="text-xs text-muted-foreground">{prompt.promptSlug}</div>
+                                                                </div>
+                                                            </div>
+                                                            <Badge className={prompt.isActive ? "bg-status-success/10 text-status-success" : "bg-muted"}>
+                                                                {prompt.isActive ? "ATIVO" : "INATIVO"}
+                                                            </Badge>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </TabsContent>
 
                                         <TabsContent value="providers" className="space-y-4 pt-4">
