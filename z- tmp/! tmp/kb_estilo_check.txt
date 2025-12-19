@@ -1,0 +1,58 @@
+# ESTILO DE ESCRITA (3 TÉCNICAS)
+
+## QUANDO USAR
+Aplicar estas técnicas ao longo de TODO o roteiro para maximizar impacto emocional.
+
+---
+
+## 1. RITMO: BUILD-UP + PUNCH
+
+**PRINCÍPIO:** Frases longas criam tensão. Frases curtas criam impacto.
+
+**FÓRMULA:**
+- BUILD-UP (25-35 palavras): Descrição, contexto, tensão crescente...
+- PUNCH (5-10 palavras): Impacto. Final abrupto. Mudança.
+
+**EXEMPLO:**
+BUILD-UP: Durante treinta y cinco años había guardado silencio, soportando cada comentario, cada mirada de desprecio, cada humillación que mi nuera me lanzaba como si fueran piedras invisibles.
+
+PUNCH: Pero esa noche, todo cambió.
+
+**MÍNIMO:** 10 momentos build-up/punch por roteiro
+
+---
+
+## 2. CUANTIFICAÇÃO PRECISA
+
+**PRINCÍPIO:** Números específicos criam credibilidade e peso emocional.
+
+**SEMPRE USAR:**
+- Hora exacta: "las tres y cuarenta y siete" (não "por la tarde")
+- Idade: "sesenta y dos años" (não "mayor")
+- Pessoas: "cuarenta y siete invitados" (não "muchos")
+- Dinheiro: "tres mil doscientos dólares" (não "mucho dinero")
+- Duração: "quince años y cuatro meses" (não "mucho tiempo")
+
+**REGRAS:**
+- Mínimo 15 números por roteiro
+- SEMPRE por extenso (nunca cifras)
+- Distribuir: Acto 1 (3-4) | Actos 2-5 (8-10) | Actos 6-7 (2-3)
+
+---
+
+## 3. MOMENTOS DE QUASE DESCOBERTA
+
+**PRINCÍPIO:** Protagonista quase é descoberto investigando. Gera micro-tensão.
+
+**FÓRMULA:**
+1. Protagonista em ação (buscar, escutar, fotografar)
+2. Villano quase chega/descubre
+3. Protagonista escapa por segundos
+4. Audiência exhala (alívio)
+
+**MÍNIMO:** 2-3 momentos por roteiro
+
+**EXECUÇÃO:**
+Build-up longo → momento de quase → escape → respiração
+
+**DETALHE:** Timing específico sempre ("por dos segundos de diferencia")

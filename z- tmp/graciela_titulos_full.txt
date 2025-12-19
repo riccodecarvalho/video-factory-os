@@ -1,0 +1,482 @@
+# BIBLIOTECA DE TÍTULOS E REGRAS (SSOT)
+
+## PARTE 4: HOOK SCORE (Sistema 0-10)
+
+### Critérios com Pesos (Ajustados para Verdades de Graciela)
+
+| Critério | Pontos | Como Avaliar |
+|----------|:------:|--------------|
+| **Indignação/Traição clara** | +2 | Conflito familiar nos primeiros 30 chars |
+| **Apelido/Insulto CAPS** | +2 | VIEJA, CERDA, HIJO INGRATO, ou frase cruel |
+| **Número concreto** | +1 | "15 bofetadas", "200 invitados", "10 años" |
+| **Relação familiar clara** | +1 | Hijo, suegra, esposo, yerno, nuera |
+| **Conector forte** | +2 | "entonces", "así que", "pero", "lo que hice" |
+| **Loop bem aberto** | +1 | Não fecha a história, gera curiosidade |
+| **Identificação 55+** | +1 | Madre, abuela, esposa madura |
+
+**TOTAL MÁXIMO:** 10 pontos
+
+| Score | Avaliação | Ação |
+|:-----:|-----------|------|
+| **9-10** | Excelente | ✅ Publicar |
+| **8** | Bom | ✅ Publicar com confiança |
+| **6-7** | Aceitável | ⚠️ Considerar refinamento |
+| **<6** | Fraco | ❌ Refazer |
+
+**Regra:** Só gerar títulos com Hook Score **8+**
+
+---
+
+## PARTE 5: BIBLIOTECA DE 12 TEMPLATES (Verdades de Graciela)
+
+### Distribuição por Tipo de Conflito
+
+- **50%** → TF1-TF4 — Conflitos FAMILIARES (filho, esposo, sogra)
+- **30%** → TF5-TF8 — Conflitos em EVENTOS (boda, cena, festa)
+- **20%** → TF9-TF12 — Conflitos MISTOS (trabalho + família)
+
+---
+
+### TF1) FILHO INGRATO + VINGANÇA ⭐⭐⭐⭐⭐
+
+**Estrutura:** `Mi hijo [ação cruel]… así que [vingança da mãe]`
+
+**Exemplos (dos roteiros):**
+```
+Mi hijo me dio 15 bofetadas frente a su esposa... así que vendí su casa mientras trabajaba
+Mi hijo me echó del matrimonio por culpa de su esposa... pero lo que dije después nadie lo olvidará
+Mi hijo dijo "Mamá, me avergüenzas"... entonces preparé algo que jamás olvidará
+```
+
+**CTR:** 6-8% | **Uso:** 15% dos títulos | **TEMPLATE CAMPEÃO**
+
+---
+
+### TF2) SOGRA/SOGRO ABUSIVO + REAÇÃO ⭐⭐⭐⭐⭐
+
+**Estrutura:** `Mi suegra/suegro [ação cruel]… entonces yo [reação]`
+
+**Exemplos (dos roteiros):**
+```
+En la boda la suegra le dio a mi hija un uniforme de empleada... mi yerno rió, entonces yo...
+Mi suegro le pegó a mi hija por la comida salada... mi marido calló, entonces yo llegué
+El suegro dijo "Ese muchacho es un idiota"... mi hijo lloró, entonces revelé un secreto
+```
+
+**CTR:** 5-8% | **Uso:** 15% dos títulos
+
+---
+
+### TF3) ESPOSO TRAIDOR + DESCOBERTA ⭐⭐⭐⭐⭐
+
+**Estrutura:** `Mi esposo [traição]… quedé en shock cuando descubrí [plano]`
+
+**Exemplos (dos roteiros):**
+```
+Mi esposo me echó de la casa... usé la tarjeta vieja de mi padre y el gerente gritó...
+Encontré a mi esposo con la novia de mi hijo... quedé en shock cuando descubrí que ella era...
+"Mamá, no vuelvas a casa" dijo mi hijo en pánico... quedé en shock al descubrir el plan de mi esposo
+```
+
+**CTR:** 5-7% | **Uso:** 10% dos títulos
+
+---
+
+### TF4) YERNO/NUERA + HUMILHAÇÃO ⭐⭐⭐⭐
+
+**Estrutura:** `Mi yerno/nuera [ação cruel]… lo que hice después [consequência]`
+
+**Exemplos (dos roteiros):**
+```
+Mi yerno llamó a mi hija CERDA GORDA minutos antes de su boda... lo escuché todo
+Mi yerno dejó a mi hija sin techo para irse con la amante... lo que hice después él jamás lo olvidará
+Mi nuera convenció a mi hijo de expulsarme... pero lo que descubrí cambió todo
+```
+
+**CTR:** 5-7% | **Uso:** 10% dos títulos
+
+---
+
+### TF5) HUMILHAÇÃO NA BODA ⭐⭐⭐⭐
+
+**Estrutura:** `En la boda [humilhação]… [reação/vingança]`
+
+**Exemplos (dos roteiros):**
+```
+En la boda el suegro dijo "Ese muchacho es un idiota"... mi hijo lloró, entonces revelé un secreto
+En la boda la suegra le dio a mi hija un uniforme de empleada... perfecto, entonces yo...
+En la boda mi hijo me gritó "Vete, mamá"... frente a 200 invitados... lo que hice nadie lo olvidará
+```
+
+**CTR:** 5-7% | **Uso:** 10% dos títulos
+
+---
+
+### TF6) EXPULSÃO/EXCLUSÃO FAMILIAR ⭐⭐⭐⭐
+
+**Estrutura:** `[Familiar] me echó/excluyó de [evento]… pero [vingança]`
+
+**Exemplos (dos roteiros):**
+```
+Mi hijo me envió un mensaje "No vas al crucero con nosotros, solo es viaje familiar"...
+Mi hijo me echó del matrimonio por culpa de su esposa... pero lo que dije después nadie lo olvidará
+Me expulsaron de la cena de Navidad frente a mis nietos... así que revelé el secreto de la familia
+```
+
+**CTR:** 4-6% | **Uso:** 8% dos títulos
+
+---
+
+### TF7) FRASE CRUEL (Aspas) + CONSEQUÊNCIA ⭐⭐⭐⭐
+
+**Estrutura:** `"[Frase cruel]" — [quem disse]… [reação]`
+
+**Exemplos (dos roteiros):**
+```
+"Vete, mamá, mi novia no te quiere aquí" — Mi hijo gritó frente a 200 personas... entonces yo...
+"Esa cerda inmunda de su hija" — Escuché a mi yerno decir... y lo que hice cambió todo
+"Es todo lo que él sabe hacer" — El suegro se burló de mi hijo... pero yo tenía un secreto
+```
+
+**CTR:** 5-7% | **Uso:** 8% dos títulos
+
+---
+
+### TF8) VIOLÊNCIA FAMILIAR + REAÇÃO ⭐⭐⭐
+
+**Estrutura:** `[Familiar] me pegó/golpeó… [reação/vingança]`
+
+**Exemplos (dos roteiros):**
+```
+Mi hijo me dio 15 bofetadas frente a su esposa... así que vendí su casa mientras trabajaba
+Mi suegro me pegó por la comida salada... mi marido calló, entonces yo llegué
+Mi esposo me golpeó frente a mis hijos... lo que hice después él jamás lo imaginó
+```
+
+**CTR:** 5-7% | **Uso:** 6% dos títulos
+
+---
+
+### TF9) HERANÇA/CASA + VINGANÇA ⭐⭐⭐
+
+**Estrutura:** `[Conflito por herança/casa]… [vingança legal]`
+
+**Exemplos:**
+```
+Mi hijo quería quedarse con mi casa... así que cambié el testamento sin que él supiera
+La casa todavía estaba a mi nombre... vendí todo mientras ellos trabajaban
+Mi nuera me echó de mi propia casa... pero ella no sabía que yo tenía los documentos
+```
+
+**CTR:** 4-6% | **Uso:** 6% dos títulos
+
+---
+
+### TF10) APELIDO CRUEL FAMILIAR ⭐⭐⭐
+
+**Estrutura:** `Me/La llamaron [APELIDO]… pero [vingança]`
+
+**Exemplos:**
+```
+Me llamaron VIEJA INÚTIL en la cena familiar... pero lo que hice después los dejó sin palabras
+La llamaron CERDA GORDA minutos antes de su boda... lo escuché todo y actué
+Mi nuera me llamó SUEGRA METIDA... así que le mostré quién mandaba realmente
+```
+
+**CTR:** 4-6% | **Uso:** 6% dos títulos
+
+---
+
+### TF11) SEGREDO REVELADO ⭐⭐⭐
+
+**Estrutura:** `Nadie sabía que [segredo]… hasta que [revelação]`
+
+**Exemplos:**
+```
+Nadie sabía que mi esposo tenía otra familia... hasta que su hijo apareció en la boda
+Nadie sabía que mi yerno estaba casado... hasta que llegó su esposa a la fiesta
+Nadie sabía que yo había grabado todo... hasta que mostré el video en la cena
+```
+
+**CTR:** 4-5% | **Uso:** 4% dos títulos
+
+---
+
+### TF12) MARIDO OMISSO + REAÇÃO DA MÃE ⭐⭐
+
+**Estrutura:** `[Abuso]… mi marido/hijo calló… entonces yo [reação]`
+
+**Exemplos:**
+```
+Mi suegro le pegó a mi hija... mi marido calló, entonces yo llegué con una sorpresa
+Mi suegra humilló a mi hija en la boda... mi yerno rió, entonces yo revelé su secreto
+Mi nuera me insultó frente a todos... mi hijo no dijo nada, así que actué yo
+```
+
+**CTR:** 3-5% | **Uso:** 2% dos títulos
+
+---
+
+## Templates CORPORATIVOS (40% — Usar Regularmente)
+
+### TC1) HUMILHAÇÃO CORPORATIVA + VIRADA ⭐⭐⭐⭐⭐
+
+**Estrutura:** `[Poderoso] humilló a [Humilde] en [Local]… hasta que [Virada]`
+
+**Exemplos:**
+```
+CEO humilló a la limpiadora en su hotel... hasta que descubrió quién era ella realmente
+Jefe insultó a la mesera frente a 50 clientes... hasta que ella le mostró algo que lo dejó en shock
+Gerente despidió a la empleada por llegar tarde... sin saber que ella era la nueva dueña
+```
+
+**CTR:** 5-8% | **Uso:** 15% dos títulos
+
+---
+
+### TC2) IGNORÂNCIA FATAL (Sin Saber) ⭐⭐⭐⭐⭐
+
+**Estrutura:** `[Poderoso] [Ação] a [Humilde]… sin saber que [Segredo/Competência]`
+
+**Exemplos:**
+```
+Millonario se burló de la limpiadora, sin saber que ella hablaba 9 idiomas fluidos...
+CEO despidió a la recepcionista, sin saber que era la hija del fundador de la empresa...
+Empresario humilló a la mendiga, sin saber que era la dueña del edificio...
+```
+
+**CTR:** 5-8% | **Uso:** 10% dos títulos
+
+---
+
+### TC3) APELIDO CRUEL + TRANSFORMAÇÃO ⭐⭐⭐⭐⭐
+
+**Estrutura:** `La llamaron [APELIDO CRUEL]… pero [volvió/años después] [TRANSFORMAÇÃO]`
+
+**Exemplos:**
+```
+La llamaron SIRVIENTA TORPE por derramar café... 10 años después era la dueña
+La llamaron GORDA INÚTIL en la entrevista... pero volvió como la nueva CEO
+La llamaron VIEJA LOCA en el hospital... sin saber que era la doctora que los salvaría
+```
+
+**CTR:** 6-8% | **Uso:** 10% dos títulos | **TEMPLATE CAMPEÃO CORPORATIVO**
+
+---
+
+### TC4) COMPETÊNCIA OCULTA (Underdog) ⭐⭐⭐⭐
+
+**Estrutura:** `[Expertos] no pudieron [resolver]… pero [Humilde] lo hizo en [tiempo]`
+
+**Exemplos:**
+```
+30 ingenieros no pudieron arreglarlo... pero la limpiadora lo resolvió en 5 minutos...
+Nadie en la empresa sabía qué hacer... hasta que la secretaria "ignorante" habló...
+Los mejores traductores fallaron... pero la mesera tradujo todo sin problema...
+```
+
+**CTR:** 4-6% | **Uso:** 5% dos títulos
+
+---
+
+## PARTE 6: CONCEITO DE MECANISMO (Schwartz)
+
+> **"Quando o mercado já viu todas as promessas, o diferencial é o COMO (mecanismo)."**
+
+| Tipo | Exemplo | Uso no Título |
+|------|---------|---------------|
+| **Documento** | Contrato, testamento, exame | "...por el testamento" |
+| **Objeto** | Anel, bilhete, foto, dinheiro | "...por el anillo" |
+| **Informação** | Senha, segredo, gravação | "...ella sabía el secreto" |
+| **Identidade** | Era filha de, dona de, herdeira | "...sin saber que era" |
+| **Prova** | Câmera, áudio, testemunha | "...la cámara grabó todo" |
+| **Competência** | Idioma, técnica, habilidade | "...hablaba 9 idiomas" |
+
+**Regra:** Sempre que possível, incluir o mecanismo aumenta credibilidade.
+
+---
+
+## PARTE 7: TIPOS DE OPEN LOOP
+
+| Tipo | Descrição | Conector | Pergunta Implícita |
+|------|-----------|----------|-------------------|
+| **Identidade** | Quem é de verdade? | "sin saber que era..." | Quem ela é? |
+| **Consequência** | O que vai acontecer? | "hasta que..." | O que vai acontecer? |
+| **Prova** | O que será revelado? | "cuando vio..." | O que será revelado? |
+| **Karma** | Justiça será feita? | "pero entonces..." | Terá justiça? |
+| **Transformação** | Como ela mudou? | "volvió [X] y..." | Como ela virou? |
+
+**Anti-padrão:** ❌ "y vivió feliz para siempre" → FECHA o loop
+
+---
+
+## PARTE 8: WORD BANK COMPLETO (Verdades de Graciela)
+
+### Arquétipos VILÕES (Familiares)
+
+#### Família do Esposo/Yerno
+```
+suegra (sogra) — muito frequente
+suegro (sogro) — abusivo
+yerno (genro) — interesseiro, abusivo
+cuñada/cuñado — intrigante
+```
+
+#### Família Própria (Traidores)
+```
+hijo ingrato — bate, expulsa, humilha a mãe
+esposo/marido — traidor, abusivo, planeja contra esposa
+nuera (nora) — manipuladora, afasta filho da mãe
+hija ingrata — raro, mas existe
+```
+
+#### Corporativos (Secundário)
+```
+millonario, CEO, jefe, gerente, empresario
+(usar quando história envolve trabalho/herança)
+```
+
+### Arquétipos PROTAGONISTAS (Heroínas)
+
+#### Papel Familiar
+```
+madre — narradora principal (55-65 años)
+esposa — traída, enganada
+abuela — ignorada, expulsa
+viuda — vulnerável mas forte
+madre soltera — lutadora
+```
+
+#### Papel Profissional (Secundário)
+```
+limpiadora, empleada, mesera, secretaria, enfermera
+(usar quando história envolve trabalho)
+```
+
+### Verbos de CONFLITO
+
+```
+se burló (15%), humilló (10%), ignoró (12%), despidió (8%), 
+rechazó (7%), despreciá (9%), expulsó (4%), insultó (6%), 
+acusó (5%), obligó (8%), prohibió (3%), amenazó (4%), 
+gritó (4%), echó (3%), ridiculizó (3%), maltrató (4%)
+```
+
+### Conectores EXPANDIDOS (Ranking de Performance)
+
+#### Tier 1 — Alta Performance (usar 60% das vezes)
+| Conector | Uso | Exemplo |
+|----------|:---:|----------|
+| **"entonces" / "entonces yo"** | ⭐⭐⭐⭐⭐ | "Mi hijo lloró, entonces revelé un secreto" |
+| **"pero"** | ⭐⭐⭐⭐⭐ | "Pero lo que dije después nadie lo olvidará" |
+| **"así que"** | ⭐⭐⭐⭐⭐ | "Así que vendí su casa enquanto trabalhava" |
+| **"hasta que"** | ⭐⭐⭐⭐⭐ | "Hasta que descubrí la verdad" |
+
+#### Tier 2 — Boa Performance (usar 30% das vezes)
+| Conector | Uso | Exemplo |
+|----------|:---:|----------|
+| **"sin saber que"** | ⭐⭐⭐⭐ | "Sin saber que yo lo escuché todo" |
+| **"lo que hice después"** | ⭐⭐⭐⭐ | "Lo que hice después él jamás lo olvidará" |
+| **"quedé en shock"** | ⭐⭐⭐⭐ | "Quedé en shock al descubrir el plan" |
+| **"cuando descubrí"** | ⭐⭐⭐⭐ | "Cuando descubrí que ella era..." |
+
+### Apelidos/Insultos por Categoria
+
+#### Body Shaming (CTR 6-8%)
+```
+GORDA, BALLENA, CERDA, BUJÓN, FLACA, FEA, TORPE,
+BALLENA VARADA, CERDA GORDA, CERDA INMUNDA
+```
+
+#### Idade (CTR 5-7%) — MUITO RELEVANTE PARA 55+
+```
+VIEJA, ANCIANA, ACABADA, VIEJA INÚTIL, VIEJA LOCA,
+VIEJA IDIOTA, MOMIA, CADUCA
+```
+
+#### Papel Familiar (NOVO — específico do canal)
+```
+SUEGRA METIDA, MADRE CONTROLADORA, NUERA INTERESADA,
+HIJO INGRATO, ESPOSO TRAIDOR, YERNO APROVECHADO
+```
+
+#### Classe Social (CTR 5-6%)
+```
+SIRVIENTA, EMPLEADA, LIMPIADORA, POBRE, MENDIGA,
+INÚTIL, IGNORANTE
+```
+
+---
+
+## PARTE 9: ANTI-PADRÕES (❌ vs ✅)
+
+### Erro 1: Loop Fechado
+❌ **ERRADO:** `Limpiadora fue humillada pero se volvió CEO y vivió feliz` (Sem suspense)
+✅ **CERTO:** `Limpiadora fue humillada... hasta que 10 años después volvió como CEO` (Suspense)
+
+### Erro 2: Sem Número
+❌ **ERRADO:** `CEO humilló a limpiadora... pero ella volvió rica` (Vago)
+✅ **CERTO:** `CEO humilló a limpiadora... 10 años después ella volvió con 50 millones` (Concreto)
+
+### Erro 3: Inventar Elementos
+❌ **ERRADO:** `La llamaron LIMPIADORA` (quando ela era vendedora)
+✅ **CERTO:** `La llamaron VENDEDORA FRACASADA` (Fiel ao contexto)
+
+### Erro 4: Protagonista Vaga
+❌ **ERRADO:** `Mujer fue humillada...`
+✅ **CERTO:** `Abuela de 70 años fue humillada...` (Identificação)
+
+---
+
+## PARTE 10: REGRAS SEMPRE / NUNCA / VARIAR
+
+### ✅ SEMPRE INCLUIR
+1. 1 arquétipo de PODER (CEO/millonario/gerente)
+2. 1 arquétipo HUMILDE (limpieza/empleada/mesera)
+3. 1 conector de LOOP ("hasta que…", "sin saber…", "pero…")
+4. NÚMERO específico quando possível (años, personas, millones)
+5. Reticências (...) no final — NUNCA fechar loop
+6. 80-95 caracteres
+7. Baseado no CONTEXTO do usuário
+
+### ❌ NUNCA FAZER
+1. Entregar o final no título
+2. Arquétipos ambíguos (quem é rico? quem é pobre?)
+3. Mais de 100 caracteres
+4. Protagonista masculino (público 80%+ feminino)
+5. Final triste ou ambíguo
+6. Sem conector de virada
+7. Inventar elementos que não existem no contexto
+8. Apelidos genéricos (use CAPS + específico)
+
+---
+
+## PARTE 11: CHECKLIST DE VALIDAÇÃO
+
+### Para Cada Título
+
+**Contexto**
+- [ ] Protagonista extraída do contexto?
+- [ ] Vilão extraído do contexto?
+- [ ] Situação extraída do contexto?
+- [ ] Número extraído do contexto?
+
+**Estrutura**
+- [ ] Tem arquétipo de poder?
+- [ ] Tem arquétipo humilde?
+- [ ] Tem "hasta que/sin saber/pero"?
+- [ ] Abre loop (não fecha a história)?
+
+**Técnico**
+- [ ] 80-95 caracteres?
+- [ ] Reticências no final?
+- [ ] Número incluído?
+- [ ] Apelido em CAPS (se aplicável)?
+- [ ] Espanhol natural com artigos?
+
+**Psicologia**
+- [ ] Gatilho de indignação nos primeiros 30 chars?
+- [ ] Gatilho de curiosidade no conector?
+- [ ] Promessa implícita de justiça/vingança?
+- [ ] Identificação com público 55+ feminino?
+

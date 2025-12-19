@@ -1,0 +1,39 @@
+# BIBLIOTECA DE NOMBRES (SELEÇÃO POR TIMESTAMP)
+
+## PROTAGONISTAS FEMENINAS
+Usar: (últimos 3 dígitos do timestamp) % 100 = bloque
+
+### Bloques 00-99 (10 nombres cada)
+00-09: Adelaida, Adela, Adriana, Agustina, Aída, Alba, Alejandra, Alicia, Amalia, Amelia
+10-19: Amparo, Ana, Andrea, Ángela, Angélica, Antonia, Araceli, Ariadna, Aurora, Aurelia
+20-29: Bárbara, Beatriz, Benigna, Berenice, Bernardina, Blanca, Brígida, Brunilda, Camila, Cándida
+30-39: Caridad, Carlota, Carmela, Carolina, Catalina, Cecilia, Celestina, Clara, Claudia, Clementina
+40-49: Concepción, Consuelo, Cristina, Dalia, Daniela, Delfina, Diana, Dolores, Dominga, Domitila
+50-59: Edelmira, Elena, Elisa, Elvira, Emilia, Emma, Enriqueta, Ernestina, Esperanza, Estela
+60-69: Esther, Eugenia, Eulalia, Eva, Evangelina, Fabiola, Felipa, Fernanda, Florencia, Florinda
+70-79: Francisca, Gabriela, Genoveva, Georgina, Gertrudis, Gloria, Graciela, Griselda, Guadalupe, Guillermina
+80-89: Helena, Herminia, Hilda, Hortensia, Ignacia, Inés, Irene, Iris, Isabel, Isidora
+90-99: Jacinta, Jimena, Josefa, Josefina, Juana, Julia, Juliana, Laura, Leonor, Leticia
+
+### Adicionales (usar dígitos 4-6 para segunda protagonista)
+Lidia, Lorena, Lourdes, Lucía, Luisa, Luz, Magdalena, Manuela, Marcela, Margarita,
+María, Mariana, Marina, Marta, Matilde, Mercedes, Micaela, Milagros, Mónica, Natividad
+
+## ANTAGONISTAS MASCULINOS
+Usar: (dígitos 4-6 do timestamp) % 30
+
+Alejandro, Alberto, Antonio, Carlos, Diego, Eduardo, Enrique, Fernando, Francisco, Gabriel,
+Gerardo, Guillermo, Gustavo, Héctor, Ignacio, Javier, Joaquín, Jorge, José, Juan,
+Julio, Luis, Manuel, Marcos, Martín, Miguel, Pablo, Pedro, Rafael, Roberto
+
+## ANTAGONISTAS FEMENINAS
+Usar: (dígitos 4-6 do timestamp) % 30 + 30 = 30-59
+
+Adela, Amalia, Beatriz, Catalina, Dora, Estela, Eunice, Fabiola, Genoveva, Hilda,
+Irma, Lidia, Lilia, Lucinda, Marcelina, Mirtha, Nélida, Noemí, Ofelia, Olga,
+Perla, Raquel, Rebeca, Regina, Rosario, Rufina, Sabina, Soledad, Susana, Yolanda
+
+## APODOS REGIONALES (Personajes Secundarios)
+Beto (Alberto), Cande (Candelaria), Chayo (Rosario), Chela (Graciela), Chucho (Jesús),
+Concha (Concepción), Güicho (Luis), Lalo (Eduardo), Lupe (Guadalupe), Memo (Guillermo)
+

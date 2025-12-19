@@ -1,0 +1,142 @@
+# BIBLIOTECA DE ESCALADAS (12 TIPOS)
+
+## SELEÇÃO AUTOMÁTICA
+Usar: (dígitos 11-12 do timestamp) % 12 = tipo de escalada
+
+---
+
+## 0. LINEAR CLÁSICA
+**CURVA:** A → B → C → Crisis
+**PRINCIPIO:** Incidentes crecientes en intensidad. Cada uno peor que anterior.
+**DISTRIBUCIÓN:**
+- Acto 2 (15%): Incidente pequeño (test de límites)
+- Acto 3 (25%): Incidente mediano (patrón emerge)
+- Acto 4 (35%): Incidente grande (línea cruzada)
+- Acto 5 (45%): Crisis (punto de quiebre)
+**MICRO-TENSIONES:** 4 totales, después de cada incidente
+
+---
+
+## 1. ESPIRAL RECURRENTE
+**CURVA:** Problema → Pausa → Problema peor → Pausa → Crisis
+**PRINCIPIO:** Conflicto "vuelve" agravado. Protagonista piensa que acabó, pero resurge.
+**DISTRIBUCIÓN:**
+- Actos 2-3: Conflicto + primera pausa falsa
+- Acto 4: Resurge agravado
+- Acto 5: Crisis final
+**MICRO-TENSIONES:** 3-4 totales, en cada "resurge"
+
+---
+
+## 2. DOBLE LÍNEA CONVERGENTE
+**CURVA:** Conflicto A paralelo + Conflicto B → Se cruzan → Explosión
+**PRINCIPIO:** Dos problemas que parecen separados se revelan conectados.
+**DISTRIBUCIÓN:**
+- Acto 2: Introduce conflicto A
+- Acto 3: Introduce conflicto B
+- Acto 4: Pista de conexión
+- Acto 5: Revelación de conspiración
+**MICRO-TENSIONES:** En cada línea (2 por línea = 4 totales)
+
+---
+
+## 3. FALSA VITÓRIA + RECAÍDA
+**CURVA:** Problema → Resolución aparente → Revelación: es peor → Crisis real
+**PRINCIPIO:** Protagonista piensa que ganó. Luego descubre trampa más profunda.
+**DISTRIBUCIÓN:**
+- Actos 2-3: Construcción de conflicto
+- Acto 4 (1ª mitad): Solución aparente
+- Acto 4 (2ª mitad): Revelación de trampa
+- Acto 5: Crisis verdadera
+**MICRO-TENSIONES:** En momento de "falsa victoria" y "recaída"
+
+---
+
+## 4. DESCUBRIMIENTOS PROGRESSIVOS (Boneca Russa)
+**CURVA:** Verdad 1 (25%) → Verdad 2 (50%) → Verdad 3 (75%) → Verdad Final (90%)
+**PRINCIPIO:** Cada verdad revela que la anterior era solo la punta del iceberg.
+**DISTRIBUCIÓN:**
+- Acto 2: Primera verdad (pequeña)
+- Acto 3: Segunda verdad (mediana, implica alguien cercano)
+- Acto 4: Tercera verdad (grande, conspiración)
+- Acto 5: Verdad final (devastadora)
+**MICRO-TENSIONES:** En cada revelación (4 totales)
+
+---
+
+## 5. PRESIÓN TEMPORAL CRESCENTE
+**CURVA:** Deadline establecido → Tiempo agotándose → Acciones desesperadas → Clímax en deadline
+**PRINCIPIO:** Reloj visible aumenta tensión. Cada decisión tiene peso de tiempo.
+**DISTRIBUCIÓN:**
+- Acto 2: Deadline establecido (evento, fecha límite)
+- Acto 3: Primera mitad del tiempo consumida
+- Acto 4: Últimos momentos, acciones desesperadas
+- Acto 5: Clímax ocurre exacto en deadline
+**MICRO-TENSIONES:** A cada reducción de tiempo (5-6 totales)
+
+---
+
+## 6. ESCALADA SOCIAL PÚBLICA
+**CURVA:** Privado → Semi-público (familia) → Público (comunidad) → Viral
+**PRINCIPIO:** Cada nivel aumenta testigos y vergüenza. Stakes sociales crecientes.
+**DISTRIBUCIÓN:**
+- Acto 2: Conflicto entre 2 personas
+- Acto 3: Familia enterada (10-20 personas)
+- Acto 4: Comunidad enterada (50-200)
+- Acto 5: Público masivo (evento, viral)
+**MICRO-TENSIONES:** En cada salto de nivel
+
+---
+
+## 7. ESCALADA EMOCIONAL INTENSIVA
+**CURVA:** Desconfort → Dolor → Rabia → Quiebre → Transformación
+**PRINCIPIO:** Jornada emocional del protagonista. Cada fase más intensa.
+**DISTRIBUCIÓN:**
+- Acto 2: Desconfort (algo está mal)
+- Acto 3: Dolor (confirmación)
+- Acto 4: Rabia (decisión de actuar)
+- Acto 5: Quiebre + Transformación
+**MICRO-TENSIONES:** En cada transición emocional
+
+---
+
+## 8. TRAICIONES EN CASCATA
+**CURVA:** Traición 1 (persona A) → Traición 2 (persona B) → Conspiración revelada
+**PRINCIPIO:** "¿Quién más lo sabía?" Cada traición revela cómplice.
+**DISTRIBUCIÓN:**
+- Acto 2: Primera traición (la más obvia)
+- Acto 3: Segunda traición (alguien de confianza)
+- Acto 4: Conexión revelada
+- Acto 5: Conspiración completa expuesta
+
+---
+
+## 9. EFECTO DOMINÓ
+**CURVA:** Acción pequeña → Consecuencia 1 → Consecuencia 2 → Avalancha
+**PRINCIPIO:** Butterfly effect dramático. Decisión menor escala incontrolablemente.
+**DISTRIBUCIÓN:**
+- Acto 2: Acción inicial (parece menor)
+- Acto 3: Primera consecuencia inesperada
+- Acto 4: Segunda consecuencia (peor)
+- Acto 5: Avalancha de consecuencias
+
+---
+
+## 10. ESPEJO INVERTIDO
+**CURVA:** Villano hace X → Protagonista sufre → Protagonista hace X mejor → Villano sufre
+**PRINCIPIO:** Simetría dramática en karma. Lo que villano hizo, regresa amplificado.
+**DISTRIBUCIÓN:**
+- Actos 2-3: Villano ejecuta su plan cruel
+- Acto 4: Protagonista planea respuesta simétrica
+- Acto 5: Ejecución perfecta, karma espejo
+
+---
+
+## 11. ARMADILHA PREPARADA
+**CURVA:** Protagonista sufre → Decide preparar trampa → Ejecución silenciosa → Villano cae
+**PRINCIPIO:** Ironía dramática: audiencia ve la trampa, villano no.
+**DISTRIBUCIÓN:**
+- Acto 2: Sufrimiento que motiva venganza
+- Acto 3: Preparación de la trampa (audiencia sabe)
+- Acto 4: Villano camina hacia la trampa
+- Acto 5: Trampa se cierra

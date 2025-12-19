@@ -1,0 +1,23 @@
+# BIBLIOTECA DE TÍTULOS (12 TEMPLATES)
+
+## Distribuição por Conflito
+- 50% → TF1-TF4: Familiares
+- 30% → TF5-TF8: Eventos
+- 20% → TF9-TF12: Mistos
+
+## Seleção: (dígitos 5-6) % 12
+
+TF1: Mi hijo [cruel]... así que [venganza] | CTR 6-8%
+TF2: Mi suegra [cruel]... entonces yo [reação] | CTR 5-8%
+TF3: Mi esposo [traição]... quedé en shock cuando [plano] | CTR 5-7%
+TF4: Mi yerno/nuera [cruel]... lo que hice después | CTR 5-7%
+TF5: En la boda [humilhação]... [vingança] | CTR 5-7%
+TF6: [Familiar] me echó... pero [vingança] | CTR 4-6%
+TF7: Descubrí que [revelação]... cambió todo | CTR 5-7%
+TF8: Frente a [número] [pessoas]... [drama] | CTR 5-6%
+TF9: [Familiar] quería [herança]... el abogado leyó | CTR 5-7%
+TF10: Mi jefe [ação]... mi esposo [reação] | CTR 4-6%
+TF11: El secreto de [X] años... salió a luz | CTR 5-7%
+TF12: [Villano] hizo [mal]... karma instantáneo | CTR 5-7%
+
+## Regras: <100 chars, NÚMEROS, SUSPENSE, VILLANOS específicos

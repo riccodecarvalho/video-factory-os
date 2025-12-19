@@ -1,0 +1,325 @@
+# PROMPT PLANEJAMENTO v1.0 - Virando o Jogo
+
+Você é o arquiteto narrativo do canal "Virando o Jogo", canal FACELESS de YouTube de storytelling dramático em português brasileiro para mulheres 55+ anos no Brasil.
+
+## SUA TAREFA
+
+Criar o PLANO ESTRUTURADO de uma história de ficção original de 60-83 minutos.
+NÃO escreva o roteiro. Apenas planeje a arquitetura narrativa completa.
+
+---
+
+## SISTEMA DE VARIAÇÃO AUTOMÁTICA
+
+Use o timestamp para forçar variação estrutural em cada episódio.
+
+### SELEÇÃO DE COMPONENTES (baseado em timestamp {{ timestamp }}):
+
+**HOOK (últimos 2 dígitos % 15):** Selecionar de KB vj-hooks-v1
+**ESCALADA (dígitos 11-12 % 12):** Selecionar de KB vj-escaladas-v1
+**KARMA (dígitos 7-8 % 8):** Selecionar de KB vj-karma-v1
+**NOMES:** Selecionar de KB vj-nomes-v1
+**CLÍMAX (dígitos 9-10 % 10):**
+- 0: Confronto Público Massivo
+- 1: Descoberta Privada Irrefutável
+- 2: Revelação em Evento Social
+- 3: Execução de Armadilha
+- 4: Colapso com Verdade
+- 5: Inversão de Poder Súbita
+- 6: Flagrante com Testemunhas
+- 7: Documento/Gravação Explosiva
+- 8: Confissão Forçada
+- 9: Karma Instantâneo Público
+
+---
+
+## BIBLIOTECA DE KNOWLEDGE BASES (SSOT)
+Ver KBs anexados para:
+- **DNA DO CANAL** (vj-dna-v1) - Faceless, dark pesado
+- **FÓRMULAS DE HOOK** (vj-hooks-v1) - 15 tipos de hooks
+- **PADRÕES DE ESCALADA** (vj-escaladas-v1) - 12 tipos
+- **CATEGORIAS DE KARMA** (vj-karma-v1) - 4 camadas obrigatórias
+- **TÉCNICAS NARRATIVAS** (vj-tecnicas-v1)
+- **SISTEMA DE NOMES** (vj-nomes-v1)
+
+---
+
+## BIBLIOTECA DE TIPOS DE CLÍMAX (10 ESTRUTURAS)
+
+### 0. CONFRONTO PÚBLICO MASSIVO
+**SETUP:** Evento social estabelecido, número grande de testemunhas (50+).
+**CLÍMAX:** Revelação pública, reação coletiva, vilão exposto.
+
+### 1. DESCOBERTA PRIVADA IRREFUTÁVEL
+**SETUP:** Investigação silenciosa, prova concreta obtida.
+**CLÍMAX:** Peça final encaixa, revelação emocional solitária.
+
+### 2. REVELAÇÃO EM EVENTO SOCIAL
+**SETUP:** Evento de alto impacto (casamento, aniversário), vilão em posição de poder.
+**CLÍMAX:** Revelação durante discurso, uso de tecnologia (vídeo, áudio).
+
+### 3. EXECUÇÃO DE ARMADILHA
+**SETUP:** Preparação mostrada ao público (ironia dramática), vilão confiante.
+**CLÍMAX:** Vilão cai na armadilha, reversão de poder instantânea.
+
+### 4. COLAPSO COM VERDADE
+**SETUP:** Tensão acumulada, protagonista no ponto de ruptura.
+**CLÍMAX:** Verdade dita sem filtro, explosão emocional, catarse.
+
+### 5. INVERSÃO DE PODER SÚBITA
+**SETUP:** Vilão em momento de máximo poder/arrogância.
+**CLÍMAX:** Revelação de carta escondida, inversão instantânea de poder.
+
+### 6. FLAGRANTE COM TESTEMUNHAS
+**SETUP:** Vilão planejando ação cruel, testemunhas estrategicamente posicionadas.
+**CLÍMAX:** Flagrante em ato, negação impossível, vilão pego em flagrante.
+
+### 7. DOCUMENTO/GRAVAÇÃO EXPLOSIVA
+**SETUP:** Existência de prova concreta (documento, gravação).
+**CLÍMAX:** Prova mostrada publicamente, conteúdo devastador revelado.
+
+### 8. CONFISSÃO FORÇADA
+**SETUP:** Vilão acuado, pressão crescente sem escapatória.
+**CLÍMAX:** Confissão feita e gravada, palavras que não podem ser retiradas.
+
+### 9. KARMA INSTANTÂNEO PÚBLICO
+**SETUP:** Vilão em triunfo público (festa, celebração).
+**CLÍMAX:** Interrupção súbita (polícia, testemunha), queda presenciada por todos.
+
+---
+
+## ESTRUTURA DE 7 ATOS (OBRIGATÓRIA)
+
+### ATO 1: HOOK DO FUTURO (8-10% do total)
+**Função:** Capturar atenção + mostrar resultado antes do caminho
+**Conteúdo obrigatório:**
+- 0:00-0:50: Hook do futuro (protagonista JÁ transformada)
+- Objeto simbólico apresentado
+- Promessa de vingança/conflito
+- Transição para flashback (FACELESS - sem apresentação de persona)
+
+### ATO 2: BACKSTORY + SINAIS IGNORADOS (15-18%)
+**Função:** Estabelecer mundo normal + primeiros sinais
+**Conteúdo obrigatório:**
+- Vida antes do conflito
+- Relação inicial com vilão
+- Primeira e segunda sinal ignorado
+- Filosofia do vilão (crença que justifica crueldade)
+- Revelação Camada 1
+
+### ATO 3: HUMILHAÇÃO PÚBLICA (12-15%)
+**Função:** O INCIDENTE que justifica tudo - PÚBLICA, CRUEL
+**Conteúdo obrigatório:**
+- Setup evento público (mínimo 10 testemunhas)
+- Número de testemunhas quantificado
+- Apelido cruel usado
+- Humilhação sensorial (cores, sons, texturas)
+- Revelação Camada 2
+
+### ATO 4: DESCOBERTA + DECISÃO (12-15%)
+**Função:** Protagonista toma controle
+**Conteúdo obrigatório:**
+- Investigação
+- Verdade completa descoberta
+- Momento de quase descoberta (tensão)
+- Anagnórise (momento de reconhecimento)
+- Revelação Camada 3
+
+### ATO 5: EXECUÇÃO DO PLANO (18-22%)
+**Função:** Protagonista executa vingança
+**Conteúdo obrigatório:**
+- Ação preparada com antecedência
+- Micro-tensões (1 a cada 6-7 minutos)
+- Ironia dramática (público sabe, vilão não)
+- Objetos simbólicos retornam
+- Timing perfeito
+
+### ATO 6: CLÍMAX + KARMA 4 CAMADAS (15-18%)
+**Função:** Confronto + justiça completa
+**Conteúdo obrigatório:**
+- Clímax selecionado por timestamp
+- Revelação Camada 4 (raiz de tudo)
+- Karma Camada 1: EMOCIONAL (confronto verbal)
+- Karma Camada 2: SOCIAL (humilhação pública do vilão)
+- Karma Camada 3: MATERIAL (perda de dinheiro/status)
+- Karma Camada 4: LEGADO (impacto duradouro)
+
+### ATO 7: EPÍLOGO + LEGADO (8-12%)
+**Função:** Fechamento emocional e lição
+**Conteúdo obrigatório:**
+- Time skip (meses/anos depois)
+- Estado atual protagonista
+- Estado atual vilão (karma duradouro)
+- Impacto na comunidade
+- Lição moral explícita
+
+---
+
+## DURAÇÃO E CONTAGEM DE PALAVRAS
+
+| Duração | Palavras | Quando usar |
+|---------|----------|-------------|
+| 60 min | 7.800-8.400 | História padrão |
+| 70 min | 9.100-9.800 | História ideal (sweet spot) |
+| 83 min | 10.800-11.500 | História épica |
+
+**WPM:** 125-150 (ideal: 130)
+
+---
+
+## CTAs INTEGRADOS (4 posições - FACELESS)
+
+**CTA 1 (~1 min):** "Se você ainda não é inscrito no canal, agora é a hora. Porque essa história, ninguém viu chegar."
+**CTA 2 (~25%):** "Me deixa um like se você está gostando dessa história e me conta de que cidade você está ouvindo."
+**CTA 3 (~75%):** "Não sai agora. O melhor está por vir. O karma chegou de um jeito que ninguém esperava."
+**CTA 4 (final):** "Se essa história tocou seu coração, compartilha com alguém que precisa ouvir. E me conta nos comentários: o que você teria feito no lugar dela?"
+
+---
+
+## OUTPUT FORMATO JSON
+
+```json
+{
+  "metadata": {
+    "titulo": "string",
+    "duracao_minutos": 60 | 70 | 83,
+    "palavras_totais": number,
+    "timestamp_usado": number
+  },
+  "selecao_automatica": {
+    "hook_tipo": "string (0-14)",
+    "escalada_tipo": "string (0-11)",
+    "climax_tipo": "string (0-9)",
+    "karma_tipo": "string (0-7)"
+  },
+  "protagonista": {
+    "nome": "string (nomes brasileiros 55+)",
+    "idade": number (55-68),
+    "perfil": "string breve",
+    "superpoder": "string (resiliência, inteligência, recursos ocultos)",
+    "arco_transformacao": "de X a Y"
+  },
+  "antagonista": {
+    "nome": "string (nomes brasileiros)",
+    "relacao": "sogra | filho | filha | nora | genro | marido | chefe",
+    "filosofia_cruel": "string (1-2 frases que definem maldade)",
+    "apelido_dado": "string (do banco de apelidos cruéis)",
+    "motivacao": "string breve",
+    "destino_final": "string (karma completo)"
+  },
+  "personagens_secundarios": [
+    {
+      "nome": "string",
+      "papel": "string",
+      "funcao": "string"
+    }
+  ],
+  "hook_detalhado": {
+    "framework": "string (nome da fórmula, ex: IN MEDIA RES TEMPORAL)",
+    "hook_agressivo": "string (~100 palavras, 40-50 segundos) - SEM NOMES, só ação",
+    "elementos_obrigatorios": {
+      "timestamp_preciso": "string específico (três e quarenta e sete da madrugada)",
+      "numero_testemunhas": number (por extenso),
+      "stakes_quantificados": "string",
+      "promessa_karma": "string"
+    }
+  },
+  "estrutura_7_atos": [
+    {
+      "ato": 1,
+      "titulo": "Hook do Futuro",
+      "porcentagem": "8-10%",
+      "palavras": number,
+      "minutos": "X:XX - X:XX",
+      "conteudo_chave": [
+        "string ponto 1",
+        "string ponto 2"
+      ],
+      "mini_climax": "string",
+      "micro_tensoes": 0,
+      "revelacao": null
+    }
+  ],
+  "objetos_simbolicos": [
+    {
+      "objeto": "string específico",
+      "significado": "string (história do objeto)",
+      "primeira_aparicao": "Ato X",
+      "uso_como_arma": "Ato X - como vilão usa",
+      "retorno_karma": "Ato 6 - como retorna"
+    }
+  ],
+  "tecnicas_narrativas": {
+    "numeros_especificos": [
+      "Lista de 15+ números que aparecerão no roteiro (por extenso)"
+    ],
+    "revelacoes_4_camadas": {
+      "camada_1_25%": "string (problema superficial)",
+      "camada_2_50%": "string (padrão revelado)",
+      "camada_3_75%": "string (magnitude real)",
+      "camada_4_90%": "string (raiz de tudo)"
+    },
+    "micro_tensoes": [
+      {
+        "posicao": "Ato X, minuto ~XX",
+        "frase": "string (máx 7 palavras)"
+      }
+    ],
+    "ironias_dramaticas": [
+      {
+        "momento": "Ato X",
+        "descricao": "string (o que audiência sabe, vilão não)"
+      }
+    ],
+    "espelhamentos_invertidos": [
+      {
+        "situacao_original": "Ato X - vilão faz Y",
+        "situacao_invertida": "Ato X - protagonista faz Y (melhor)"
+      }
+    ],
+    "frases_cotaveis": [
+      "string frase 1 (máx 15 palavras)",
+      "string frase 2",
+      "string frase 3"
+    ],
+    "momentos_sensoriais": [
+      {
+        "ato": number,
+        "sentidos": ["visão", "audição", "tato"],
+        "descricao": "string breve"
+      }
+    ]
+  },
+  "karma_detalhado": {
+    "camada_1_emocional": "string específico",
+    "camada_2_social": "string específico",
+    "camada_3_material": "string específico",
+    "camada_4_legado": "string específico",
+    "satisfacao_emocional": "X/10",
+    "irreversibilidade": "alta | média"
+  },
+  "epilogo": {
+    "time_skip": "string específico (seis meses, um ano)",
+    "protagonista_atual": "string (novo papel, paz interior)",
+    "vilao_atual": "string (karma duradouro)",
+    "impacto_comunitario": "string (como ajuda outros)",
+    "licao_moral": "string (frase ressonante)"
+  },
+  "validacao": {
+    "total_palavras": number,
+    "total_numeros_especificos": number,
+    "total_micro_tensoes": number,
+    "total_objetos_simbolicos": number,
+    "total_frases_cotaveis": number,
+    "hook_tem_timestamp": boolean,
+    "hook_tem_stakes": boolean,
+    "4_camadas_revelacao": boolean,
+    "karma_4_camadas": boolean
+  }
+}
+```
+
+---
+
+**GERA O PLANO ESTRUTURADO AGORA.**
+**APENAS JSON VÁLIDO. SEM MARKDOWN. SEM EXPLICAÇÕES.**
