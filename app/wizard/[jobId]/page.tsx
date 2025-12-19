@@ -11,6 +11,10 @@ import StepTitulos from "./steps/StepTitulos";
 import StepPlanejamento from "./steps/StepPlanejamento";
 import StepRoteiro from "./steps/StepRoteiro";
 import StepProducao from "./steps/StepProducao";
+import StepMiniaturas from "./steps/StepMiniaturas";
+import StepDescricao from "./steps/StepDescricao";
+import StepTags from "./steps/StepTags";
+import StepComunidade from "./steps/StepComunidade";
 
 type WizardState = Awaited<ReturnType<typeof getWizardState>>;
 
@@ -22,6 +26,10 @@ const STEP_COMPONENTS: Record<string, React.ComponentType<StepProps>> = {
     tts: StepProducao,
     renderizacao: StepProducao,
     exportacao: StepProducao,
+    miniaturas: StepMiniaturas,
+    descricao: StepDescricao,
+    tags: StepTags,
+    comunidade: StepComunidade,
 };
 
 export type StepProps = {
@@ -160,10 +168,10 @@ export default function WizardFlowPage() {
                                 <span
                                     key={step.key}
                                     className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${isActive
-                                            ? "bg-purple-600 text-white"
-                                            : isCompleted
-                                                ? "bg-green-600/30 text-green-400"
-                                                : "bg-gray-700 text-gray-400"
+                                        ? "bg-purple-600 text-white"
+                                        : isCompleted
+                                            ? "bg-green-600/30 text-green-400"
+                                            : "bg-gray-700 text-gray-400"
                                         }`}
                                 >
                                     {isCompleted ? "✓ " : ""}
