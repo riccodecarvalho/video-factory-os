@@ -40,6 +40,7 @@ import {
     getJobSteps,
     startJob,
     retryStep,
+    retryFromStep,
     cancelJob,
     deleteJob,
 } from "./actions";
@@ -182,6 +183,13 @@ function JobsPageContent() {
     const handleRetryStep = async (stepKey: string) => {
         if (!selectedJob) return;
         await retryStep(selectedJob.id, stepKey);
+        loadJobDetails(selectedJob.id);
+        loadJobs();
+    };
+
+    const handleRetryFromStep = async (stepKey: string) => {
+        if (!selectedJob) return;
+        await retryFromStep(selectedJob.id, stepKey);
         loadJobDetails(selectedJob.id);
         loadJobs();
     };
@@ -380,6 +388,7 @@ function JobsPageContent() {
                                                 jobId={selectedJob.id}
                                                 currentStep={selectedJob.currentStep}
                                                 onRetry={handleRetryStep}
+                                                onRetryFromHere={handleRetryFromStep}
                                             />
                                         </TabsContent>
 

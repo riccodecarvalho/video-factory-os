@@ -11,6 +11,7 @@ import {
     SkipForward,
     RotateCcw,
     Clock,
+    Play,
 } from "lucide-react";
 import { StepPreview } from "./StepPreview";
 
@@ -31,6 +32,7 @@ interface PipelineViewProps {
     jobId?: string;
     currentStep?: string | null;
     onRetry?: (stepKey: string) => void;
+    onRetryFromHere?: (stepKey: string) => void;
     className?: string;
 }
 
@@ -79,7 +81,7 @@ function formatDuration(ms: number): string {
     return `${(ms / 60000).toFixed(1)}min`;
 }
 
-export function PipelineView({ steps, jobId, currentStep, onRetry, className }: PipelineViewProps) {
+export function PipelineView({ steps, jobId, currentStep, onRetry, onRetryFromHere, className }: PipelineViewProps) {
     return (
         <div className={cn("space-y-1", className)}>
             <h3 className="text-sm font-medium mb-3">Pipeline</h3>
@@ -150,15 +152,29 @@ export function PipelineView({ steps, jobId, currentStep, onRetry, className }: 
                                     {step.status}
                                 </Badge>
 
-                                {/* Retry button */}
+                                {/* Retry button for failed steps */}
                                 {step.status === "failed" && onRetry && (
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => onRetry(step.stepKey)}
                                         className="shrink-0"
+                                        title="Retry este step"
                                     >
                                         <RotateCcw className="w-4 h-4" />
+                                    </Button>
+                                )}
+
+                                {/* Retry from here button for completed steps */}
+                                {step.status === "success" && onRetryFromHere && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => onRetryFromHere(step.stepKey)}
+                                        className="shrink-0 text-muted-foreground hover:text-primary"
+                                        title="Refazer deste step em diante"
+                                    >
+                                        <Play className="w-4 h-4" />
                                     </Button>
                                 )}
                             </div>

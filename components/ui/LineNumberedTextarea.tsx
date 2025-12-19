@@ -18,7 +18,8 @@ export function LineNumberedTextarea({
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = React.useRef<HTMLDivElement>(null);
 
-    const lines = value.split("\n");
+    const safeValue = typeof value === 'string' ? value : String(value ?? "");
+    const lines = safeValue.split("\n");
     const lineCount = lines.length;
 
     // Sync scroll between line numbers and textarea

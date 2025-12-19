@@ -210,6 +210,51 @@ export async function retryStep(jobId: string, stepKey: string) {
     return result;
 }
 
+/**
+ * Refaz o job a partir de um step específico
+ * Reseta todos os steps >= stepKey e re-executa
+ */
+export async function retryFromStep(jobId: string, stepKey: string) {
+    const db = getDb();
+
+    // Get all steps for the job
+    const steps = await db.select().from(schema.jobSteps)
+        .where(eq(schema.jobSteps.jobId, jobId));
+
+    // Find the step order for the target step
+    const targetStep = steps.find(s => s.stepKey === stepKey);
+    if (!targetStep) {
+        return { success: false, error: "Step não encontrado" };
+    }
+
+    // Reset all steps >= target step order
+    for (const step of steps) {
+        if (step.stepOrder >= targetStep.stepOrder) {
+            await db.update(schema.jobSteps).set({
+                status: "pending",
+                lastError: null,
+                attempts: 0,
+                durationMs: null,
+                startedAt: null,
+                completedAt: null,
+            }).where(eq(schema.jobSteps.id, step.id));
+        }
+    }
+
+    // Reset job status
+    await db.update(schema.jobs).set({
+        status: "pending",
+        lastError: null,
+        updatedAt: new Date().toISOString(),
+    }).where(eq(schema.jobs.id, jobId));
+
+    // Re-run the job (runner will skip already completed steps)
+    engineRunJob(jobId).catch(console.error);
+
+    revalidatePath("/jobs");
+    return { success: true };
+}
+
 export async function cancelJob(jobId: string) {
     const db = getDb();
 

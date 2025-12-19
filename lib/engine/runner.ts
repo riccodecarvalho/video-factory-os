@@ -827,9 +827,19 @@ async function executeStepRender(
             resolutionSuffix = '_720p';
         }
 
+        // Determine recipe folder for avatar - use input.recipeSlug or default to graciela
+        const recipeSlug = (input.recipeSlug as string) || '';
+        const recipeFolder = recipeSlug.includes('vj') ? 'vj' : 'graciela';
+
+        // Resolution suffix for filename (valentino-720p.png vs avatar_720p.png)
+        const isVJ = recipeFolder === 'vj';
+        const avatarName = isVJ ? 'valentino' : 'avatar';
+        const resolutionFormat = isVJ ? `-${resolutionSuffix.replace('_', '')}` : resolutionSuffix;
+
         // Try resolution-specific avatar first, then fallback to default
-        const recipeAvatarPath = path.join(process.cwd(), 'recipes', 'graciela', 'assets', `avatar${resolutionSuffix}.png`);
-        const fallbackAvatarPath = path.join(process.cwd(), 'recipes', 'graciela', 'assets', 'avatar.png');
+        const recipeAvatarPath = path.join(process.cwd(), 'public', 'assets', 'channels', recipeFolder, `${avatarName}${resolutionFormat}.png`);
+        const fallbackAvatarPath = path.join(process.cwd(), 'public', 'assets', 'channels', recipeFolder, `${avatarName}-original.png`);
+        const legacyAvatarPath = path.join(process.cwd(), 'recipes', 'graciela', 'assets', `avatar${resolutionSuffix}.png`);
 
         if (fs.existsSync(recipeAvatarPath)) {
             backgroundImagePath = recipeAvatarPath;
@@ -845,6 +855,14 @@ async function executeStepRender(
                 timestamp: now(),
                 level: "info",
                 message: `Usando avatar da recipe (fallback): ${fallbackAvatarPath}`,
+                stepKey: stepDef.key
+            });
+        } else if (fs.existsSync(legacyAvatarPath)) {
+            backgroundImagePath = legacyAvatarPath;
+            logs.push({
+                timestamp: now(),
+                level: "info",
+                message: `Usando avatar legacy: ${legacyAvatarPath}`,
                 stepKey: stepDef.key
             });
         }
