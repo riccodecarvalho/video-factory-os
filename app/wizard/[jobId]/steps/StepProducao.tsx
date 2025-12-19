@@ -8,6 +8,7 @@ export default function StepProducao({ stepKey, isLoading, onGenerate, onApprove
     const [status, setStatus] = useState("Aguardando...");
 
     const stepLabels: Record<string, { label: string; icon: string; description: string }> = {
+        tts: { label: "Síntese de Voz", icon: "🎙️", description: "Convertendo texto em áudio com Azure TTS" },
         renderizacao: { label: "Renderização", icon: "🎬", description: "Renderizando vídeo com FFmpeg" },
         exportacao: { label: "Exportação", icon: "📦", description: "Exportando arquivos finais" },
     };
@@ -65,11 +66,11 @@ export default function StepProducao({ stepKey, isLoading, onGenerate, onApprove
             <div className="bg-gray-900/50 rounded-xl p-4 mt-6">
                 <div className="text-xs text-gray-500 uppercase tracking-wide mb-3">Pipeline de Produção</div>
                 <div className="space-y-2">
-                    {["renderizacao", "exportacao"].map((key) => {
+                    {["tts", "renderizacao", "exportacao"].map((key) => {
                         const step = stepLabels[key];
                         const isCurrent = key === stepKey;
-                        const isPast = ["renderizacao", "exportacao"].indexOf(key) <
-                            ["renderizacao", "exportacao"].indexOf(stepKey);
+                        const isPast = ["tts", "renderizacao", "exportacao"].indexOf(key) <
+                            ["tts", "renderizacao", "exportacao"].indexOf(stepKey);
 
                         return (
                             <div
