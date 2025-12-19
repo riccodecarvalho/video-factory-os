@@ -1,6 +1,6 @@
 # ADR-011: Wizard Mode (Step-by-Step Video Creation)
 
-> **Status:** Proposto  
+> **Status:** Aceito  
 > **Data:** 2025-12-19  
 > **Decisores:** Ricco (owner), Antigravity (implementador)
 
