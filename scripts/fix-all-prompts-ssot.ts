@@ -14,7 +14,7 @@ async function main() {
     console.log(`✅ Recipe encontrada: ${recipe.name}`);
 
     // 2. Obter KBs essenciais
-    const kbs = await db.select().from(schema.knowledgeBase).where(eq(schema.knowledgeBase.isActive, 1));
+    const kbs = await db.select().from(schema.knowledgeBase).where(eq(schema.knowledgeBase.isActive, true));
     const kbMap = {
         dna: kbs.find(k => k.slug === 'graciela-dna-tier1'),
         hooks: kbs.find(k => k.slug === 'graciela-hooks-v3'),

@@ -93,9 +93,9 @@ async function main() {
     if (planejamento) {
         let newContent = planejamento.userTemplate;
 
-        // Remove seção DNA inline
+        // Remove seção DNA inline (usando [\s\S] em vez de flag 's')
         newContent = newContent.replace(
-            /# DNA DEL CANAL\s+- Narradora: GRACIELA.*INDIGNACIÓN → CURIOSIDAD → CATARSIS\s+---/s,
+            /# DNA DEL CANAL[\s\S]*?INDIGNACIÓN → CURIOSIDAD → CATARSIS\s+---/,
             '# DNA DO CANAL: ver KB [DNA Graciela]\n\n---'
         );
 
