@@ -1173,6 +1173,20 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
                 }
             }
 
+            // WIZARD MODE: Pause after each successful step
+            if (currentJob?.executionMode === "wizard") {
+                // Update job to "pending" (waiting for user approval)
+                await db.update(schema.jobs).set({
+                    status: "pending",
+                    progress,
+                    updatedAt: new Date().toISOString(),
+                    manifest: JSON.stringify(manifest),
+                }).where(eq(schema.jobs.id, jobId));
+
+                console.log(`[Runner] Wizard mode: paused after step ${stepDef.key}`);
+                return { success: true };
+            }
+
             // Update metrics
             if (stepManifest.response?.usage) {
                 manifest.metrics.llm_tokens_used += (stepManifest.response.usage.inputTokens || 0) + (stepManifest.response.usage.outputTokens || 0);

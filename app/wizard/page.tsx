@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AppShell } from "@/components/layout";
 import { Wand2, Loader2 } from "lucide-react";
 import { getRecipes, getProjects } from "@/app/admin/actions";
-import { createJob } from "@/app/jobs/actions";
+import { createJob, startJob } from "@/app/jobs/actions";
 
 type Recipe = Awaited<ReturnType<typeof getRecipes>>[0];
 type Project = Awaited<ReturnType<typeof getProjects>>[0];
@@ -51,6 +51,10 @@ export default function WizardEntryPage() {
                 title: tema,
                 brief: "",
             }, "wizard"); // executionMode = wizard
+
+            // Iniciar job para criar os steps via runner
+            await startJob(job.id);
+
             router.push(`/wizard/${job.id}`);
         });
     };
@@ -104,8 +108,8 @@ export default function WizardEntryPage() {
                             <Card
                                 key={recipe.id}
                                 className={`cursor-pointer transition-colors ${selectedRecipe?.id === recipe.id
-                                        ? "border-primary bg-primary/5"
-                                        : "hover:border-muted-foreground/50"
+                                    ? "border-primary bg-primary/5"
+                                    : "hover:border-muted-foreground/50"
                                     }`}
                                 onClick={() => setSelectedRecipe(recipe)}
                             >

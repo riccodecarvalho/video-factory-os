@@ -7,8 +7,9 @@ import {
     StepPreview,
 } from "@/components/vf";
 import { ArrowLeft, Wand2, Play, RotateCcw, CheckCircle } from "lucide-react";
-import { getJobById, getJobSteps, getJobArtifacts, startJob } from "@/app/jobs/actions";
+import { getJobById, getJobSteps, getJobArtifacts, continueWizard } from "@/app/jobs/actions";
 import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 /**
  * Wizard Flow Page
@@ -51,14 +52,15 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
     // Server Actions
     async function handleExecuteStep() {
         "use server";
-        await startJob(params.jobId);
-        // O runner vai executar apenas o próximo step em modo wizard
+        await continueWizard(params.jobId);
+        revalidatePath(`/wizard/${params.jobId}`);
     }
 
     async function handleApprove() {
         "use server";
-        // Marcar step atual como aprovado e avançar
-        await startJob(params.jobId);
+        // Continuar wizard para próximo step
+        await continueWizard(params.jobId);
+        revalidatePath(`/wizard/${params.jobId}`);
     }
 
     return (

@@ -206,6 +206,19 @@ export async function resumeJob(jobId: string) {
     return { success: true };
 }
 
+/**
+ * Continua o wizard para o próximo step
+ * Usado quando job está em modo wizard e aguardando aprovação
+ */
+export async function continueWizard(jobId: string) {
+    // Runner em modo wizard para automaticamente após cada step
+    // Basta chamar runJob novamente para continuar
+    engineRunJob(jobId).catch(console.error);
+    revalidatePath("/jobs");
+    revalidatePath("/wizard");
+    return { success: true };
+}
+
 export async function retryStep(jobId: string, stepKey: string) {
     const result = await engineRetryStep(jobId, stepKey);
     if (result.success) {
