@@ -8,3 +8,4 @@ export { JobCard, JobCardSkeleton } from './JobCard';
 export { JobConfigTab } from './JobConfigTab';
 export { JobArtifactsTab } from './JobArtifactsTab';
 export { UsedBySection } from './UsedBySection';
+export { StepPreview } from './StepPreview';

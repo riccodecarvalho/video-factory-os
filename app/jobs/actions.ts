@@ -76,7 +76,12 @@ export async function getJobArtifacts(jobId: string) {
 // MUTATIONS
 // ============================================
 
-export async function createJob(recipeId: string, projectId: string, input: Record<string, unknown>) {
+export async function createJob(
+    recipeId: string,
+    projectId: string,
+    input: Record<string, unknown>,
+    executionMode: "auto" | "wizard" = "auto"
+) {
     const db = getDb();
 
     // Load recipe
@@ -154,6 +159,7 @@ export async function createJob(recipeId: string, projectId: string, input: Reco
         recipeVersion: recipe.version,
         input: JSON.stringify(enrichedInput),
         status: "pending",
+        executionMode,
         progress: 0,
         createdAt: now,
         updatedAt: now,

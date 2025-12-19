@@ -35,6 +35,7 @@ const navigation = [
         children: [
             { name: "Todos os Jobs", href: "/jobs" },
             { name: "Nova Produção", href: "/jobs/new" },
+            { name: "Wizard", href: "/wizard" },
         ],
     },
 ];

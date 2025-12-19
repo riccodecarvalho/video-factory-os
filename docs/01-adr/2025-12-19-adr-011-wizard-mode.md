@@ -2,7 +2,7 @@
 
 > **Status:** Proposto  
 > **Data:** 2025-12-19  
-> **Decisores:** Ricardo (owner), Antigravity (implementador)
+> **Decisores:** Ricco (owner), Antigravity (implementador)
 
 ---
 
