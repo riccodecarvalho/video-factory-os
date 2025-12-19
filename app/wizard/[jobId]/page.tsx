@@ -34,6 +34,14 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
         redirect(`/jobs?id=${job.id}`);
     }
 
+    // Se job wizard não tem steps ainda, iniciar para criar os steps
+    if (steps.length === 0) {
+        await continueWizard(params.jobId);
+        revalidatePath(`/wizard/${params.jobId}`);
+        // Redirect to refresh the page with the new steps
+        redirect(`/wizard/${params.jobId}`);
+    }
+
     const input = JSON.parse(job.input || "{}");
     const jobTitle = input.tema || input.title || "Wizard";
 
