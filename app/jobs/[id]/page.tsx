@@ -6,7 +6,7 @@ import {
     StatusBadge,
     MetricCard,
 } from "@/components/vf";
-import { ArrowLeft, Clock, Hash, FileText, Play, RotateCcw, XCircle, RefreshCw } from "lucide-react";
+import { ArrowLeft, Clock, Hash, FileText, Play, RotateCcw, XCircle, RefreshCw, Wand2 } from "lucide-react";
 import { getJobById, getJobSteps, getJobArtifacts, resumeJob, cancelJob, startJob } from "@/app/jobs/actions";
 import { notFound } from "next/navigation";
 
@@ -96,6 +96,12 @@ export default async function JobDetailPage({ params }: { params: { id: string }
                         <div className="flex items-center gap-3 mb-2">
                             <h1 className="text-2xl font-bold tracking-tight">{jobTitle}</h1>
                             <StatusBadge status={job.status as "pending" | "running" | "completed" | "failed" | "cancelled"} />
+                            {job.executionMode === "wizard" && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                                    <Wand2 className="h-3 w-3" />
+                                    Wizard
+                                </span>
+                            )}
                         </div>
                         <p className="text-muted-foreground">
                             {job.recipeSlug} • Criado em {new Date(job.createdAt || "").toLocaleString('pt-BR')}
@@ -104,7 +110,17 @@ export default async function JobDetailPage({ params }: { params: { id: string }
 
                     {/* Action Buttons */}
                     <div className="flex gap-2">
-                        {job.status === "pending" && (
+                        {/* Wizard Mode: Continuar Wizard */}
+                        {job.executionMode === "wizard" && job.status === "pending" && (
+                            <Link href={`/wizard/${params.id}`}>
+                                <Button className="gap-2">
+                                    <Wand2 className="h-4 w-4" />
+                                    Continuar Wizard
+                                </Button>
+                            </Link>
+                        )}
+                        {/* Auto Mode: Iniciar/Run */}
+                        {job.executionMode !== "wizard" && job.status === "pending" && (
                             <form action={handleStart}>
                                 <Button type="submit" className="gap-2">
                                     <Play className="h-4 w-4" />

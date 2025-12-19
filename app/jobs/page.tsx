@@ -32,6 +32,7 @@ import {
     AlertCircle,
     Circle,
     Trash2,
+    Wand2,
 } from "lucide-react";
 import {
     getJobs,
@@ -329,6 +330,13 @@ function JobsPageContent() {
                                                 >
                                                     {selectedJob.status}
                                                 </Badge>
+                                                {/* Wizard Badge */}
+                                                {selectedJob.executionMode === "wizard" && (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                                                        <Wand2 className="h-3 w-3" />
+                                                        Wizard
+                                                    </span>
+                                                )}
                                                 {selectedJob.progress !== undefined && selectedJob.progress !== null && selectedJob.progress > 0 && (
                                                     <span className="text-sm text-muted-foreground">{selectedJob.progress}%</span>
                                                 )}
@@ -340,7 +348,15 @@ function JobsPageContent() {
 
                                         {/* Quick Actions */}
                                         <div className="flex items-center gap-2">
-                                            {(selectedJob.status === "pending" || selectedJob.status === "failed") && (
+                                            {/* Wizard Mode: Continuar Wizard */}
+                                            {selectedJob.executionMode === "wizard" && (selectedJob.status === "pending" || selectedJob.status === "running") && (
+                                                <Button size="sm" className="gap-2" onClick={() => router.push(`/wizard/${selectedJob.id}`)}>
+                                                    <Wand2 className="w-4 h-4" />
+                                                    Continuar Wizard
+                                                </Button>
+                                            )}
+                                            {/* Auto Mode: Run */}
+                                            {selectedJob.executionMode !== "wizard" && (selectedJob.status === "pending" || selectedJob.status === "failed") && (
                                                 <Button size="sm" className="gap-2" onClick={handleStartJob}>
                                                     <Play className="w-4 h-4" />
                                                     {selectedJob.status === "failed" ? "Retry" : "Run"}
