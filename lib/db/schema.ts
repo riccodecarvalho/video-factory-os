@@ -270,9 +270,6 @@ export const jobs = sqliteTable('jobs', {
     // Status
     status: text('status').notNull().default('pending'), // 'pending', 'running', 'completed', 'failed'
 
-    // Execution mode: auto (full automatic) or wizard (step-by-step with user approval)
-    executionMode: text('execution_mode').notNull().default('auto'), // 'auto' | 'wizard'
-
     // Progress
     currentStep: text('current_step'),
     progress: integer('progress').default(0), // 0-100

@@ -72,26 +72,6 @@ export async function getJobArtifacts(jobId: string) {
     return db.select().from(schema.artifacts).where(eq(schema.artifacts.jobId, jobId));
 }
 
-export async function getProjects() {
-    const db = getDb();
-    const results = await db.select({
-        id: schema.projects.id,
-        key: schema.projects.key,
-        name: schema.projects.name,
-    }).from(schema.projects).where(eq(schema.projects.isActive, true));
-    return results;
-}
-
-export async function getRecipes() {
-    const db = getDb();
-    const results = await db.select({
-        id: schema.recipes.id,
-        slug: schema.recipes.slug,
-        name: schema.recipes.name,
-    }).from(schema.recipes).where(eq(schema.recipes.isActive, true));
-    return results;
-}
-
 // ============================================
 // MUTATIONS
 // ============================================

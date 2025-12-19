@@ -19,9 +19,6 @@ import {
     ChefHat,
     FolderOpen,
     Library,
-    Wand2,
-    Zap,
-    ListChecks,
 } from "lucide-react";
 
 // Main navigation (top level)
@@ -36,9 +33,8 @@ const navigation = [
         href: "/jobs",
         icon: Play,
         children: [
-            { name: "Todos os Jobs", href: "/jobs", icon: ListChecks },
-            { name: "Modo Automático", href: "/jobs/new", icon: Zap, description: "Executa pipeline completa automaticamente" },
-            { name: "Modo Wizard", href: "/wizard", icon: Wand2, description: "Passo a passo com aprovação" },
+            { name: "Todos os Jobs", href: "/jobs" },
+            { name: "Nova Produção", href: "/jobs/new" },
         ],
     },
 ];
@@ -134,24 +130,21 @@ export function Sidebar({ className }: SidebarProps) {
                             {/* Children */}
                             {item.children && isActive(item.href) && (
                                 <div className="ml-7 mt-1 space-y-1">
-                                    {item.children.map((child) => {
-                                        const ChildIcon = child.icon || ChevronRight;
-                                        return (
-                                            <Link
-                                                key={child.href}
-                                                href={child.href}
-                                                className={cn(
-                                                    "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors",
-                                                    pathname === child.href || (child.href === "/wizard" && pathname.startsWith("/wizard"))
-                                                        ? "text-primary font-medium bg-primary/5"
-                                                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                                                )}
-                                            >
-                                                <ChildIcon className="w-3.5 h-3.5" />
-                                                {child.name}
-                                            </Link>
-                                        );
-                                    })}
+                                    {item.children.map((child) => (
+                                        <Link
+                                            key={child.href}
+                                            href={child.href}
+                                            className={cn(
+                                                "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors",
+                                                pathname === child.href
+                                                    ? "text-primary font-medium"
+                                                    : "text-muted-foreground hover:text-foreground"
+                                            )}
+                                        >
+                                            <ChevronRight className="w-3 h-3" />
+                                            {child.name}
+                                        </Link>
+                                    ))}
                                 </div>
                             )}
                         </div>
