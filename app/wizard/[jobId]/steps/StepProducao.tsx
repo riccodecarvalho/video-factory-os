@@ -7,16 +7,14 @@ export default function StepProducao({ stepKey, isLoading, onGenerate, onApprove
     const [progress, setProgress] = useState(0);
     const [status, setStatus] = useState("Aguardando...");
 
-    const stepLabels: Record<string, { label: string; icon: string }> = {
-        tts: { label: "Gerando áudio", icon: "🎙️" },
-        renderizacao: { label: "Renderizando vídeo", icon: "🎬" },
-        exportacao: { label: "Exportando", icon: "📦" },
+    const stepLabels: Record<string, { label: string; icon: string; description: string }> = {
+        renderizacao: { label: "Renderização", icon: "🎬", description: "Renderizando vídeo com FFmpeg" },
+        exportacao: { label: "Exportação", icon: "📦", description: "Exportando arquivos finais" },
     };
 
-    const current = stepLabels[stepKey] || { label: stepKey, icon: "⚙️" };
+    const current = stepLabels[stepKey] || { label: stepKey, icon: "⚙️", description: "Processando..." };
 
     useEffect(() => {
-        // Simulate progress for demo purposes
         if (isLoading) {
             const interval = setInterval(() => {
                 setProgress(p => Math.min(p + 5, 95));
@@ -37,11 +35,7 @@ export default function StepProducao({ stepKey, isLoading, onGenerate, onApprove
             <div className="text-center mb-8">
                 <span className="text-6xl mb-4 block">{current.icon}</span>
                 <h2 className="text-2xl font-bold text-white mb-2">{current.label}</h2>
-                <p className="text-gray-400">
-                    {stepKey === "tts" && "Convertendo texto em áudio com Azure TTS"}
-                    {stepKey === "renderizacao" && "Renderizando vídeo com FFmpeg"}
-                    {stepKey === "exportacao" && "Exportando arquivos finais"}
-                </p>
+                <p className="text-gray-400">{current.description}</p>
             </div>
 
             {/* Progress */}
@@ -71,23 +65,22 @@ export default function StepProducao({ stepKey, isLoading, onGenerate, onApprove
             <div className="bg-gray-900/50 rounded-xl p-4 mt-6">
                 <div className="text-xs text-gray-500 uppercase tracking-wide mb-3">Pipeline de Produção</div>
                 <div className="space-y-2">
-                    {["tts", "renderizacao", "exportacao"].map((key) => {
+                    {["renderizacao", "exportacao"].map((key) => {
                         const step = stepLabels[key];
                         const isCurrent = key === stepKey;
-                        const isPast = ["tts", "renderizacao", "exportacao"].indexOf(key) <
-                            ["tts", "renderizacao", "exportacao"].indexOf(stepKey);
+                        const isPast = ["renderizacao", "exportacao"].indexOf(key) <
+                            ["renderizacao", "exportacao"].indexOf(stepKey);
 
                         return (
                             <div
                                 key={key}
-                                className={`flex items-center gap-3 p-2 rounded-lg ${isCurrent ? "bg-purple-600/20" : ""
-                                    }`}
+                                className={`flex items-center gap-3 p-2 rounded-lg ${isCurrent ? "bg-purple-600/20" : ""}`}
                             >
                                 <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${isPast
-                                        ? "bg-green-600 text-white"
-                                        : isCurrent
-                                            ? "bg-purple-600 text-white animate-pulse"
-                                            : "bg-gray-700 text-gray-400"
+                                    ? "bg-green-600 text-white"
+                                    : isCurrent
+                                        ? "bg-purple-600 text-white animate-pulse"
+                                        : "bg-gray-700 text-gray-400"
                                     }`}>
                                     {isPast ? "✓" : step.icon}
                                 </span>
@@ -100,7 +93,6 @@ export default function StepProducao({ stepKey, isLoading, onGenerate, onApprove
                 </div>
             </div>
 
-            {/* Continue to next */}
             {!isLoading && progress === 0 && (
                 <p className="text-center text-gray-500 text-sm mt-6">
                     Clique para iniciar esta etapa da produção

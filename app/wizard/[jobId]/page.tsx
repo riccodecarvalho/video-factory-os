@@ -23,7 +23,6 @@ const STEP_COMPONENTS: Record<string, React.ComponentType<StepProps>> = {
     titulo: StepTitulos,
     planejamento: StepPlanejamento,
     roteiro: StepRoteiro,
-    tts: StepProducao,
     renderizacao: StepProducao,
     exportacao: StepProducao,
     miniaturas: StepMiniaturas,
