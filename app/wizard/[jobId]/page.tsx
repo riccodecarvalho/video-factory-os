@@ -35,11 +35,11 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
     }
 
     // Se job wizard não tem steps ainda, iniciar para criar os steps
+    // O runner roda em background, então mostrar loading
+    let isInitializing = false;
     if (steps.length === 0) {
-        await continueWizard(params.jobId);
-        revalidatePath(`/wizard/${params.jobId}`);
-        // Redirect to refresh the page with the new steps
-        redirect(`/wizard/${params.jobId}`);
+        continueWizard(params.jobId);
+        isInitializing = true;
     }
 
     const input = JSON.parse(job.input || "{}");
@@ -66,9 +66,27 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
 
     async function handleApprove() {
         "use server";
-        // Continuar wizard para próximo step
         await continueWizard(params.jobId);
         revalidatePath(`/wizard/${params.jobId}`);
+    }
+
+    // Inicialização em andamento - mostrar loading
+    if (isInitializing) {
+        return (
+            <div className="container py-8">
+                <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    <h2 className="text-xl font-semibold">Inicializando Wizard...</h2>
+                    <p className="text-muted-foreground">Criando steps do pipeline. Atualize a página em alguns segundos.</p>
+                    <Link href={`/wizard/${params.jobId}`}>
+                        <Button variant="outline" className="mt-4 gap-2">
+                            <RotateCcw className="h-4 w-4" />
+                            Atualizar Página
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+        );
     }
 
     return (
