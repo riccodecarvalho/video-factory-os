@@ -35,6 +35,8 @@
 4431cdf feat: complete Big 4 audit + quick wins
 ad2cc21 docs: align timeline with git commits (2025-12-17, 18, 19)
 5253487 feat(jobs): add retry-from-step functionality + multi-recipe render support
+bd1adfe docs: update timeline 2025-12-19 with session 002 + correct SHA anchor
+dcae791 feat(assets): add VJ channel avatars for multi-recipe render support
 ```
 
 ### Build Status
@@ -46,4 +48,4 @@ ad2cc21 docs: align timeline with git commits (2025-12-17, 18, 19)
 ✅ Commits pushed
 
 ---
-**Timeline covers up to:** `5253487`
+**Timeline covers up to:** `dcae791`
