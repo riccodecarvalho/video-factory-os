@@ -6,23 +6,22 @@ import {
     StatusBadge,
     StepPreview,
 } from "@/components/vf";
-import { ArrowLeft, Wand2, Play, RotateCcw, CheckCircle } from "lucide-react";
-import { getJobById, getJobSteps, getJobArtifacts, continueWizard } from "@/app/jobs/actions";
+import { ArrowLeft, Wand2, Play, RotateCcw, CheckCircle, RefreshCw } from "lucide-react";
+import { getJobById, getJobSteps, getJobArtifacts, continueWizard, startJob } from "@/app/jobs/actions";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 /**
  * Wizard Flow Page
  * 
- * Mostra pipeline com PipelineView e preview do step atual com StepPreview
- * Reutiliza componentes VF existentes conforme ADR-011
+ * Mostra pipeline e permite execução step-by-step
+ * NÃO faz auto-init para evitar loops
  */
 
 export default async function WizardFlowPage({ params }: { params: { jobId: string } }) {
-    const [job, steps, artifacts] = await Promise.all([
+    const [job, steps] = await Promise.all([
         getJobById(params.jobId),
         getJobSteps(params.jobId),
-        getJobArtifacts(params.jobId)
     ]);
 
     if (!job) {
@@ -34,61 +33,97 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
         redirect(`/jobs?id=${job.id}`);
     }
 
-    // Se job wizard não tem steps ainda, iniciar para criar os steps
-    // O runner roda em background, então mostrar loading
-    let isInitializing = false;
-    if (steps.length === 0) {
-        continueWizard(params.jobId);
-        isInitializing = true;
-    }
-
     const input = JSON.parse(job.input || "{}");
     const jobTitle = input.tema || input.title || "Wizard";
-
-    // Encontrar step atual (pending ou running)
-    const currentStepIndex = steps.findIndex(s => s.status === "pending" || s.status === "running");
-    const currentStep = currentStepIndex >= 0 ? steps[currentStepIndex] : null;
-
-    // Step anterior (para preview)
-    const prevStep = currentStepIndex > 0 ? steps[currentStepIndex - 1] : null;
 
     // Progresso
     const completedSteps = steps.filter(s => s.status === "success").length;
     const totalSteps = steps.length;
     const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
+    // Step atual
+    const currentStepIndex = steps.findIndex(s => s.status === "pending" || s.status === "running");
+    const currentStep = currentStepIndex >= 0 ? steps[currentStepIndex] : null;
+    const prevStep = currentStepIndex > 0 ? steps[currentStepIndex - 1] : null;
+
     // Server Actions
-    async function handleExecuteStep() {
+    async function handleStartWizard() {
+        "use server";
+        // Inicia o job - cria steps e executa o primeiro
+        await startJob(params.jobId);
+        revalidatePath(`/wizard/${params.jobId}`);
+    }
+
+    async function handleContinue() {
         "use server";
         await continueWizard(params.jobId);
         revalidatePath(`/wizard/${params.jobId}`);
     }
 
-    async function handleApprove() {
+    async function handleRefresh() {
         "use server";
-        await continueWizard(params.jobId);
         revalidatePath(`/wizard/${params.jobId}`);
     }
 
-    // Inicialização em andamento - mostrar loading
-    if (isInitializing) {
+    // Estado: sem steps ainda - mostrar botão para iniciar
+    if (steps.length === 0 && job.status === "pending") {
         return (
             <div className="container py-8">
-                <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                    <h2 className="text-xl font-semibold">Inicializando Wizard...</h2>
-                    <p className="text-muted-foreground">Criando steps do pipeline. Atualize a página em alguns segundos.</p>
-                    <Link href={`/wizard/${params.jobId}`}>
-                        <Button variant="outline" className="mt-4 gap-2">
-                            <RotateCcw className="h-4 w-4" />
-                            Atualizar Página
+                <Link
+                    href="/jobs"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Voltar aos Jobs
+                </Link>
+
+                <div className="flex flex-col items-center justify-center min-h-[400px] gap-6">
+                    <Wand2 className="h-16 w-16 text-primary" />
+                    <h1 className="text-2xl font-bold">{jobTitle}</h1>
+                    <p className="text-muted-foreground text-center max-w-md">
+                        Este wizard ainda não foi iniciado. Clique abaixo para começar a execução step-by-step.
+                    </p>
+                    <form action={handleStartWizard}>
+                        <Button type="submit" size="lg" className="gap-2">
+                            <Play className="h-5 w-5" />
+                            Iniciar Wizard
                         </Button>
-                    </Link>
+                    </form>
                 </div>
             </div>
         );
     }
 
+    // Estado: job running - mostrar loading com refresh
+    if (job.status === "running") {
+        return (
+            <div className="container py-8">
+                <Link
+                    href="/jobs"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Voltar aos Jobs
+                </Link>
+
+                <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    <h2 className="text-xl font-semibold">Executando Step...</h2>
+                    <p className="text-muted-foreground">
+                        {steps.length > 0 ? `Step ${completedSteps + 1} de ${totalSteps}` : "Criando steps..."}
+                    </p>
+                    <form action={handleRefresh}>
+                        <Button type="submit" variant="outline" className="mt-4 gap-2">
+                            <RefreshCw className="h-4 w-4" />
+                            Atualizar
+                        </Button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+    // Estado normal: mostrar wizard UI
     return (
         <div className="container py-8">
             {/* Header */}
@@ -109,9 +144,15 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
                             <StatusBadge status={job.status as "pending" | "running" | "completed" | "failed"} />
                         </div>
                         <p className="text-muted-foreground">
-                            Wizard Mode • {job.recipeSlug} • Step {completedSteps + 1} de {totalSteps}
+                            Wizard Mode • {job.recipeSlug} • {completedSteps} de {totalSteps} steps completos
                         </p>
                     </div>
+                    <form action={handleRefresh}>
+                        <Button type="submit" variant="ghost" size="sm" className="gap-2">
+                            <RefreshCw className="h-4 w-4" />
+                            Atualizar
+                        </Button>
+                    </form>
                 </div>
             </div>
 
@@ -173,7 +214,7 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 {currentStep.status === "pending" && (
-                                    <form action={handleExecuteStep}>
+                                    <form action={handleContinue}>
                                         <Button type="submit" className="w-full gap-2">
                                             <Play className="h-4 w-4" />
                                             Executar {currentStep.stepKey}
@@ -181,7 +222,7 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
                                     </form>
                                 )}
                                 {currentStep.status === "running" && (
-                                    <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                                    <div className="flex items-center justify-center gap-2 text-muted-foreground py-4">
                                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
                                         Executando...
                                     </div>
@@ -190,13 +231,13 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
                         </Card>
                     )}
 
-                    {/* Preview do Step Anterior (se existir) */}
+                    {/* Preview do Step Anterior */}
                     {prevStep && prevStep.status === "success" && (
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <CheckCircle className="h-4 w-4 text-green-500" />
-                                    Preview: {prevStep.stepKey}
+                                    Resultado: {prevStep.stepKey}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -209,18 +250,18 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
                         </Card>
                     )}
 
-                    {/* Ações de aprovação */}
+                    {/* Ações */}
                     {prevStep && currentStep && currentStep.status === "pending" && (
                         <Card>
                             <CardContent className="pt-6">
                                 <div className="flex gap-4">
-                                    <form action={handleApprove} className="flex-1">
+                                    <form action={handleContinue} className="flex-1">
                                         <Button type="submit" className="w-full gap-2">
                                             <CheckCircle className="h-4 w-4" />
                                             Aprovar e Continuar
                                         </Button>
                                     </form>
-                                    <Button variant="outline" className="gap-2">
+                                    <Button variant="outline" className="gap-2" disabled>
                                         <RotateCcw className="h-4 w-4" />
                                         Regenerar
                                     </Button>
@@ -236,6 +277,22 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
                                 <div className="flex items-center justify-center gap-2 text-green-500">
                                     <CheckCircle className="h-6 w-6" />
                                     <span className="text-lg font-medium">Wizard Completo!</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Sem steps pendentes - todos completos ou vazio */}
+                    {!currentStep && steps.length > 0 && job.status !== "completed" && (
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="text-center text-muted-foreground">
+                                    Todos os steps foram processados.{" "}
+                                    <form action={handleRefresh} className="inline">
+                                        <Button type="submit" variant="link" className="p-0">
+                                            Clique para atualizar
+                                        </Button>
+                                    </form>
                                 </div>
                             </CardContent>
                         </Card>
