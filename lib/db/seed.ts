@@ -566,6 +566,158 @@ Nunca comiences con exposición. Comienza con acción, conflicto o revelación.
         },
     ]).onConflictDoNothing();
 
+    // ============================================
+    // 10. EXECUTION BINDINGS
+    // Vincula prompts, providers e presets aos steps da recipe
+    // ============================================
+    console.log('🔗 Criando execution bindings...');
+
+    // Buscar IDs criados
+    const claudeProvider = await db.select().from(providers).limit(1);
+    const azureProvider = await db.select().from(providers).limit(2);
+    const gracielaRecipe = await db.select().from(recipes).limit(1);
+    const titlePrompt = await db.select().from(prompts).limit(1);
+    const briefPrompt = await db.select().from(prompts).limit(2);
+    const scriptPrompt = await db.select().from(prompts).limit(3);
+    const voicePreset = await db.select().from(presetsVoice).limit(1);
+    const videoPreset = await db.select().from(presetsVideo).limit(1);
+    const ssmlPreset = await db.select().from(presetsSsml).limit(1);
+
+    if (claudeProvider[0] && gracielaRecipe[0]) {
+        const recipeId = gracielaRecipe[0].id;
+        const llmProviderId = claudeProvider[0].id;
+        const ttsProviderId = azureProvider[1]?.id || azureProvider[0]?.id;
+
+        await db.insert(executionBindings).values([
+            // Title step
+            {
+                id: uuid(),
+                scope: 'global',
+                recipeId,
+                stepKey: 'title',
+                slot: 'provider',
+                targetId: llmProviderId,
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            },
+            {
+                id: uuid(),
+                scope: 'global',
+                recipeId,
+                stepKey: 'title',
+                slot: 'prompt',
+                targetId: titlePrompt[0]?.id || '',
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            },
+            // Brief step
+            {
+                id: uuid(),
+                scope: 'global',
+                recipeId,
+                stepKey: 'brief',
+                slot: 'provider',
+                targetId: llmProviderId,
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            },
+            {
+                id: uuid(),
+                scope: 'global',
+                recipeId,
+                stepKey: 'brief',
+                slot: 'prompt',
+                targetId: briefPrompt[1]?.id || briefPrompt[0]?.id || '',
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            },
+            // Script step
+            {
+                id: uuid(),
+                scope: 'global',
+                recipeId,
+                stepKey: 'script',
+                slot: 'provider',
+                targetId: llmProviderId,
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            },
+            {
+                id: uuid(),
+                scope: 'global',
+                recipeId,
+                stepKey: 'script',
+                slot: 'prompt',
+                targetId: scriptPrompt[2]?.id || scriptPrompt[0]?.id || '',
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            },
+            // Parse SSML step
+            {
+                id: uuid(),
+                scope: 'global',
+                recipeId,
+                stepKey: 'parse_ssml',
+                slot: 'preset_ssml',
+                targetId: ssmlPreset[0]?.id || '',
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            },
+            // TTS step
+            {
+                id: uuid(),
+                scope: 'global',
+                recipeId,
+                stepKey: 'tts',
+                slot: 'provider',
+                targetId: ttsProviderId || '',
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            },
+            {
+                id: uuid(),
+                scope: 'global',
+                recipeId,
+                stepKey: 'tts',
+                slot: 'preset_voice',
+                targetId: voicePreset[0]?.id || '',
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            },
+            // Render step
+            {
+                id: uuid(),
+                scope: 'global',
+                recipeId,
+                stepKey: 'render',
+                slot: 'preset_video',
+                targetId: videoPreset[0]?.id || '',
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            },
+        ]).onConflictDoNothing();
+    }
+
     console.log('✅ Seed concluído com sucesso!');
     closeDb();
 }
