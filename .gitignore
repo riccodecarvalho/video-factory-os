@@ -47,3 +47,6 @@ coverage/
 # Turbopack
 .turbo/
 z- archive/
+
+# Backups
+backups/
