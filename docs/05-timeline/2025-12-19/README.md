@@ -59,4 +59,4 @@ d775a9c docs: add ADR-011 Wizard Mode
 ✅ 2 commits pendentes push (prontos)
 
 ---
-**Timeline covers up to:** `0e5ce8e`
+**Timeline covers up to:** `ccf0289`
