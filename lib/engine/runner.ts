@@ -30,6 +30,10 @@ import {
 import { renderVideo, VideoPreset } from "./ffmpeg";
 import { getPreviousOutputKey, normalizeStepKey, getStepExecutorType } from "./step-mapper";
 import { exportJob } from "./export";
+// Timeline DSL integration (Gate 2.0)
+import { buildTimelineFromRecipe } from "./recipe-to-timeline";
+import { executeRenderPlan, getExecutionSummary } from "./timeline-executor";
+import { compileTimeline } from "@/lib/timeline";
 
 type JobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 type StepStatus = "pending" | "running" | "success" | "failed" | "skipped";
@@ -776,6 +780,113 @@ async function executeStepRender(
     const kind = stepDef.kind || getStepKind(stepDef.key);
 
     logs.push({ timestamp: now(), level: "info", message: `Step Render: ${stepDef.name}`, stepKey: stepDef.key });
+
+    // ========================================
+    // TIMELINE DSL PATH (Gate 2.0)
+    // ========================================
+    const useTimelineDSL = (input.useTimelineDSL as boolean) ?? false;
+
+    if (useTimelineDSL) {
+        logs.push({ timestamp: now(), level: "info", message: "Using Timeline DSL for render", stepKey: stepDef.key });
+
+        // Extract TTS output for timeline
+        const ttsOutput = getPreviousOutputKey(previousOutputs, 'tts') as { audioPath?: string; durationSec?: number } | undefined;
+
+        if (!ttsOutput?.audioPath) {
+            return {
+                key: stepDef.key,
+                kind,
+                status: "failed",
+                config: stepConfig,
+                started_at: startedAt,
+                completed_at: now(),
+                error: { code: "NO_AUDIO", message: "Timeline DSL: Nenhum áudio encontrado do step TTS" },
+            };
+        }
+
+        // Build Timeline from recipe context
+        const timeline = buildTimelineFromRecipe({
+            jobId,
+            recipe: {
+                recipeSlug: input.recipeSlug as string,
+                format: (input.format as 'longform' | 'shorts') ?? 'longform',
+                backgroundPath: input.backgroundPath as string,
+                avatarPath: input.avatarPath as string,
+            },
+            previousOutputs: {
+                tts: {
+                    audioPath: ttsOutput.audioPath,
+                    durationSec: ttsOutput.durationSec,
+                },
+            },
+            input,
+        });
+
+        logs.push({ timestamp: now(), level: "info", message: `Timeline built: ${timeline.scenes.length} scenes`, stepKey: stepDef.key });
+
+        // Compile Timeline to RenderPlan
+        const artifactDir = await ensureArtifactDir(jobId, stepDef.key);
+        const compileResult = compileTimeline(timeline, {
+            jobId,
+            outputDir: artifactDir,
+        });
+
+        if (!compileResult.success || !compileResult.plan) {
+            logs.push({ timestamp: now(), level: "error", message: `Compile failed: ${compileResult.errors.join('; ')}`, stepKey: stepDef.key });
+            return {
+                key: stepDef.key,
+                kind,
+                status: "failed",
+                config: stepConfig,
+                started_at: startedAt,
+                completed_at: now(),
+                error: { code: "COMPILE_FAILED", message: compileResult.errors.join('; ') },
+            };
+        }
+
+        logs.push({ timestamp: now(), level: "info", message: `RenderPlan compiled: ${compileResult.plan.steps.length} steps`, stepKey: stepDef.key });
+
+        // Execute RenderPlan
+        const execution = await executeRenderPlan(compileResult.plan, {
+            onLog: (stepId, msg) => logs.push({ timestamp: now(), level: "debug", message: `[${stepId}] ${msg}`, stepKey: stepDef.key }),
+        });
+
+        logs.push({ timestamp: now(), level: "info", message: getExecutionSummary(execution), stepKey: stepDef.key });
+
+        if (execution.status === 'failed') {
+            const failedStep = execution.stepResults.find(r => r.status === 'failed');
+            return {
+                key: stepDef.key,
+                kind,
+                status: "failed",
+                config: stepConfig,
+                started_at: startedAt,
+                completed_at: now(),
+                error: failedStep?.error ?? { code: "RENDER_FAILED", message: "RenderPlan execution failed" },
+            };
+        }
+
+        const outputPath = execution.finalOutputPath ?? `${artifactDir}/video.mp4`;
+
+        return {
+            key: stepDef.key,
+            kind,
+            status: "success",
+            config: stepConfig,
+            started_at: startedAt,
+            completed_at: now(),
+            duration_ms: Date.now() - new Date(startedAt).getTime(),
+            artifacts: [{
+                uri: outputPath,
+                content_type: "video/mp4",
+            }],
+            response: { output: { videoPath: outputPath, usedTimelineDSL: true } },
+        };
+    }
+
+    // ========================================
+    // LEGACY PATH (original render flow)
+    // ========================================
 
     // Get audio from previous TTS step
     const ttsOutput = getPreviousOutputKey(previousOutputs, 'tts') as { audioPath?: string } | undefined;

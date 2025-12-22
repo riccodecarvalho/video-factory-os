@@ -6,6 +6,7 @@
 |---|---------|--------|---------|
 | 001 | [Início + Auditoria Docs](sessions/001-inicio-sincronizacao-2025-12-22.md) | ✅ Completa | 7 |
 | 002 | [Render Engine Evolution](sessions/002-render-engine-evolution-2025-12-22.md) | ✅ Completa | 1 |
+| 003 | [Gate 2.0 Timeline DSL Integration](sessions/003-gate-2-timeline-dsl-integration-2025-12-22.md) | ✅ Completa | 1 |
 
 ## Resumo do Dia
 
