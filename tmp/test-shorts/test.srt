@@ -1,0 +1,12 @@
+1
+00:00:01,000 --> 00:00:03,500
+Este é o primeiro segmento.
+
+2
+00:00:04,000 --> 00:00:07,000
+Segundo segmento com mais texto
+que ocupa duas linhas.
+
+3
+00:00:08,000 --> 00:00:10,500
+Terceiro e último segmento.
