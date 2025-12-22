@@ -125,6 +125,28 @@ A Knowledge Base é dividida em **tiers** para controle de tokens e contexto:
 
 > Documentado em: [mapeamento-chatgpt-plano.md](../05-timeline/2025-12-13/mapeamento-chatgpt-plano.md#6-sistema-de-tiers-knowledge-base)
 
+### 2.6 Render Engine Evolution (Fase 2.0)
+
+Evolução inspirada no JSON2Video para compor vídeos de forma declarativa:
+
+| Componente | Descrição |
+|------------|-----------|
+| **Timeline DSL** | Schema declarativo: `timeline → scenes → elements` |
+| **RenderPlan** | Plano de execução: steps + comandos FFmpeg |
+| **Compiler** | Transforma Timeline → RenderPlan |
+
+**Arquivos:**
+- `lib/timeline/schema.ts` — Types Timeline, Scene, Element
+- `lib/timeline/validator.ts` — Validação Zod
+- `lib/timeline/render-plan.ts` — RenderPlan e presets
+- `lib/timeline/compiler.ts` — Compiler Timeline → FFmpeg
+
+**Format Profiles:**
+- `longform` (16:9): 1920x1080, 30fps
+- `shorts` (9:16): 1080x1920, 30fps (YouTube Shorts, TikTok, Reels)
+
+> Documentado em: [ADR-013 Timeline DSL + RenderPlan](../01-adr/2025-12-22-adr-013-timeline-dsl-renderplan.md)
+
 ---
 
 ## 3) "Não negociáveis" (Regras de ouro)
