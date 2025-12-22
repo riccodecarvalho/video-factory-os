@@ -25,7 +25,6 @@ docs/
 │
 ├── 00-regras/                  # REGRAS E CONVENÇÕES
 │   ├── workflow-inicio.md      # ⭐ ESTE ARQUIVO
-│   ├── workflow-inicio-v1.md   # Versão anterior (referência)
 │   ├── nomenclatura.md         # Convenções de nomes
 │   ├── audit-*.md              # Documentos de auditoria
 │   ├── operacao/
@@ -78,6 +77,7 @@ docs/
 │       └── sessions/           # Logs de sessão detalhados
 │
 ├── 06-archive/                 # ARQUIVOS ARQUIVADOS
+│   ├── workflow-inicio-v1.md   # Versão anterior do workflow
 │   ├── external-logs/          # Logs de chats externos (ChatGPT, etc)
 │   └── z-tmp-consolidation-*.md
 │
