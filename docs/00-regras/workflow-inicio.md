@@ -1,8 +1,8 @@
 # 📐 WORKFLOW DE INÍCIO DE SESSÃO v2.1
 
 **Projeto:** Video Factory OS  
-**Versão:** 2.1 (2025-12-22)  
-**Anterior:** [workflow-inicio-v1.md](workflow-inicio-v1.md)
+**Versão:** 2.1 (2025-12-22)
+
 
 ---
 
