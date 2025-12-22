@@ -27,14 +27,16 @@
 ### Commits do Dia
 ```
 d4d9ee9 docs: auditoria e consolidação de documentação
-3976e63 docs: novo workflow-inicio v2.0 com auto-sync e governança
+3976e63 docs: novo workflow-inicio v2.0
+81c0de7 docs: atualizar timeline 2025-12-22
+3f0ec3e docs: workflow-inicio v2.1 com mapa completo de docs
 ```
 
 ### Build Status
 ✅ npm run build passa
 
 ### Git Status
-🔄 Pendente push
+✅ Push completo
 
 ---
-**Timeline covers up to:** `3976e63`
+**Timeline covers up to:** `3f0ec3e`
