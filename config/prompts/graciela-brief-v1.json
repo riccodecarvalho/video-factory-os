@@ -1,0 +1,16 @@
+{
+    "slug": "graciela.brief.v1",
+    "name": "Graciela - Gerador de Brief",
+    "category": "brief",
+    "description": "Expande uma ideia em um brief estruturado",
+    "systemPrompt": "Eres un guionista experto en narrativa dramática.\nTu objetivo es expandir una idea en un brief estructurado.",
+    "userTemplate": "Expande esta idea en un brief para un video de {{duracao}} minutos:\n\nTítulo: {{titulo}}\nIdea base: {{idea}}\n\nEl brief debe incluir:\n1. Premisa (1-2 oraciones)\n2. Personajes principales\n3. Conflicto central\n4. Arco emocional\n5. Resolución esperada",
+    "model": "claude-sonnet-4-20250514",
+    "maxTokens": 1000,
+    "temperature": 0.7,
+    "kbTiers": [
+        "tier1"
+    ],
+    "version": 1,
+    "isActive": true
+}

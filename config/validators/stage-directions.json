@@ -1,0 +1,83 @@
+[
+    {
+        "slug": "stage-directions-no-ssml",
+        "name": "Stage Directions: Sem SSML",
+        "description": "Roteiro não pode conter tags SSML",
+        "type": "forbidden_patterns",
+        "config": {
+            "patterns": [
+                "<speak",
+                "<voice",
+                "<break",
+                "</voice>",
+                "</speak>"
+            ]
+        },
+        "errorMessage": "Roteiro contém tags SSML. Use marcadores de Stage Directions.",
+        "severity": "error",
+        "isActive": true
+    },
+    {
+        "slug": "stage-directions-no-markdown",
+        "name": "Stage Directions: Sem Markdown",
+        "description": "Roteiro não pode conter formatação Markdown",
+        "type": "forbidden_patterns",
+        "config": {
+            "patterns": [
+                "**",
+                "```",
+                "# ",
+                "## ",
+                "### "
+            ]
+        },
+        "errorMessage": "Roteiro contém Markdown. Use texto puro com Stage Directions.",
+        "severity": "error",
+        "isActive": true
+    },
+    {
+        "slug": "stage-directions-starts-correctly",
+        "name": "Stage Directions: Início correto",
+        "description": "Roteiro deve começar com (voz: NARRADORA)",
+        "type": "required_patterns",
+        "config": {
+            "patterns": [
+                "^\\(voz:\\s*NARRADORA\\)"
+            ],
+            "flags": "i"
+        },
+        "errorMessage": "Roteiro deve começar com (voz: NARRADORA)",
+        "severity": "error",
+        "isActive": true
+    },
+    {
+        "slug": "stage-directions-min-words",
+        "name": "Stage Directions: Mínimo de palavras",
+        "description": "Roteiro deve ter no mínimo 6000 palavras",
+        "type": "min_words",
+        "config": {
+            "min": 6000
+        },
+        "errorMessage": "Roteiro muito curto. Mínimo: 6000 palavras.",
+        "severity": "error",
+        "isActive": true
+    },
+    {
+        "slug": "stage-directions-valid-voices",
+        "name": "Stage Directions: Vozes válidas",
+        "description": "Marcadores de voz devem ser NARRADORA, ANTAGONISTA ou OTRO",
+        "type": "required_patterns",
+        "config": {
+            "checkAllMatches": true,
+            "matchPattern": "\\(voz:\\s*(\\w+)\\)",
+            "allowedValues": [
+                "NARRADORA",
+                "ANTAGONISTA",
+                "OTRO"
+            ]
+        },
+        "errorMessage": "Marcador de voz inválido. Use: NARRADORA, ANTAGONISTA ou OTRO.",
+        "severity": "error",
+        "isActive": true
+    }
+]

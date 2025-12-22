@@ -1,0 +1,13 @@
+{
+    "slug": "mac-videotoolbox-720p",
+    "name": "Mac VideoToolbox 720p",
+    "description": "Encoder acelerado por hardware no Mac. Recomendado para produção.",
+    "encoder": "h264_videotoolbox",
+    "scale": "1280:720",
+    "fps": 30,
+    "bitrate": "4M",
+    "pixelFormat": "yuv420p",
+    "audioCodec": "aac",
+    "audioBitrate": "192k",
+    "isActive": true
+}

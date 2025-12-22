@@ -1,0 +1,14 @@
+{
+    "slug": "es-mx-dalia-narradora",
+    "name": "Dalia - Narradora (ES-MX)",
+    "description": "Voz principal da Graciela, estilo narração profissional",
+    "voiceName": "es-MX-DaliaNeural",
+    "language": "es-MX",
+    "rate": 1.0,
+    "pitch": "0%",
+    "volume": "default",
+    "style": "narration-professional",
+    "styleDegree": 1.2,
+    "role": null,
+    "isActive": true
+}

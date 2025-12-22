@@ -1,0 +1,15 @@
+{
+    "slug": "graciela-default",
+    "name": "Graciela - SSML Default",
+    "pauseMappings": {
+        "[PAUSA CORTA]": "300ms",
+        "[PAUSA]": "500ms",
+        "[PAUSA LARGA]": "1000ms"
+    },
+    "voiceMappings": {
+        "NARRADORA": "es-mx-dalia-narradora",
+        "ANTAGONISTA": "es-mx-jorge-antagonista",
+        "OTRO": "es-mx-candela-otro"
+    },
+    "isActive": true
+}

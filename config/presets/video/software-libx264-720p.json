@@ -1,0 +1,13 @@
+{
+    "slug": "software-libx264-720p",
+    "name": "Software libx264 720p",
+    "description": "Encoder por software. Fallback quando VideoToolbox não disponível.",
+    "encoder": "libx264",
+    "scale": "1280:720",
+    "fps": 30,
+    "bitrate": "4M",
+    "pixelFormat": "yuv420p",
+    "audioCodec": "aac",
+    "audioBitrate": "192k",
+    "isActive": true
+}

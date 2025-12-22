@@ -52,4 +52,4 @@ docs/audit/
 ❌ Build falhando (3 erros TS)
 
 ---
-**Timeline covers up to:** Sessão continuou em 2025-12-19
+**Timeline covers up to:** `4431cdf` (continuou em 2025-12-19)

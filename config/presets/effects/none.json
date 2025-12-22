@@ -1,0 +1,9 @@
+{
+    "slug": "none",
+    "name": "Sem efeitos",
+    "description": "Render limpo sem filtros adicionais",
+    "filtergraph": "",
+    "order": 0,
+    "enabledByDefault": true,
+    "isActive": true
+}

@@ -1,0 +1,16 @@
+{
+    "slug": "graciela.title.v1",
+    "name": "Graciela - Gerador de Títulos",
+    "category": "title",
+    "description": "Gera opções de títulos impactantes para vídeos",
+    "systemPrompt": "Eres un experto en crear títulos virales para YouTube en español.\nTu objetivo es crear títulos que generen curiosidad y clics.\n\nReglas:\n- Máximo 60 caracteres\n- Usar números cuando posible\n- Incluir gancho emocional\n- Evitar clickbait extremo",
+    "userTemplate": "Genera 5 opciones de títulos para un video sobre:\n\nTema: {{tema}}\nBrief: {{brief}}\n\nFormato de respuesta:\n1. [título]\n2. [título]\n3. [título]\n4. [título]\n5. [título]",
+    "model": "claude-sonnet-4-20250514",
+    "maxTokens": 500,
+    "temperature": 0.8,
+    "kbTiers": [
+        "tier1"
+    ],
+    "version": 1,
+    "isActive": true
+}

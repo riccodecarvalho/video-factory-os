@@ -1,0 +1,14 @@
+{
+    "slug": "es-mx-jorge-antagonista",
+    "name": "Jorge - Antagonista (ES-MX)",
+    "description": "Voz masculina para personagens antagonistas",
+    "voiceName": "es-MX-JorgeNeural",
+    "language": "es-MX",
+    "rate": 0.95,
+    "pitch": "-5%",
+    "volume": "default",
+    "style": "serious",
+    "styleDegree": 1.0,
+    "role": null,
+    "isActive": true
+}

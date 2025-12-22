@@ -1,0 +1,61 @@
+{
+    "slug": "graciela-youtube-long",
+    "name": "Graciela - YouTube 40min",
+    "description": "Pipeline completo para vídeos longos do canal Verdades de Graciela",
+    "pipeline": [
+        {
+            "key": "title",
+            "name": "Gerar Títulos",
+            "promptSlug": "graciela.title.v1",
+            "required": true
+        },
+        {
+            "key": "brief",
+            "name": "Expandir Brief",
+            "promptSlug": "graciela.brief.v1",
+            "required": true
+        },
+        {
+            "key": "script",
+            "name": "Gerar Roteiro",
+            "promptSlug": "graciela.script.v1",
+            "required": true
+        },
+        {
+            "key": "parse_ssml",
+            "name": "Converter para SSML",
+            "ssmlPresetSlug": "graciela-default",
+            "required": true
+        },
+        {
+            "key": "tts",
+            "name": "Gerar Áudio (TTS)",
+            "providerSlug": "azure-tts",
+            "required": true
+        },
+        {
+            "key": "render",
+            "name": "Renderizar Vídeo",
+            "videoPresetSlug": "mac-videotoolbox-720p",
+            "required": true
+        },
+        {
+            "key": "export",
+            "name": "Exportar Pacote",
+            "required": true
+        }
+    ],
+    "defaultVoicePresetSlug": "es-mx-dalia-narradora",
+    "defaultVideoPresetSlug": "mac-videotoolbox-720p",
+    "validatorsConfig": {
+        "script": [
+            "stage-directions-no-ssml",
+            "stage-directions-no-markdown",
+            "stage-directions-starts-correctly",
+            "stage-directions-min-words",
+            "stage-directions-valid-voices"
+        ]
+    },
+    "version": 1,
+    "isActive": true
+}

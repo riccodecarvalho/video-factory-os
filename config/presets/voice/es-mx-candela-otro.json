@@ -1,0 +1,14 @@
+{
+    "slug": "es-mx-candela-otro",
+    "name": "Candela - Outro (ES-MX)",
+    "description": "Voz feminina para outros personagens",
+    "voiceName": "es-MX-CandelaNeural",
+    "language": "es-MX",
+    "rate": 1.0,
+    "pitch": "0%",
+    "volume": "default",
+    "style": null,
+    "styleDegree": 1.0,
+    "role": null,
+    "isActive": true
+}

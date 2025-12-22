@@ -1,0 +1,9 @@
+{
+    "slug": "subtle-vignette",
+    "name": "Vinheta sutil",
+    "description": "Vinheta leve nas bordas",
+    "filtergraph": "vignette=PI/4",
+    "order": 1,
+    "enabledByDefault": false,
+    "isActive": true
+}
