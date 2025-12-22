@@ -29,6 +29,7 @@ docs/
 │   ├── audit-*.md              # Documentos de auditoria
 │   ├── operacao/
 │   │   ├── troubleshooting.md  # ⭐ LIÇÕES APRENDIDAS (ler sempre!)
+│   │   ├── aprendizados-criticos.md  # ⭐ NOVO: Anti-regressão
 │   │   └── manual-modelos-ia.md
 │   └── design-system/
 │       └── ui-guidelines.md
