@@ -5,7 +5,7 @@
 | # | Session | Status | Commits |
 |---|---------|--------|---------|
 | 001 | [Início + Auditoria Docs](sessions/001-inicio-sincronizacao-2025-12-22.md) | ✅ Completa | 7 |
-| 002 | [Render Engine Evolution](sessions/002-render-engine-evolution-2025-12-22.md) | 🟡 Em andamento | - |
+| 002 | [Render Engine Evolution](sessions/002-render-engine-evolution-2025-12-22.md) | ✅ Completa | 1 |
 
 ## Resumo do Dia
 
@@ -101,4 +101,4 @@ O usuário trouxe um context pack completo para evoluir o Video Factory OS:
 - `docs/02-features/` — Documentar Timeline DSL
 
 ---
-**Timeline covers up to:** `b28f24d`
+**Timeline covers up to:** `a399e97`

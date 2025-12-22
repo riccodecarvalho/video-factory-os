@@ -1,44 +1,50 @@
 # Session 002: Render Engine Evolution (2025-12-22)
 
-**Início:** 2025-12-22 13:13 BRT
-**Status:** 🟡 Em andamento
+**Início:** 2025-12-22 13:13 BRT  
+**Fim:** 2025-12-22 13:28 BRT  
+**Status:** ✅ Completa
 
 ## Objetivo da Sessão
 
-Iniciar a **Fase 2.0 (Render Engine Evolution)** conforme handover da sessão anterior, que inclui:
-- Criar ADR-013: Timeline DSL + RenderPlan Architecture
-- Evoluir o Video Factory OS com conceitos JSON2Video
-- Definir primitives de composição e pipeline de render
+Iniciar a **Fase 2.0 (Render Engine Evolution)** conforme handover da sessão anterior.
 
-## Context Pack Recebido (da sessão anterior)
+## Entregas
 
-O usuário trouxe um context pack completo para evoluir o Video Factory OS:
+### ADR-013: Timeline DSL + RenderPlan Architecture
+- [x] Schema Timeline DSL (scenes, elements, timing)
+- [x] Schema RenderPlan (steps, commands, dependências)
+- [x] Fluxo Compiler (Timeline → RenderPlan → FFmpeg)
+- [x] Exemplos JSON incluídos
 
-1. **Internalizar conceito JSON2Video** — video as JSON + template variables + job render assíncrono
-2. **Timeline DSL** — primitives de composição (scenes/layers/timing)
-3. **RenderPlan Compiler** — Manifest → RenderPlan → FFmpeg
-4. **Render Farm com Macs** — M1/M2 com VideoToolbox como workers
-5. **Short-form profiles** — YouTube Shorts, TikTok, Reels (9:16)
+### lib/timeline/ (novo módulo)
+- [x] `schema.ts` — Types + format profiles + safe areas
+- [x] `validator.ts` — Validação Zod + regras de negócio
+- [x] `render-plan.ts` — RenderPlan + presets VideoToolbox
+- [x] `compiler.ts` — Compiler Timeline → FFmpeg commands
+- [x] `index.ts` — Exports centralizados
 
-## Verificações de Início
-
-- [x] Git sync: Branch `main` up-to-date com origin
-- [x] Build: `npm run build` passa sem erros
-- [x] Timeline: Lida do README.md do dia
-- [x] PRD: Seções 1.4, 1.5, 2.5 revisadas
-- [x] Troubleshooting: 8 lições aprendidas revisadas
-- [x] SHA âncora: Atualizada de `43a5a0e` → `b28f24d`
-
-## Próximos Passos
-
-1. [ ] Criar ADR-013: Timeline DSL + RenderPlan Architecture
-2. [ ] Atualizar PRD com seção sobre Render Engine
-3. [ ] Definir schema do Timeline DSL
+### Documentação
+- [x] PRD seção 2.6 Render Engine Evolution
+- [x] Session log atualizado
+- [x] SHA âncora atualizada
 
 ## Commits da Sessão
 
-*(a serem adicionados)*
+```
+a399e97 feat: ADR-013 Timeline DSL + RenderPlan Architecture (11 files, +1493 lines)
+```
+
+## Verificações
+
+- [x] `npm run build` passa
+- [x] Push realizado
+
+## Próximos Passos
+
+1. **Gate 2.0**: Integrar Timeline DSL com runner existente
+2. **ADR-014**: Render Farm Strategy (Mac Workers)
+3. **ADR-015**: Short-form Format Profiles
 
 ---
 
-**Session log ativo**
+**Session completa**
