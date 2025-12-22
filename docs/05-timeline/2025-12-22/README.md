@@ -101,4 +101,4 @@ O usuário trouxe um context pack completo para evoluir o Video Factory OS:
 - `docs/02-features/` — Documentar Timeline DSL
 
 ---
-**Timeline covers up to:** `a399e97`
+**Timeline covers up to:** `758512a`
