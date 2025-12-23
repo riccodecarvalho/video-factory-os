@@ -38,6 +38,11 @@
 
 #### Fase 4: Melhorias Admin ✅
 - ✅ Adicionado `UsedBySection` na página de Providers
+- ✅ Adicionado `UsedBySection` na página de Prompts
+
+#### Fase 5: Regeneração de Steps ✅
+- ✅ Implementado `handleRegenerate` no Wizard usando `retryFromStep`
+- ✅ Botão "Regenerar" agora funcional na aprovação de steps
 
 ### Commits do Dia
 ```
@@ -46,6 +51,8 @@
 cec3939 docs: update backlog and timeline for 2025-12-23
 234c616 feat(design-system): add v2.0 components and documentation
 f386ab3 feat(admin): add UsedBySection to providers page
+b080f2e docs: update timeline with complete session summary
+6dcde89 feat(wizard): implement step regeneration and add UsedBy to prompts
 ```
 
 ### Build Status
