@@ -86,98 +86,11 @@ const getMaxTokensOptions = (model: string) => {
 
     return allOptions.filter(o => parseInt(o.value) <= maxOutput);
 };
-
 // =============================================
-// AZURE VOICES - LISTA COMPLETA INCLUINDO MULTILINGUAL
-// Fonte: Azure TTS Language Support + vozes do seu DB
+// AZURE TTS - Configurações do Provider
+// NOTA: As vozes estão cadastradas em presets_voice (53 vozes)
+// e são selecionadas em Projects > Presets, não aqui.
 // =============================================
-const AZURE_VOICES = [
-    // === MULTILINGUAL (falam múltiplos idiomas) ===
-    { value: "es-ES-XimenaMultilingualNeural", label: "🌐 Ximena Multilingual (ES) — 41 idiomas" },
-    { value: "es-ES-IsidoraMultilingualNeural", label: "🌐 Isidora Multilingual (ES) — 41 idiomas" },
-    { value: "es-ES-ArabellaMultilingualNeural", label: "🌐 Arabella Multilingual (ES) — 41 idiomas" },
-    { value: "pt-BR-ThalitaMultilingualNeural", label: "🌐 Thalita Multilingual (BR) — 41 idiomas" },
-    { value: "en-US-AvaMultilingualNeural", label: "🌐 Ava Multilingual (US) — 41 idiomas" },
-    { value: "en-US-AndrewMultilingualNeural", label: "🌐 Andrew Multilingual (US) — 41 idiomas" },
-    { value: "en-US-EmmaMultilingualNeural", label: "🌐 Emma Multilingual (US) — 41 idiomas" },
-    { value: "en-US-BrianMultilingualNeural", label: "🌐 Brian Multilingual (US) — 41 idiomas" },
-
-    // === ESPANHOL MÉXICO ===
-    { value: "es-MX-DaliaNeural", label: "🇲🇽 Dalia (México - F)" },
-    { value: "es-MX-JorgeNeural", label: "🇲🇽 Jorge (México - M)" },
-    { value: "es-MX-BeatrizNeural", label: "🇲🇽 Beatriz (México - F)" },
-    { value: "es-MX-CandelaNeural", label: "🇲🇽 Candela (México - F)" },
-    { value: "es-MX-CarlotaNeural", label: "🇲🇽 Carlota (México - F)" },
-    { value: "es-MX-CecilioNeural", label: "🇲🇽 Cecilio (México - M)" },
-    { value: "es-MX-GerardoNeural", label: "🇲🇽 Gerardo (México - M)" },
-    { value: "es-MX-LarissaNeural", label: "🇲🇽 Larissa (México - F)" },
-    { value: "es-MX-LibertoNeural", label: "🇲🇽 Liberto (México - M)" },
-    { value: "es-MX-LucianoNeural", label: "🇲🇽 Luciano (México - M)" },
-    { value: "es-MX-MarinaNeural", label: "🇲🇽 Marina (México - F)" },
-    { value: "es-MX-NuriaNeural", label: "🇲🇽 Nuria (México - F Criança)" },
-    { value: "es-MX-PelayoNeural", label: "🇲🇽 Pelayo (México - M)" },
-    { value: "es-MX-RenataNeural", label: "🇲🇽 Renata (México - F)" },
-    { value: "es-MX-YagoNeural", label: "🇲🇽 Yago (México - M)" },
-
-    // === ESPANHOL ESPANHA ===
-    { value: "es-ES-ElviraNeural", label: "🇪🇸 Elvira (Espanha - F)" },
-    { value: "es-ES-AlvaroNeural", label: "🇪🇸 Álvaro (Espanha - M)" },
-    { value: "es-ES-AbrilNeural", label: "🇪🇸 Abril (Espanha - F)" },
-    { value: "es-ES-ArnauNeural", label: "🇪🇸 Arnau (Espanha - M)" },
-    { value: "es-ES-DarioNeural", label: "🇪🇸 Dario (Espanha - M)" },
-    { value: "es-ES-EliasNeural", label: "🇪🇸 Elías (Espanha - M)" },
-    { value: "es-ES-EstrellaNeural", label: "🇪🇸 Estrella (Espanha - F)" },
-    { value: "es-ES-IreneNeural", label: "🇪🇸 Irene (Espanha - F)" },
-    { value: "es-ES-LaiaNeural", label: "🇪🇸 Laia (Espanha - F)" },
-    { value: "es-ES-LiaNeural", label: "🇪🇸 Lía (Espanha - F)" },
-    { value: "es-ES-NilNeural", label: "🇪🇸 Nil (Espanha - M)" },
-    { value: "es-ES-SaulNeural", label: "🇪🇸 Saúl (Espanha - M)" },
-    { value: "es-ES-TeoNeural", label: "🇪🇸 Teo (Espanha - M)" },
-    { value: "es-ES-TrianaNeural", label: "🇪🇸 Triana (Espanha - F)" },
-    { value: "es-ES-VeraNeural", label: "🇪🇸 Vera (Espanha - F)" },
-
-    // === ESPANHOL LATAM ===
-    { value: "es-AR-ElenaNeural", label: "🇦🇷 Elena (Argentina - F)" },
-    { value: "es-AR-TomasNeural", label: "🇦🇷 Tomás (Argentina - M)" },
-    { value: "es-CO-SalomeNeural", label: "🇨🇴 Salomé (Colômbia - F)" },
-    { value: "es-CO-GonzaloNeural", label: "🇨🇴 Gonzalo (Colômbia - M)" },
-    { value: "es-CL-CatalinaNeural", label: "🇨🇱 Catalina (Chile - F)" },
-    { value: "es-CL-LorenzoNeural", label: "🇨🇱 Lorenzo (Chile - M)" },
-    { value: "es-PE-CamilaNeural", label: "🇵🇪 Camila (Peru - F)" },
-    { value: "es-PE-AlexNeural", label: "🇵🇪 Alex (Peru - M)" },
-    { value: "es-VE-PaolaNeural", label: "🇻🇪 Paola (Venezuela - F)" },
-    { value: "es-VE-SebastianNeural", label: "🇻🇪 Sebastián (Venezuela - M)" },
-
-    // === PORTUGUÊS BRASIL ===
-    { value: "pt-BR-FranciscaNeural", label: "🇧🇷 Francisca (Brasil - F)" },
-    { value: "pt-BR-AntonioNeural", label: "🇧🇷 Antonio (Brasil - M)" },
-    { value: "pt-BR-BrendaNeural", label: "🇧🇷 Brenda (Brasil - F)" },
-    { value: "pt-BR-DonatoNeural", label: "🇧🇷 Donato (Brasil - M)" },
-    { value: "pt-BR-ElzaNeural", label: "🇧🇷 Elza (Brasil - F)" },
-    { value: "pt-BR-FabioNeural", label: "🇧🇷 Fabio (Brasil - M)" },
-    { value: "pt-BR-GiovannaNeural", label: "🇧🇷 Giovanna (Brasil - F)" },
-    { value: "pt-BR-HumbertoNeural", label: "🇧🇷 Humberto (Brasil - M)" },
-    { value: "pt-BR-JulioNeural", label: "🇧🇷 Julio (Brasil - M)" },
-    { value: "pt-BR-LeilaNeural", label: "🇧🇷 Leila (Brasil - F)" },
-    { value: "pt-BR-LeticiaNeural", label: "🇧🇷 Letícia (Brasil - F)" },
-    { value: "pt-BR-ManuelaNeural", label: "🇧🇷 Manuela (Brasil - F)" },
-    { value: "pt-BR-NicolauNeural", label: "🇧🇷 Nicolau (Brasil - M)" },
-    { value: "pt-BR-ThalitaNeural", label: "🇧🇷 Thalita (Brasil - F Conversacional)" },
-    { value: "pt-BR-ValerioNeural", label: "🇧🇷 Valério (Brasil - M)" },
-    { value: "pt-BR-YaraNeural", label: "🇧🇷 Yara (Brasil - F)" },
-
-    // === PORTUGUÊS PORTUGAL ===
-    { value: "pt-PT-RaquelNeural", label: "🇵🇹 Raquel (Portugal - F)" },
-    { value: "pt-PT-DuarteNeural", label: "🇵🇹 Duarte (Portugal - M)" },
-
-    // === INGLÊS ===
-    { value: "en-US-JennyNeural", label: "🇺🇸 Jenny (EUA - F)" },
-    { value: "en-US-GuyNeural", label: "🇺🇸 Guy (EUA - M)" },
-    { value: "en-US-AriaNeural", label: "🇺🇸 Aria (EUA - F)" },
-    { value: "en-US-DavisNeural", label: "🇺🇸 Davis (EUA - M)" },
-    { value: "en-GB-SoniaNeural", label: "🇬🇧 Sonia (UK - F)" },
-    { value: "en-GB-RyanNeural", label: "🇬🇧 Ryan (UK - M)" },
-];
 
 const AZURE_OUTPUT_FORMATS = [
     { value: "audio-16khz-64kbitrate-mono-mp3", label: "MP3 64kbps 16kHz" },
@@ -378,40 +291,16 @@ export default function AdminProvidersPage() {
 
     const renderTTSConfig = () => {
         const config = getConfig();
-        const currentVoice = String(config.defaultVoice || "");
 
         return (
             <div className="space-y-4">
-                {currentVoice && (
-                    <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20 text-sm">
-                        <p><strong>Voz atual:</strong> {currentVoice}</p>
-                    </div>
-                )}
-
-                <FieldWithHelp label="Voz Azure" help="Selecione ou digite">
-                    <Select
-                        value={currentVoice}
-                        onValueChange={(v) => updateConfig("defaultVoice", v)}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Selecione uma voz" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {AZURE_VOICES.map((v) => (
-                                <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </FieldWithHelp>
-
-                <FieldWithHelp label="Ou digite manualmente" help="Qualquer voz Azure válida">
-                    <Input
-                        value={currentVoice}
-                        onChange={(e) => updateConfig("defaultVoice", e.target.value)}
-                        placeholder="es-ES-XimenaMultilingualNeural"
-                        className="font-mono text-sm"
-                    />
-                </FieldWithHelp>
+                <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <p className="text-sm font-medium mb-2">📢 Vozes configuradas em Projects</p>
+                    <p className="text-xs text-muted-foreground">
+                        As 53 vozes Azure estão cadastradas no banco de dados.
+                        Selecione a voz específica em <strong>Projects &gt; Presets</strong>.
+                    </p>
+                </div>
 
                 <FieldWithHelp label="Formato de Saída" help="Qualidade do áudio">
                     <Select
