@@ -390,11 +390,22 @@ async function executeStepLLM(
     };
 
     // Build final variables: input base → aliases → flattened outputs (input takes precedence)
-    const variables = {
+    const variables: Record<string, unknown> = {
         ...inputAliases,
         ...flattenedOutputs,
         ...input, // Input overrides everything if explicitly provided
     };
+
+    // If there's an iteration hint for this step, add it prominently
+    if (input.iterationHint && input.iterationStep === stepDef.key) {
+        variables.iterationHint = input.iterationHint;
+        logs.push({
+            timestamp: now(),
+            level: "info",
+            message: `Iterating with hint: ${input.iterationHint}`,
+            stepKey: stepDef.key,
+        });
+    }
 
     // Record request metadata
     stepManifest.request = {

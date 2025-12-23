@@ -274,6 +274,39 @@ export async function retryFromStep(jobId: string, stepKey: string) {
     return { success: true };
 }
 
+/**
+ * Refaz um step específico com instrução customizada
+ * A instrução é adicionada ao input do job como iterationHint
+ */
+export async function retryWithInstruction(jobId: string, stepKey: string, instruction: string) {
+    const db = getDb();
+
+    // Get the job
+    const [job] = await db.select().from(schema.jobs)
+        .where(eq(schema.jobs.id, jobId));
+
+    if (!job) {
+        return { success: false, error: "Job não encontrado" };
+    }
+
+    // Parse existing input and add iteration hint
+    const existingInput = JSON.parse(job.input || "{}");
+    const updatedInput = {
+        ...existingInput,
+        iterationHint: instruction,
+        iterationStep: stepKey,
+    };
+
+    // Update job input with iteration hint
+    await db.update(schema.jobs).set({
+        input: JSON.stringify(updatedInput),
+        updatedAt: new Date().toISOString(),
+    }).where(eq(schema.jobs.id, jobId));
+
+    // Now retry from the step
+    return retryFromStep(jobId, stepKey);
+}
+
 export async function cancelJob(jobId: string) {
     const db = getDb();
 

@@ -8,8 +8,8 @@ import {
     WizardStepper,
     StepExecutionProgress,
     GeneratedResultCard,
-    IterateWithAI,
     WizardFooter,
+    WizardApprovalActions,
     PreviousStepsContext,
     DEFAULT_WIZARD_PHASES,
     getPhaseStatus,
@@ -20,7 +20,7 @@ import {
     extractMainContent,
 } from "@/components/vf";
 import { ArrowLeft, Wand2, Play, RotateCcw, CheckCircle, RefreshCw, Home } from "lucide-react";
-import { getJobById, getJobSteps, getJobArtifacts, continueWizard, startJob, retryFromStep } from "@/app/jobs/actions";
+import { getJobById, getJobSteps, getJobArtifacts, continueWizard, startJob, retryFromStep, retryWithInstruction } from "@/app/jobs/actions";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -118,6 +118,12 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
     async function handleRegenerate(stepKey: string) {
         "use server";
         await retryFromStep(params.jobId, stepKey);
+        revalidatePath(`/wizard/${params.jobId}`);
+    }
+
+    async function handleIterateWithInstruction(stepKey: string, instruction: string) {
+        "use server";
+        await retryWithInstruction(params.jobId, stepKey, instruction);
         revalidatePath(`/wizard/${params.jobId}`);
     }
 
@@ -352,24 +358,13 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
 
                         {/* Ações de Aprovação */}
                         {prevStep && currentStep && currentStep.status === "pending" && (
-                            <Card className="border-primary/30 bg-primary/5">
-                                <CardContent className="pt-6">
-                                    <div className="flex gap-4">
-                                        <form action={handleContinue} className="flex-1">
-                                            <Button type="submit" className="w-full gap-2">
-                                                <CheckCircle className="h-4 w-4" />
-                                                Aprovar e Continuar
-                                            </Button>
-                                        </form>
-                                        <form action={handleRegenerate.bind(null, prevStep.stepKey)}>
-                                            <Button type="submit" variant="outline" className="gap-2">
-                                                <RotateCcw className="h-4 w-4" />
-                                                Regenerar
-                                            </Button>
-                                        </form>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <WizardApprovalActions
+                                jobId={params.jobId}
+                                stepKey={prevStep.stepKey}
+                                onApprove={handleContinue}
+                                onRegenerate={handleRegenerate}
+                                onIterateWithInstruction={handleIterateWithInstruction}
+                            />
                         )}
 
                         {/* Job Completo */}

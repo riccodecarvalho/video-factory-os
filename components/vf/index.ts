@@ -27,6 +27,7 @@ export {
 } from './GeneratedResultCard';
 export { IterateWithAI } from './IterateWithAI';
 export { WizardFooter } from './WizardFooter';
+export { WizardApprovalActions } from './WizardApprovalActions';
 export {
     PreviousStepsContext,
     extractStepSummary,
