@@ -4,11 +4,11 @@
 
 | # | Session | Status | Commits |
 |---|---------|--------|---------|
-| 001 | Build Fix + Wizard + Design System | ✅ Completa | 5 |
+| 001 | Build Fix + Wizard + Design System | ✅ Completa | 10 |
 
 ## Resumo do Dia
 
-**Foco:** Correção de build, Redesign do Wizard, Consolidação do Design System
+**Foco:** Correção de build, Redesign do Wizard, Consolidação do Design System v2.0
 
 ### Entregas Principais
 
@@ -33,16 +33,21 @@
 - ✅ `CharacterCard.tsx` - Cards de personagem narrativo
 - ✅ `ProcessNotification.tsx` - Toast para processos background
 - ✅ `UsageIndicator.tsx` - Badge de contagem de uso
+- ✅ `NarrativeStructure.tsx` - Estrutura narrativa com plot points
+- ✅ `TimestampGenerator.tsx` - Gerador de timestamps para YouTube
 - ✅ Atualizado `ds-spec.md` para v2.0 com todos os componentes
 - ✅ Atualizado `ui-guidelines.md` com padrões de layout e tabelas
 
-#### Fase 4: Melhorias Admin ✅
-- ✅ Adicionado `UsedBySection` na página de Providers
-- ✅ Adicionado `UsedBySection` na página de Prompts
+#### Fase 4: UsedBySection em TODAS páginas Admin ✅
+- ✅ Providers - mostra uso em recipes/steps
+- ✅ Prompts - mostra uso em pipeline
+- ✅ Validators - mostra uso em bindings
+- ✅ Knowledge Base - mostra uso em bindings
+- ✅ Presets - mostra uso em projetos
 
 #### Fase 5: Regeneração de Steps ✅
 - ✅ Implementado `handleRegenerate` no Wizard usando `retryFromStep`
-- ✅ Botão "Regenerar" agora funcional na aprovação de steps
+- ✅ Botão "Regenerar" funcional na aprovação de steps
 
 ### Commits do Dia
 ```
@@ -53,40 +58,44 @@ cec3939 docs: update backlog and timeline for 2025-12-23
 f386ab3 feat(admin): add UsedBySection to providers page
 b080f2e docs: update timeline with complete session summary
 6dcde89 feat(wizard): implement step regeneration and add UsedBy to prompts
+40e8e47 docs: update timeline with regeneration feature
+25f0f40 feat(admin): add UsedBySection to all admin pages
+c378a32 feat(design-system): add NarrativeStructure and TimestampGenerator
 ```
 
 ### Build Status
 ✅ npm run build passa
 
 ### Git Status
-✅ Push completo
+✅ Push pendente
 
 ---
 
 ## 📋 HANDOVER PARA PRÓXIMA SESSÃO
 
 ### Estado Atual
-- **SHA HEAD:** `f386ab3`
+- **SHA HEAD:** `c378a32`
 - **Branch:** `main`
 - **Build:** ✅ Passa
 
 ### O que foi Implementado
 1. **Suspense Boundary** - Todas as páginas usam `SuspenseSidebar`
-2. **Wizard Redesign** - 6 novos componentes e página refatorada
-3. **Design System v2.0** - 4 novos componentes + documentação atualizada
-4. **Providers** - Mostra uso de cada provider via bindings
+2. **Wizard Redesign** - 6 novos componentes + regeneração funcional
+3. **Design System v2.0** - 6 novos componentes Content + documentação
+4. **UsedBySection** - Todas as 5 páginas admin mostram onde cada entidade é usada
 
 ### Itens do Backlog Marcados como DONE
 - [x] Redesign do Wizard (CRITICAL)
 - [x] Wizard Feedback Visual (HIGH)
 - [x] Gerenciamento de Providers (HIGH)
 - [x] Referências Adicionais Wizard Parte 2 (CRITICAL)
+- [x] Todos os componentes de backlog
 
 ### Próximos Passos
-1. Testar Wizard com um job real
-2. Implementar regeneração funcional de steps
-3. Adicionar navegação cliente no WizardFooter
-4. Aplicar Design System nas demais páginas admin
+1. Testar Wizard com um job real em dev
+2. Integrar `IterateWithAI` com backend (prompt customizado)
+3. Usar novos componentes nas páginas relevantes (Brief, Descrição, etc.)
+4. Implementar navegação cliente no WizardFooter
 
 ---
 
@@ -94,10 +103,10 @@ b080f2e docs: update timeline with complete session summary
 
 | Métrica | Valor |
 |---------|-------|
-| Componentes criados | 10 |
-| Arquivos modificados | ~20 |
-| Commits | 5 |
-| Backlog items completed | 4 |
+| Componentes VF criados | 12 |
+| Páginas admin atualizadas | 6 |
+| Commits | 10 |
+| Backlog items completed | 7 |
 
 ---
-**Timeline covers up to:** `f386ab3`
+**Timeline covers up to:** `c378a32`
