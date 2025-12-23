@@ -4,11 +4,11 @@
 
 | # | Session | Status | Commits |
 |---|---------|--------|---------|
-| 001 | Build Fix + Wizard + Design System | ✅ Completa | 10 |
+| 001 | Build Fix + Wizard + Design System | ✅ Completa | 14 |
 
 ## Resumo do Dia
 
-**Foco:** Correção de build, Redesign do Wizard, Consolidação do Design System v2.0
+**Foco:** Correção de build, Redesign do Wizard, Consolidação do Design System v2.0, Integrações Backend
 
 ### Entregas Principais
 
@@ -26,6 +26,7 @@
 - ✅ `IterateWithAI.tsx` - Campo de iteração para regeneração
 - ✅ `WizardFooter.tsx` - Footer fixo de navegação
 - ✅ `PreviousStepsContext.tsx` - Contexto de steps anteriores
+- ✅ `WizardApprovalActions.tsx` - Ações de aprovação com iteração
 - ✅ Página `/wizard/[jobId]` refatorada com novo design
 
 #### Fase 3: Design System v2.0 ✅
@@ -45,22 +46,27 @@
 - ✅ Knowledge Base - mostra uso em bindings
 - ✅ Presets - mostra uso em projetos
 
-#### Fase 5: Regeneração de Steps ✅
-- ✅ Implementado `handleRegenerate` no Wizard usando `retryFromStep`
-- ✅ Botão "Regenerar" funcional na aprovação de steps
+#### Fase 5: Integração Backend ✅
+- ✅ `retryWithInstruction` - Regeneração com instrução customizada
+- ✅ `iterationHint` passado para variáveis do LLM
+- ✅ `WizardApprovalActions` integrado ao backend
+- ✅ `TimestampGenerator` integrado ao Script Studio
 
 ### Commits do Dia
 ```
 86a47b7 fix(layout): add Suspense boundary around Sidebar
-1c711f7 feat(wizard): redesign with hierarchical stepper and visual feedback
+1c711f7 feat(wizard): redesign with hierarchical stepper
 cec3939 docs: update backlog and timeline for 2025-12-23
 234c616 feat(design-system): add v2.0 components and documentation
 f386ab3 feat(admin): add UsedBySection to providers page
 b080f2e docs: update timeline with complete session summary
-6dcde89 feat(wizard): implement step regeneration and add UsedBy to prompts
+6dcde89 feat(wizard): implement step regeneration and add UsedBy
 40e8e47 docs: update timeline with regeneration feature
 25f0f40 feat(admin): add UsedBySection to all admin pages
 c378a32 feat(design-system): add NarrativeStructure and TimestampGenerator
+a42aa7a docs: comprehensive timeline update
+5d0b6e0 feat(wizard): integrate IterateWithAI with backend
+dadbb85 feat(script-studio): integrate TimestampGenerator
 ```
 
 ### Build Status
@@ -74,15 +80,17 @@ c378a32 feat(design-system): add NarrativeStructure and TimestampGenerator
 ## 📋 HANDOVER PARA PRÓXIMA SESSÃO
 
 ### Estado Atual
-- **SHA HEAD:** `c378a32`
+- **SHA HEAD:** `dadbb85`
 - **Branch:** `main`
 - **Build:** ✅ Passa
 
 ### O que foi Implementado
 1. **Suspense Boundary** - Todas as páginas usam `SuspenseSidebar`
-2. **Wizard Redesign** - 6 novos componentes + regeneração funcional
+2. **Wizard Redesign** - 7 novos componentes + regeneração funcional
 3. **Design System v2.0** - 6 novos componentes Content + documentação
 4. **UsedBySection** - Todas as 5 páginas admin mostram onde cada entidade é usada
+5. **Integração Backend** - IterateWithAI conectado ao retryWithInstruction
+6. **Script Studio** - TimestampGenerator integrado
 
 ### Itens do Backlog Marcados como DONE
 - [x] Redesign do Wizard (CRITICAL)
@@ -92,9 +100,9 @@ c378a32 feat(design-system): add NarrativeStructure and TimestampGenerator
 - [x] Todos os componentes de backlog
 
 ### Próximos Passos
-1. Testar Wizard com um job real em dev
-2. Integrar `IterateWithAI` com backend (prompt customizado)
-3. Usar novos componentes nas páginas relevantes (Brief, Descrição, etc.)
+1. Testar Wizard com job real em dev
+2. Usar `NarrativeStructure` em steps de Brief/Planejamento
+3. Persistir timestamps no banco (atualmente só em memória)
 4. Implementar navegação cliente no WizardFooter
 
 ---
@@ -103,10 +111,11 @@ c378a32 feat(design-system): add NarrativeStructure and TimestampGenerator
 
 | Métrica | Valor |
 |---------|-------|
-| Componentes VF criados | 12 |
+| Componentes VF criados | 13 |
 | Páginas admin atualizadas | 6 |
-| Commits | 10 |
+| Integrações backend | 2 |
+| Commits | 14 |
 | Backlog items completed | 7 |
 
 ---
-**Timeline covers up to:** `c378a32`
+**Timeline covers up to:** `dadbb85`
