@@ -11,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SplitView,
@@ -211,7 +211,7 @@ export default function ExecutionMapPage() {
 
     return (
         <div className="flex min-h-screen bg-background">
-            <Sidebar />
+            <SuspenseSidebar />
 
             <div className="flex-1 flex flex-col">
                 <PageHeader

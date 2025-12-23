@@ -1,5 +1,6 @@
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import { Sidebar } from "./Sidebar";
+import { SidebarSkeleton } from "./SidebarSkeleton";
 import { Header } from "./Header";
 import { BreadcrumbItem } from "./Breadcrumb";
 import { cn } from "@/lib/utils";
@@ -40,8 +41,10 @@ export function AppShell({
 }: AppShellProps) {
     return (
         <div className="flex min-h-screen bg-background">
-            {/* Sidebar */}
-            <Sidebar />
+            {/* Sidebar - wrapped in Suspense for useSearchParams */}
+            <Suspense fallback={<SidebarSkeleton />}>
+                <Sidebar />
+            </Suspense>
 
             {/* Main Area */}
             <div className="flex-1 flex flex-col">

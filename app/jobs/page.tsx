@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SectionCards,
@@ -223,7 +223,7 @@ function JobsPageContent() {
 
     return (
         <div className="flex min-h-screen bg-background">
-            <Sidebar />
+            <SuspenseSidebar />
 
             <div className="flex-1 flex flex-col">
                 <PageHeader

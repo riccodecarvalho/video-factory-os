@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SectionCards,
@@ -100,7 +100,7 @@ export default function AdminKnowledgeBasePage() {
 
     return (
         <div className="flex min-h-screen bg-background">
-            <Sidebar />
+            <SuspenseSidebar />
 
             <div className="flex-1 flex flex-col">
                 <PageHeader
