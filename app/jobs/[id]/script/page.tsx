@@ -17,7 +17,9 @@ import {
     Download,
     RotateCcw,
     Star,
+    ListOrdered,
 } from "lucide-react";
+import { TimestampGenerator, type Timestamp } from "@/components/vf";
 import {
     getScriptVersions,
     getCurrentScriptVersion,
@@ -42,6 +44,8 @@ export default function ScriptStudioPage() {
     const [content, setContent] = useState("");
     const [isPending, startTransition] = useTransition();
     const [showHistory, setShowHistory] = useState(false);
+    const [showTimestamps, setShowTimestamps] = useState(false);
+    const [timestamps, setTimestamps] = useState<Timestamp[]>([]);
     const [hasChanges, setHasChanges] = useState(false);
 
     // Load versions
@@ -147,6 +151,14 @@ export default function ScriptStudioPage() {
                         <div className="flex gap-2">
                             <Button
                                 size="sm"
+                                variant={showTimestamps ? "default" : "outline"}
+                                onClick={() => setShowTimestamps(!showTimestamps)}
+                            >
+                                <ListOrdered className="w-4 h-4 mr-2" />
+                                Timestamps
+                            </Button>
+                            <Button
+                                size="sm"
                                 variant="outline"
                                 onClick={() => setShowHistory(!showHistory)}
                             >
@@ -219,6 +231,17 @@ export default function ScriptStudioPage() {
                             </Button>
                         </div>
                     </div>
+
+                    {/* Timestamps Sidebar */}
+                    {showTimestamps && (
+                        <div className="w-80 border-l bg-muted/30 p-4 overflow-y-auto">
+                            <TimestampGenerator
+                                timestamps={timestamps}
+                                onChange={setTimestamps}
+                                editable={true}
+                            />
+                        </div>
+                    )}
 
                     {/* History Sidebar */}
                     {showHistory && (
