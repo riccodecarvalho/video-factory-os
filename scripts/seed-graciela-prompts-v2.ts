@@ -39,7 +39,7 @@ const PROMPTS: PromptFile[] = [
         name: 'Graciela - Ideação de Histórias',
         category: 'ideacao',
         description: 'Gera ideias de histórias originais para o canal',
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20250929',
         maxTokens: 4096,
         temperature: 0.8
     },
@@ -49,7 +49,7 @@ const PROMPTS: PromptFile[] = [
         name: 'Graciela - Títulos Virais',
         category: 'titulo',
         description: 'Gera títulos virais otimizados para CTR',
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20250929',
         maxTokens: 4096,
         temperature: 0.6
     },
@@ -59,7 +59,7 @@ const PROMPTS: PromptFile[] = [
         name: 'Graciela - Planejamento Estruturado',
         category: 'planejamento',
         description: 'Cria plano narrativo JSON estruturado com 7 atos e 32 técnicas',
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20250929',
         maxTokens: 16000,
         temperature: 0.7
     },
@@ -69,7 +69,7 @@ const PROMPTS: PromptFile[] = [
         name: 'Graciela - Roteiro Narrado',
         category: 'roteiro',
         description: 'Gera roteiro completo em texto narrativo pronto para TTS',
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20250929',
         maxTokens: 16000,
         temperature: 0.7
     },
@@ -79,7 +79,7 @@ const PROMPTS: PromptFile[] = [
         name: 'Graciela - Miniaturas (Thumbnails)',
         category: 'miniaturas',
         description: 'Gera prompts de imagem para thumbnails virais com layout ANTES→DEPOIS',
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20250929',
         maxTokens: 4096,
         temperature: 0.3
     },
@@ -89,7 +89,7 @@ const PROMPTS: PromptFile[] = [
         name: 'Graciela - Descrição YouTube',
         category: 'descricao',
         description: 'Gera descrição otimizada SEO + comentário fixado',
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20250929',
         maxTokens: 4096,
         temperature: 0.5
     },
@@ -99,7 +99,7 @@ const PROMPTS: PromptFile[] = [
         name: 'Graciela - Tags SEO',
         category: 'tags',
         description: 'Gera tags YouTube otimizadas para SEO',
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20250929',
         maxTokens: 2000,
         temperature: 0.3
     },
@@ -109,7 +109,7 @@ const PROMPTS: PromptFile[] = [
         name: 'Graciela - Community Posts',
         category: 'comunidade',
         description: 'Gera posts de community para engagement entre uploads',
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20250929',
         maxTokens: 3000,
         temperature: 0.6
     }
