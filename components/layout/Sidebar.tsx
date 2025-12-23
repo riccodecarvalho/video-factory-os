@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
     LayoutDashboard,
@@ -49,7 +49,7 @@ const projectsNavigation = [
 // Library section - where you CREATE global items
 const libraryNavigation = [
     { name: "Prompts", href: "/admin/prompts", icon: FileText, description: "Templates de IA" },
-    { name: "Vozes", href: "/admin/presets", icon: Mic, description: "Presets de voz", filter: "voice" },
+    { name: "Vozes", href: "/admin/presets?type=voice", icon: Mic, description: "Presets de voz" },
     { name: "Vídeo", href: "/admin/presets?type=video", icon: Video, description: "Presets de vídeo" },
     { name: "Recipes", href: "/admin/recipes", icon: ChefHat, description: "Pipelines" },
     { name: "Validators", href: "/admin/validators", icon: ShieldCheck, description: "Regras" },
@@ -63,12 +63,26 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     const isActive = (href: string) => {
         if (href === "/") return pathname === "/";
-        // Handle query params
-        const basePath = href.split("?")[0];
-        return pathname.startsWith(basePath);
+
+        // Parse href for path and query
+        const [itemPath, itemQuery] = href.split("?");
+        const currentType = searchParams.get("type");
+
+        // Match path first
+        if (!pathname.startsWith(itemPath)) return false;
+
+        // If href has query params, they must match
+        if (itemQuery) {
+            const expectedType = new URLSearchParams(itemQuery).get("type");
+            return currentType === expectedType;
+        }
+
+        // No query in href means no query should be in URL for this path
+        return !currentType;
     };
 
     const NavItem = ({ item }: { item: { name: string; href: string; icon: React.ElementType } }) => (
