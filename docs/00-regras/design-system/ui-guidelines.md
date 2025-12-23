@@ -31,3 +31,39 @@ Use sempre estes componentes em vez de construir layouts do zero:
 ## 🌞 Light/Dark Mode
 - **Light First:** O design deve funcionar perfeitamente no light mode (como o 4pice).
 - **Dark Mode:** Apenas inversão de cores sem adicionar "efeitos neon" desnecessários.
+
+---
+
+## 🆕 Guidelines para Novas Features (2025-12-22)
+
+### Wizard de Criação (Backlog CRITICAL)
+Referências visuais em `docs/04-produto/assets/`. Seguir estes padrões:
+
+**Estrutura:**
+- Stepper hierárquico (2 níveis): Fases > Steps
+- Barra de progresso global (ex: "33% completo")
+- Footer fixo: [← Anterior] [Status] [Salvar] [Próximo →]
+
+**Feedback de IA:**
+- Barra de progresso com percentual
+- Texto descritivo: "Chamando IA Claude..."
+- Tempo decorrido visível
+- Toast para processos em background
+
+**Cards de Resultado:**
+- Header: Título + Badge (ex: [VIRAL])
+- Body: Seções estruturadas (Protagonista, Conflito, Keywords)
+- Footer: Campo "Iterar com IA" + Botão Regenerar
+
+**Componentes a criar:**
+- `WizardStepper.tsx`
+- `StepExecutionProgress.tsx`
+- `GeneratedResultCard.tsx`
+- `IterateWithAI.tsx`
+
+### Regras Gerais para Novas Features
+1. Usar componentes canônicos sempre que possível
+2. Seguir padrão SplitView para listas com detalhes
+3. Manter Zero Glow (sem gradientes excessivos)
+4. Light mode first, dark mode por inversão
+5. Feedback visual para toda operação assíncrona

@@ -44,6 +44,7 @@ const navigation = [
 const projectsNavigation = [
     { name: "Projects", href: "/admin/projects", icon: Building2, description: "Hub de configuração" },
     { name: "Execution Map", href: "/admin/execution-map", icon: Settings2, description: "Visualizar bindings" },
+    { name: "Timeline Test", href: "/admin/timeline-test", icon: Play, description: "Testar Timeline DSL" },
 ];
 
 // Library section - where you CREATE global items
