@@ -26,6 +26,8 @@ import {
 import { ContextBanner } from "@/components/ui/ContextBanner";
 import { Save, Loader2, Mic, Video, Sparkles, FileCode, Sliders, HelpCircle } from "lucide-react";
 import { getPresets, getPresetCounts, updatePreset, type PresetType } from "../actions";
+import { getUsedBy } from "../execution-map/actions";
+import { UsedBySection } from "@/components/vf";
 
 type Preset = Awaited<ReturnType<typeof getPresets>>[0];
 
@@ -582,6 +584,14 @@ export default function AdminPresetsPage() {
                                                 {selected.isActive ? "ATIVO" : "INATIVO"}
                                             </Badge>
                                         </div>
+
+                                        {/* Used By Section */}
+                                        <UsedBySection
+                                            entityId={selected.id}
+                                            entityType="preset"
+                                            getUsedBy={getUsedBy}
+                                            className="mt-6"
+                                        />
                                     </div>
                                 </SplitViewDetail>
                             ) : (

@@ -27,6 +27,8 @@ import {
 import { ContextBanner } from "@/components/ui/ContextBanner";
 import { Plus, Save, Loader2, ShieldCheck, AlertTriangle, Ban, HelpCircle, Trash2 } from "lucide-react";
 import { getValidators, getValidatorTypes, updateValidator, createValidator } from "../actions";
+import { getUsedBy } from "../execution-map/actions";
+import { UsedBySection } from "@/components/vf";
 
 type Validator = Awaited<ReturnType<typeof getValidators>>[0];
 
@@ -418,6 +420,14 @@ export default function AdminValidatorsPage() {
                                                 {selected.isActive ? "ATIVO" : "INATIVO"}
                                             </Badge>
                                         </div>
+
+                                        {/* Used By Section */}
+                                        <UsedBySection
+                                            entityId={selected.id}
+                                            entityType="validator"
+                                            getUsedBy={getUsedBy}
+                                            className="mt-6"
+                                        />
                                     </div>
                                 </SplitViewDetail>
                             ) : (

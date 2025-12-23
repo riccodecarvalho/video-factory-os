@@ -21,6 +21,8 @@ import { LineNumberedTextarea } from "@/components/ui/LineNumberedTextarea";
 import { TierExplainer } from "@/components/vf/TierExplainer";
 import { Plus, Save, Loader2, BookOpen, FileText, Lightbulb, Download } from "lucide-react";
 import { getKnowledgeBase, getKnowledgeTiers, updateKnowledge, createKnowledge } from "../actions";
+import { getUsedBy } from "../execution-map/actions";
+import { UsedBySection } from "@/components/vf";
 
 type Knowledge = Awaited<ReturnType<typeof getKnowledgeBase>>[0];
 
@@ -259,6 +261,14 @@ export default function AdminKnowledgeBasePage() {
                                                 {selected.isActive ? "ATIVO" : "INATIVO"}
                                             </Badge>
                                         </div>
+
+                                        {/* Used By Section */}
+                                        <UsedBySection
+                                            entityId={selected.id}
+                                            entityType="knowledge"
+                                            getUsedBy={getUsedBy}
+                                            className="mt-6"
+                                        />
                                     </div>
                                 </SplitViewDetail>
                             ) : (
