@@ -9,3 +9,27 @@ export { JobConfigTab } from './JobConfigTab';
 export { JobArtifactsTab } from './JobArtifactsTab';
 export { UsedBySection } from './UsedBySection';
 export { StepPreview } from './StepPreview';
+
+// Wizard Redesign Components
+export {
+    WizardStepper,
+    DEFAULT_WIZARD_PHASES,
+    getPhaseStatus,
+    getCurrentPhase,
+    type WizardPhase,
+    type WizardStep,
+} from './WizardStepper';
+export { StepExecutionProgress, StepExecutionToast } from './StepExecutionProgress';
+export {
+    GeneratedResultCard,
+    parseAIOutputMetadata,
+    extractMainContent,
+} from './GeneratedResultCard';
+export { IterateWithAI } from './IterateWithAI';
+export { WizardFooter } from './WizardFooter';
+export {
+    PreviousStepsContext,
+    extractStepSummary,
+    STEP_NAMES,
+} from './PreviousStepsContext';
+
