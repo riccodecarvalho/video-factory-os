@@ -478,6 +478,10 @@ export async function updateProject(id: string, data: Partial<{
     name: string;
     key: string;
     description: string;
+    voiceRate: string;
+    voicePitch: string;
+    llmTemperature: number;
+    llmMaxTokens: number;
 }>) {
     const db = getDb();
 

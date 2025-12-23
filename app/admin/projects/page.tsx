@@ -133,6 +133,10 @@ export default function AdminProjectsPage() {
                     name: edited.name,
                     key: edited.key,
                     description: edited.description || undefined,
+                    voiceRate: (edited as any).voiceRate,
+                    voicePitch: (edited as any).voicePitch,
+                    llmTemperature: (edited as any).llmTemperature,
+                    llmMaxTokens: (edited as any).llmMaxTokens,
                 });
                 loadData();
             } catch (e) {
@@ -409,6 +413,41 @@ export default function AdminProjectsPage() {
                                                 </Select>
                                             </FieldWithHelp>
 
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <FieldWithHelp label="Temperatura" help="Criatividade (0-1)">
+                                                    <Select
+                                                        value={String(edited.llmTemperature || 0.7)}
+                                                        onValueChange={(v) => setEdited({ ...edited, llmTemperature: parseFloat(v) })}
+                                                    >
+                                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="0">0.0 — Determinístico</SelectItem>
+                                                            <SelectItem value="0.3">0.3 — Preciso</SelectItem>
+                                                            <SelectItem value="0.5">0.5 — Equilibrado</SelectItem>
+                                                            <SelectItem value="0.7">0.7 — Criativo (recomendado)</SelectItem>
+                                                            <SelectItem value="0.9">0.9 — Muito criativo</SelectItem>
+                                                            <SelectItem value="1">1.0 — Máximo</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FieldWithHelp>
+
+                                                <FieldWithHelp label="Max Tokens" help="Tamanho da resposta">
+                                                    <Select
+                                                        value={String(edited.llmMaxTokens || 4096)}
+                                                        onValueChange={(v) => setEdited({ ...edited, llmMaxTokens: parseInt(v) })}
+                                                    >
+                                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="2048">2.048</SelectItem>
+                                                            <SelectItem value="4096">4.096 (padrão)</SelectItem>
+                                                            <SelectItem value="8192">8.192</SelectItem>
+                                                            <SelectItem value="16000">16.000</SelectItem>
+                                                            <SelectItem value="32000">32.000</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FieldWithHelp>
+                                            </div>
+
                                             <FieldWithHelp label="Provider TTS (Áudio)" help="Azure Speech para gerar narração">
                                                 <Select
                                                     value={getBindingValue('provider_tts')}
@@ -444,6 +483,42 @@ export default function AdminProjectsPage() {
                                                     </SelectContent>
                                                 </Select>
                                             </FieldWithHelp>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <FieldWithHelp label="Rate (Velocidade)" help="Velocidade da narração">
+                                                    <Select
+                                                        value={edited.voiceRate || "0%"}
+                                                        onValueChange={(v) => setEdited({ ...edited, voiceRate: v })}
+                                                    >
+                                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="-50%">-50% — Muito lento</SelectItem>
+                                                            <SelectItem value="-30%">-30% — Lento</SelectItem>
+                                                            <SelectItem value="-20%">-20% — Pouco lento</SelectItem>
+                                                            <SelectItem value="0%">0% — Normal</SelectItem>
+                                                            <SelectItem value="+20%">+20% — Rápido</SelectItem>
+                                                            <SelectItem value="+30%">+30% — Bem rápido</SelectItem>
+                                                            <SelectItem value="+50%">+50% — Muito rápido</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FieldWithHelp>
+
+                                                <FieldWithHelp label="Pitch (Tom)" help="Tom da voz">
+                                                    <Select
+                                                        value={edited.voicePitch || "0%"}
+                                                        onValueChange={(v) => setEdited({ ...edited, voicePitch: v })}
+                                                    >
+                                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="-30%">-30% — Grave</SelectItem>
+                                                            <SelectItem value="-15%">-15% — Pouco grave</SelectItem>
+                                                            <SelectItem value="0%">0% — Normal</SelectItem>
+                                                            <SelectItem value="+15%">+15% — Agudo</SelectItem>
+                                                            <SelectItem value="+30%">+30% — Bem agudo</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FieldWithHelp>
+                                            </div>
 
                                             <FieldWithHelp label="Preset de Vídeo" help="Resolução e encoder">
                                                 <Select

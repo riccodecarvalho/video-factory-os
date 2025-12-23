@@ -16,6 +16,14 @@ export const projects = sqliteTable('projects', {
     name: text('name').notNull(),
     description: text('description'),
 
+    // Voice config per project
+    voiceRate: text('voice_rate').default('0%'), // '-50%' to '+50%'
+    voicePitch: text('voice_pitch').default('0%'), // '-30%' to '+30%'
+
+    // LLM config per project
+    llmTemperature: real('llm_temperature').default(0.7), // 0 to 1
+    llmMaxTokens: integer('llm_max_tokens').default(4096),
+
     isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
     createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
 });
