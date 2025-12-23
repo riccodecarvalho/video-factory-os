@@ -34,17 +34,19 @@ export async function executeStepTTS(
     });
 
     // Get input text from previous step (can be string or object)
-    const scriptOutput = previousOutputs.script;
+    // Try multiple keys: script (Graciela), roteiro (VJ), parse_ssml
+    const scriptOutput = previousOutputs.script || previousOutputs.roteiro;
     const ssmlOutput = previousOutputs.parse_ssml;
 
     let textInput = "";
 
-    // Try script output (string or object)
+    // Try script/roteiro output (string or object)
     if (typeof scriptOutput === "string" && scriptOutput.length > 0) {
         textInput = scriptOutput;
     } else if (scriptOutput && typeof scriptOutput === "object") {
-        textInput = (scriptOutput as { script?: string; output?: string }).script
-            || (scriptOutput as { script?: string; output?: string }).output
+        textInput = (scriptOutput as { script?: string; roteiro?: string; output?: string }).script
+            || (scriptOutput as { script?: string; roteiro?: string; output?: string }).roteiro
+            || (scriptOutput as { script?: string; roteiro?: string; output?: string }).output
             || String(scriptOutput);
     }
 
@@ -61,7 +63,7 @@ export async function executeStepTTS(
 
     // Fallback to input
     if (!textInput) {
-        textInput = String(input.text || input.script || "");
+        textInput = String(input.text || input.script || input.roteiro || "");
     }
 
     if (!textInput) {
