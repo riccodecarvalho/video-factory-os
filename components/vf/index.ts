@@ -10,7 +10,7 @@ export { JobArtifactsTab } from './JobArtifactsTab';
 export { UsedBySection } from './UsedBySection';
 export { StepPreview } from './StepPreview';
 
-// Wizard Redesign Components
+// Wizard Redesign Components (v2.0)
 export {
     WizardStepper,
     DEFAULT_WIZARD_PHASES,
@@ -33,3 +33,8 @@ export {
     STEP_NAMES,
 } from './PreviousStepsContext';
 
+// Content Components (v2.0)
+export { TagChips } from './TagChips';
+export { CharacterCard, CharacterCardList } from './CharacterCard';
+export { ProcessNotification, useProcessNotifications } from './ProcessNotification';
+export { UsageIndicator, UsageIndicatorList } from './UsageIndicator';
