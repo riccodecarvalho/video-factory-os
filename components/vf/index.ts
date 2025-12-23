@@ -38,3 +38,6 @@ export { TagChips } from './TagChips';
 export { CharacterCard, CharacterCardList } from './CharacterCard';
 export { ProcessNotification, useProcessNotifications } from './ProcessNotification';
 export { UsageIndicator, UsageIndicatorList } from './UsageIndicator';
+export { NarrativeStructure, type PlotPoint, type SymbolicObject, type DramaticEdge } from './NarrativeStructure';
+export { TimestampGenerator, type Timestamp } from './TimestampGenerator';
+

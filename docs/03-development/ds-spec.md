@@ -296,7 +296,47 @@ interface UsageIndicatorProps {
 - Cores: 0 = muted, 1+ = primary/10
 - Clicável se onClick fornecido
 
+### NarrativeStructure
+Visualização de estrutura narrativa com plot points.
+
+```tsx
+interface NarrativeStructureProps {
+    plotPoints?: PlotPoint[];        // Revelações progressivas
+    symbolicObjects?: SymbolicObject[]; // Objetos simbólicos
+    dramaticEdges?: DramaticEdge[];  // Bordas dramáticas
+}
+
+interface PlotPoint {
+    position: number;   // 0-100%
+    label: string;
+    type: "setup" | "rising" | "climax" | "resolution";
+}
+```
+
+**Visual:**
+- Progress bar com pontos de plot
+- Cores por tipo: setup=blue, rising=amber, climax=red, resolution=green
+- Cards para objetos simbólicos e bordas
+
+### TimestampGenerator
+Gerador de timestamps para descrição do YouTube.
+
+```tsx
+interface TimestampGeneratorProps {
+    timestamps?: Timestamp[];
+    onChange?: (timestamps: Timestamp[]) => void;
+    onGenerate?: () => void;
+    editable?: boolean;
+}
+```
+
+**Visual:**
+- Lista editável de timestamps
+- Botão para gerar via IA
+- Preview formatado para cópia
+
 ---
+
 
 ## 6. UI Patterns
 

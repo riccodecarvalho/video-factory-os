@@ -188,11 +188,11 @@ Este documento registra melhorias identificadas durante o desenvolvimento para i
 - Campo inferior "Iterar com IA: Mais SEO / Adicione emojis / Mais curta..."
 
 **Componentes Adicionais a Criar:**
-- `components/vf/CharacterCard.tsx` - Protagonista/Vilão/Mentor
-- `components/vf/NarrativeStructure.tsx` - Revelações progressivas
-- `components/vf/TimestampGenerator.tsx` - Timestamps automáticos
-- `components/vf/TagChips.tsx` - Tags como badges
-- `components/vf/ProcessNotification.tsx` - Toast de processos
+- ✅ `components/vf/CharacterCard.tsx` - Protagonista/Vilão/Mentor (2025-12-23)
+- ✅ `components/vf/NarrativeStructure.tsx` - Revelações progressivas (2025-12-23)
+- ✅ `components/vf/TimestampGenerator.tsx` - Timestamps automáticos (2025-12-23)
+- ✅ `components/vf/TagChips.tsx` - Tags como badges (2025-12-23)
+- ✅ `components/vf/ProcessNotification.tsx` - Toast de processos (2025-12-23)
 
 **Total de Referências:** 9 prints analisados
 **Esforço Adicional:** +6-8h
