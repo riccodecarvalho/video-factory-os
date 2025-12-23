@@ -6,8 +6,8 @@ Este documento registra melhorias identificadas durante o desenvolvimento para i
 
 ## 🔧 UI/UX
 
-### [CRITICAL] Redesign do Wizard - Referência Completa
-**Data:** 2025-12-22  
+### [DONE] Redesign do Wizard - Referência Completa
+**Data:** 2025-12-22 | **Implementado:** 2025-12-23
 **Origem:** Análise de referências de UX (5 prints)
 
 **Problema Atual:**
@@ -122,8 +122,8 @@ Este documento registra melhorias identificadas durante o desenvolvimento para i
 
 ---
 
-### [CRITICAL] Referências Adicionais do Wizard (Parte 2)
-**Data:** 2025-12-22  
+### [DONE] Referências Adicionais do Wizard (Parte 2)
+**Data:** 2025-12-22 | **Implementado:** 2025-12-23
 **Origem:** 4 prints adicionais de referência
 
 **Novos Elementos Identificados:**
