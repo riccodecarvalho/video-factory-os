@@ -20,7 +20,24 @@ let sqlite: Database.Database | null = null;
 export function getDb() {
     if (!db) {
         sqlite = new Database(DB_PATH);
-        sqlite.pragma('journal_mode = WAL'); // Better concurrency
+
+        // ==============================================
+        // PRAGMAS DE PROTEÇÃO CONTRA CORRUPÇÃO
+        // ==============================================
+        // 
+        // WAL: Melhor concorrência e recuperação após crash
+        // synchronous=NORMAL: Bom equilíbrio entre performance e durabilidade
+        // busy_timeout=5000: Aguardar 5s se banco estiver locked
+        // foreign_keys=ON: Garantir integridade referencial
+        //
+        // @see docs/01-adr/2025-12-19-adr-012-backup-sqlite.md
+        // ==============================================
+
+        sqlite.pragma('journal_mode = WAL');
+        sqlite.pragma('synchronous = NORMAL');
+        sqlite.pragma('busy_timeout = 5000');
+        sqlite.pragma('foreign_keys = ON');
+
         db = drizzle(sqlite, { schema });
     }
     return db;

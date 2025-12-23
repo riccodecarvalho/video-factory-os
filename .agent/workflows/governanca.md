@@ -6,6 +6,18 @@ description: Workflow de governança para início de sessão
 
 Este workflow garante que todas as decisões e regras do projeto sejam respeitadas em cada sessão.
 
+## Passo 0: BACKUP OBRIGATÓRIO ⚠️
+
+// turbo
+```bash
+npm run db:backup
+```
+
+**Este passo é OBRIGATÓRIO!** Verificar:
+- ✅ Backup criado em `backups/`
+- ✅ Integridade: OK
+- ✅ Estatísticas conferem (projetos, jobs, etc.)
+
 ## Passo 1: Verificar Fonte da Verdade
 
 // turbo
@@ -23,7 +35,8 @@ Verificar:
 Ler e internalizar:
 - `docs/04-produto/prd.md` → Seções 1.4 (Por que não n8n), 1.5 (5 Módulos), 2.5 (KB Tiers)
 - `docs/04-produto/architecture.md` → Stack, 4 Camadas, Adapters
-- `docs/01-adr/` → 6 ADRs ativos
+- `docs/04-produto/backlog.md` → ⭐ Melhorias pendentes (não esquecer!)
+- `docs/01-adr/` → ADRs ativos
 
 ## Passo 3: Verificar Regras Operacionais
 
@@ -80,6 +93,11 @@ Se for uma nova sessão, criar em:
 1. Atualizar status nos 5 Módulos (PRD seção 1.5)
 2. Commitar com Conventional Commits
 3. Atualizar Timeline
+
+### Ao identificar melhoria futura:
+1. Registrar em `docs/04-produto/backlog.md`
+2. Usar template com prioridade (CRITICAL/HIGH/MEDIUM/LOW)
+3. Incluir arquivos afetados e esforço estimado
 
 ## Passo 8: Fechamento de Sessão
 

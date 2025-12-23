@@ -12,6 +12,7 @@
 | [architecture.md](./04-produto/architecture.md) | Arquitetura técnica e diagramas | ✅ Atualizado |
 | [milestones.md](./04-produto/milestones.md) | Checklist por fase | ✅ Atualizado |
 | [qa-acceptance.md](./04-produto/qa-acceptance.md) | Testes e Definition of Done | ✅ |
+| [backlog.md](./04-produto/backlog.md) | ⭐ Melhorias pendentes | 🆕 Novo |
 
 ---
 
@@ -50,6 +51,9 @@ docs/
 | 2025-12-16 | [ADR-010](./01-adr/2025-12-16-adr-010-projects-hub.md) | Projects Hub | ✅ Aceito |
 | 2025-12-19 | [ADR-011](./01-adr/2025-12-19-adr-011-wizard-mode.md) | Wizard Mode | ✅ Aceito |
 | 2025-12-19 | [ADR-012](./01-adr/2025-12-19-adr-012-backup-sqlite.md) | Backup SQLite | ✅ Aceito |
+| 2025-12-22 | [ADR-013](./01-adr/2025-12-22-adr-013-timeline-dsl-renderplan.md) | Timeline DSL + RenderPlan | ✅ Aceito |
+| 2025-12-22 | [ADR-014](./01-adr/2025-12-22-adr-014-render-farm-strategy.md) | Render Farm Strategy | ✅ Aceito |
+| 2025-12-22 | [ADR-015](./01-adr/2025-12-22-adr-015-short-form-profiles.md) | Short-form Profiles | ✅ Aceito |
 
 ---
 
@@ -69,10 +73,11 @@ docs/
 
 | Feature | Data | ADR |
 |---------|------|-----|
+| **Timeline DSL** | 2025-12-22 | [ADR-013](./01-adr/2025-12-22-adr-013-timeline-dsl-renderplan.md) |
+| **Render Engine Evolution** | 2025-12-22 | [ADR-014](./01-adr/2025-12-22-adr-014-render-farm-strategy.md) |
+| **Short-form Profiles** | 2025-12-22 | [ADR-015](./01-adr/2025-12-22-adr-015-short-form-profiles.md) |
 | **Wizard Mode** | 2025-12-19 | [ADR-011](./01-adr/2025-12-19-adr-011-wizard-mode.md) |
 | **Backup SQLite** | 2025-12-19 | [ADR-012](./01-adr/2025-12-19-adr-012-backup-sqlite.md) |
-| **StepPreview** | 2025-12-17 | - |
-| **Retry From Step** | 2025-12-19 | - |
 
 ---
 

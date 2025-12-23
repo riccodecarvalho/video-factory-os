@@ -38,39 +38,44 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
 
+        // Gerar jobId automaticamente se não fornecido
+        const jobId = body.jobId || `job-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
         const {
-            jobId,
             recipeSlug = 'graciela',
             format = 'longform',
             audioPath,
             audioDurationSec = 60,
             backgroundPath,
             priority = 0,
+            timeline: providedTimeline,
+            useTimelineDSL = false,
         } = body;
 
-        if (!jobId) {
-            return NextResponse.json(
-                { success: false, error: 'jobId é obrigatório' },
-                { status: 400 }
-            );
-        }
+        // Use provided timeline or build from recipe
+        let timeline;
 
-        // Build Timeline from recipe context
-        const timeline = buildTimelineFromRecipe({
-            jobId,
-            recipe: {
-                recipeSlug,
-                format,
-                backgroundPath,
-            },
-            previousOutputs: {
-                tts: {
-                    audioPath,
-                    durationSec: audioDurationSec,
+        if (providedTimeline && useTimelineDSL) {
+            // Use directly provided timeline (for testing)
+            timeline = providedTimeline;
+        } else {
+            // Build Timeline from recipe context
+            timeline = buildTimelineFromRecipe({
+                jobId,
+                recipe: {
+                    recipeSlug,
+                    format,
+                    backgroundPath,
                 },
-            },
-            input: body,
-        });
+                previousOutputs: {
+                    tts: {
+                        audioPath,
+                        durationSec: audioDurationSec,
+                    },
+                },
+                input: body,
+            });
+        }
 
         // Compile Timeline to RenderPlan
         const outputDir = `${process.cwd()}/jobs/${jobId}/render`;

@@ -62,6 +62,7 @@ docs/
 ├── 04-produto/                 # ⭐ DOCUMENTOS CORE DO PRODUTO
 │   ├── prd.md                  # ⭐ PRD PRINCIPAL (seções 1.4, 1.5, 2.5)
 │   ├── architecture.md         # Arquitetura técnica
+│   ├── backlog.md              # ⭐ MELHORIAS PENDENTES (não esquecer!)
 │   ├── milestones.md           # Fases e entregas
 │   └── qa-acceptance.md        # Critérios de aceite
 │
@@ -211,6 +212,7 @@ cat "docs/05-timeline/$LAST_DAY/README.md"
 | Doc | O que Verificar |
 |-----|-----------------|
 | `docs/04-produto/prd.md` | Seções 1.4 (por que não n8n), 1.5 (5 módulos), 2.5 (Knowledge Base) |
+| `docs/04-produto/backlog.md` | ⭐ Melhorias pendentes (não esquecer!) |
 | `docs/00-regras/operacao/troubleshooting.md` | Lições aprendidas recentes |
 | `docs/index.md` | Links e status geral |
 | Timeline do último dia | Handover, próximos passos, SHA âncora |

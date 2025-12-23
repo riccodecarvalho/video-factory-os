@@ -86,3 +86,32 @@ As chaves **NÃO** ficam no repositório.
 - **Problema:** TTS retorna `{audioPath}`, runner esperava `{output: {audioPath}}`.
 - **Solução:** Suportar ambos formatos no carregamento de previousOutputs.
 - **Impacto:** Resume de jobs funciona com qualquer formato de output.
+
+---
+
+## 📚 Lições Aprendidas (2025-12-22)
+
+### 9. Corrupção SQLite por concorrência/crash
+- **Problema:** Banco SQLite pode corromper em dev mode (hot reload + crash).
+- **Causa:** Múltiplos processos escrevendo + crash durante gravação.
+- **Solução:** PRAGMAs de proteção em `lib/db/index.ts`:
+  - `journal_mode = WAL`
+  - `synchronous = NORMAL`
+  - `busy_timeout = 5000`
+  - `foreign_keys = ON`
+- **Impacto:** Proteção contra corrupção + melhor concorrência.
+
+### 10. Backup obrigatório no início de sessão
+- **Problema:** Perda de dados ao recriar banco corrompido.
+- **Solução:** `npm run db:backup` como Passo 0 do workflow de governança.
+- **Impacto:** Restauração possível via `backups/`.
+
+### 11. Singleton persistence em Next.js dev mode
+- **Problema:** Hot reload destrói singletons (Worker, DB).
+- **Solução:** Usar `globalThis` para persistir instâncias.
+- **Impacto:** Jobs não "desaparecem" entre API calls.
+
+### 12. Bindings órfãos após migração
+- **Problema:** Execution bindings apontando para IDs inexistentes.
+- **Solução:** Verificar/corrigir bindings após restaurar banco.
+- **Impacto:** Providers e prompts sempre encontrados.

@@ -338,19 +338,23 @@ export class RenderWorker extends EventEmitter {
 }
 
 // ===========================================
-// SINGLETON INSTANCE
+// SINGLETON INSTANCE (persists through hot reloads)
 // ===========================================
 
-let workerInstance: RenderWorker | null = null;
+// Use globalThis to persist the worker instance in dev mode
+// Next.js hot reloading would otherwise reset module-level vars
+const globalForWorker = globalThis as unknown as {
+    renderWorker: RenderWorker | undefined;
+};
 
 /**
  * Get or create the global render worker
  */
 export function getRenderWorker(config?: Partial<WorkerConfig>): RenderWorker {
-    if (!workerInstance) {
-        workerInstance = new RenderWorker(config);
+    if (!globalForWorker.renderWorker) {
+        globalForWorker.renderWorker = new RenderWorker(config);
     }
-    return workerInstance;
+    return globalForWorker.renderWorker;
 }
 
 /**
@@ -359,3 +363,4 @@ export function getRenderWorker(config?: Partial<WorkerConfig>): RenderWorker {
 export function submitRenderJob(plan: RenderPlan, priority: number = 0): RenderJob {
     return getRenderWorker().submit(plan, priority);
 }
+
