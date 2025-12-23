@@ -20,7 +20,7 @@ import {
     extractMainContent,
 } from "@/components/vf";
 import { ArrowLeft, Wand2, Play, RotateCcw, CheckCircle, RefreshCw, Home } from "lucide-react";
-import { getJobById, getJobSteps, getJobArtifacts, continueWizard, startJob } from "@/app/jobs/actions";
+import { getJobById, getJobSteps, getJobArtifacts, continueWizard, startJob, retryFromStep } from "@/app/jobs/actions";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -112,6 +112,12 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
 
     async function handleRefresh() {
         "use server";
+        revalidatePath(`/wizard/${params.jobId}`);
+    }
+
+    async function handleRegenerate(stepKey: string) {
+        "use server";
+        await retryFromStep(params.jobId, stepKey);
         revalidatePath(`/wizard/${params.jobId}`);
     }
 
@@ -355,10 +361,12 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
                                                 Aprovar e Continuar
                                             </Button>
                                         </form>
-                                        <Button variant="outline" className="gap-2" disabled>
-                                            <RotateCcw className="h-4 w-4" />
-                                            Regenerar
-                                        </Button>
+                                        <form action={handleRegenerate.bind(null, prevStep.stepKey)}>
+                                            <Button type="submit" variant="outline" className="gap-2">
+                                                <RotateCcw className="h-4 w-4" />
+                                                Regenerar
+                                            </Button>
+                                        </form>
                                     </div>
                                 </CardContent>
                             </Card>

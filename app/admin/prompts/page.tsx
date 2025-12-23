@@ -36,6 +36,8 @@ import {
     updatePrompt,
     createPrompt,
 } from "../actions";
+import { getUsedBy } from "../execution-map/actions";
+import { UsedBySection } from "@/components/vf";
 
 type Prompt = Awaited<ReturnType<typeof getPrompts>>[0];
 
@@ -335,6 +337,14 @@ export default function AdminPromptsPage() {
                                                 onChange={(e) => setEditedPrompt({ ...editedPrompt, userTemplate: e.target.value })}
                                             />
                                         </div>
+
+                                        {/* Used By Section */}
+                                        <UsedBySection
+                                            entityId={selectedPrompt.id}
+                                            entityType="prompt"
+                                            getUsedBy={getUsedBy}
+                                            className="mt-6"
+                                        />
                                     </div>
                                 </SplitViewDetail>
                             ) : (
