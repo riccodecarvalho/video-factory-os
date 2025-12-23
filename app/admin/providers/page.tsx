@@ -24,8 +24,10 @@ import {
     EmptyState,
 } from "@/components/layout";
 import { ContextBanner } from "@/components/ui/ContextBanner";
-import { Plus, Save, Loader2, Cpu, Mic, Database, HelpCircle } from "lucide-react";
+import { Plus, Save, Loader2, Cpu, Mic, Database, HelpCircle, Trash2 } from "lucide-react";
 import { getProviders, getProviderTypes, updateProvider, createProvider } from "../actions";
+import { getUsedBy } from "../execution-map/actions";
+import { UsedBySection } from "@/components/vf";
 
 type Provider = Awaited<ReturnType<typeof getProviders>>[0];
 
@@ -453,6 +455,14 @@ export default function AdminProvidersPage() {
                                                 {selected.isActive ? "ATIVO" : "INATIVO"}
                                             </Badge>
                                         </div>
+
+                                        {/* Used By Section */}
+                                        <UsedBySection
+                                            entityId={selected.id}
+                                            entityType="provider"
+                                            getUsedBy={getUsedBy}
+                                            className="mt-6"
+                                        />
                                     </div>
                                 </SplitViewDetail>
                             ) : (

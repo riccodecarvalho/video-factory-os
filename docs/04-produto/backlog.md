@@ -199,8 +199,8 @@ Este documento registra melhorias identificadas durante o desenvolvimento para i
 
 ---
 
-### [HIGH] Gerenciamento de Providers - Mostrar Uso e Permitir Exclusão
-**Data:** 2025-12-22  
+### [DONE] Gerenciamento de Providers - Mostrar Uso e Permitir Exclusão
+**Data:** 2025-12-22 | **Implementado:** 2025-12-23
 **Origem:** Sessão de correção de bindings
 
 **Problema:**
@@ -225,7 +225,7 @@ Este documento registra melhorias identificadas durante o desenvolvimento para i
 
 ---
 
-### [HIGH] Wizard "Executando Step" - Melhorar Feedback Visual
+### [DONE] Wizard "Executando Step" - Melhorar Feedback Visual
 **Data:** 2025-12-22  
 **Origem:** Teste de UX do wizard
 
