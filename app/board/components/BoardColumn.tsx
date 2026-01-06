@@ -21,7 +21,9 @@ const COLUMN_COLORS: Record<BoardColumnType, string> = {
 };
 
 export function BoardColumn({ id, jobs, onCardClick }: BoardColumnProps) {
-    const { setNodeRef, isOver } = useDroppable({ id });
+    // Prefix column ID to avoid conflict with sortable card IDs
+    const droppableId = `column:${id}`;
+    const { setNodeRef, isOver } = useDroppable({ id: droppableId });
 
     const columnColor = COLUMN_COLORS[id];
     const jobIds = jobs.map(j => j.id);

@@ -153,7 +153,7 @@ export default function BoardPage() {
     };
 
     const handleDragEnd = async (event: DragEndEvent) => {
-        const { active, over } = event;
+        const { active, over, collisions } = event;
         setActiveJob(null);
 
         if (!over || !boardData) return;
@@ -161,16 +161,42 @@ export default function BoardPage() {
         const jobId = active.id as string;
         const overId = over.id as string;
 
-        // Derive targetColumn: over.id pode ser uma coluna ou um jobId
-        let targetColumn: BoardColumnType;
-        if (COLUMNS.includes(overId as BoardColumnType)) {
-            // Dropped directly on column
-            targetColumn = overId as BoardColumnType;
-        } else {
-            // Dropped on another card - find that card's column
-            const overJobColumn = findJobColumn(overId);
-            if (!overJobColumn) return; // Invalid drop target
-            targetColumn = overJobColumn;
+        // Debug log (temporary)
+        console.log('[DragEnd]', {
+            jobId,
+            overId,
+            collisions: collisions?.map(c => c.id)
+        });
+
+        // Derive targetColumn from overId or collisions
+        let targetColumn: BoardColumnType | null = null;
+
+        // Check if overId is a column (prefixed with 'column:')
+        if (overId.startsWith('column:')) {
+            const columnName = overId.replace('column:', '') as BoardColumnType;
+            if (COLUMNS.includes(columnName)) {
+                targetColumn = columnName;
+            }
+        }
+
+        // Fallback: check collisions for a column
+        if (!targetColumn && collisions) {
+            for (const collision of collisions) {
+                const collisionId = collision.id as string;
+                if (collisionId.startsWith('column:')) {
+                    const columnName = collisionId.replace('column:', '') as BoardColumnType;
+                    if (COLUMNS.includes(columnName)) {
+                        targetColumn = columnName;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // If still no column found, it's an invalid drop
+        if (!targetColumn) {
+            console.log('[DragEnd] No valid column found');
+            return;
         }
 
         // Find job and source column
@@ -179,8 +205,7 @@ export default function BoardPage() {
 
         const sourceColumn = findJobColumn(jobId);
 
-        // Debug log (temporary)
-        console.log('[DragEnd]', { jobId, from: sourceColumn, to: targetColumn, overId });
+        console.log('[DragEnd] Resolved', { from: sourceColumn, to: targetColumn });
 
         // Don't do anything if dropped in same column (silent no-op)
         if (sourceColumn === targetColumn) return;
