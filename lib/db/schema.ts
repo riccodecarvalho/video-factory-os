@@ -24,6 +24,10 @@ export const projects = sqliteTable('projects', {
     llmTemperature: real('llm_temperature').default(0.7), // 0 to 1
     llmMaxTokens: integer('llm_max_tokens').default(4096),
 
+    // Image config per project
+    imageStylePrefix: text('image_style_prefix'),
+    imageStyleSuffix: text('image_style_suffix'),
+
     isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
     createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
 });
