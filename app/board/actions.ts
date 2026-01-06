@@ -185,7 +185,10 @@ export async function createJobFromBoard(input: {
 }
 
 /**
- * Move job para uma coluna (dispara execução)
+ * Move job para uma coluna (dispara execução via executeUntil)
+ * 
+ * IMPORTANTE: Esta função é um adaptador para executeUntil.
+ * NÃO faz update direto de jobs.state.
  */
 export async function moveJobToColumn(jobId: string, targetColumn: BoardColumn) {
     const [job] = await db
@@ -204,28 +207,123 @@ export async function moveJobToColumn(jobId: string, targetColumn: BoardColumn) 
         throw new Error(`Não é possível mover de ${currentState} para ${targetColumn}`);
     }
 
-    // TODO: Integrar com executeUntil
+    // Resolve o step target para a coluna
     const targetStep = getTargetStepForColumn(targetColumn);
 
-    // Por enquanto, apenas atualiza o estado para o início da coluna
-    const newState = getStateForColumnStart(targetColumn);
+    // Chama executeUntil (que vai atualizar jobs.state conforme executa)
+    const result = await executeUntil(jobId, targetStep);
 
+    return {
+        success: result.status === 'completed' || result.status === 'running',
+        newState: result.newState,
+        status: result.status,
+    };
+}
+
+/**
+ * executeUntil - Executa pipeline até o step especificado
+ * 
+ * Este é o coração do board. Quando o usuário arrasta um card:
+ * 1. Resolve targetStep da coluna
+ * 2. Inicia execução incremental
+ * 3. Runner atualiza jobs.state conforme avança
+ * 4. Board poll pega os novos estados
+ * 
+ * @see implementation_plan.md §35
+ */
+async function executeUntil(
+    jobId: string,
+    targetStepKey: string
+): Promise<{ status: string; newState: JobState; lastStep?: string }> {
+    const [job] = await db
+        .select()
+        .from(jobs)
+        .where(eq(jobs.id, jobId));
+
+    if (!job) {
+        throw new Error('Job não encontrado');
+    }
+
+    const currentState = (job.state || 'DRAFT') as JobState;
+
+    // Validar estado
+    if (currentState.endsWith('_RUNNING') || currentState === 'SCRIPTING') {
+        throw new Error('Job já em execução');
+    }
+    if (currentState === 'CANCELLED') {
+        throw new Error('Job cancelado. Use resume()');
+    }
+
+    // ================================================================
+    // TODO: Integrar com o runner real
+    // Por enquanto, apenas atualiza o estado e emite eventos
+    // O runner real vai:
+    // 1. Percorrer recipe.pipeline em ordem
+    // 2. Verificar se step já completou (idempotência)
+    // 3. Adquirir lock antes de executar
+    // 4. Executar step e atualizar jobs.state
+    // 5. Emitir eventos de progresso
+    // 6. Parar ao atingir targetStepKey
+    // ================================================================
+
+    const newState = getStateForColumnStart(getColumnForTargetStep(targetStepKey));
+    const now = new Date().toISOString();
+
+    // Atualiza estado para iniciar execução
     await db
         .update(jobs)
         .set({
             state: newState,
-            updatedAt: new Date().toISOString(),
+            currentStep: targetStepKey,
+            updatedAt: now,
+            startedAt: job.startedAt || now,
         })
         .where(eq(jobs.id, jobId));
 
-    // Emite evento
+    // Emite evento de transição
     await emitJobEvent(jobId, 'auto_transition', {
         fromState: currentState,
         toState: newState,
-        targetStep,
+        targetStep: targetStepKey,
+        reason: 'executeUntil',
     });
 
-    return { success: true, newState };
+    // Emite evento de início do step
+    await emitJobEvent(jobId, 'step_started', {
+        step: targetStepKey,
+    });
+
+    return {
+        status: 'running',
+        newState,
+        lastStep: targetStepKey,
+    };
+}
+
+/**
+ * Deriva a coluna a partir do step target
+ */
+function getColumnForTargetStep(stepKey: string): BoardColumn {
+    const mapping: Record<string, BoardColumn> = {
+        'roteiro': 'ROTEIRO',
+        'tts': 'NARRACAO',
+        'export': 'VIDEO',
+    };
+    return mapping[stepKey] || 'A_FAZER';
+}
+
+/**
+ * Deriva estado inicial para uma coluna
+ */
+function getStateForColumnStart(column: BoardColumn): JobState {
+    const mapping: Record<BoardColumn, JobState> = {
+        A_FAZER: 'READY',
+        ROTEIRO: 'SCRIPTING',
+        NARRACAO: 'TTS_RUNNING',
+        VIDEO: 'RENDER_RUNNING',
+        CONCLUIDO: 'DONE',
+    };
+    return mapping[column];
 }
 
 /**
@@ -355,17 +453,6 @@ export async function getTemplates() {
 // ============================================================================
 // Helpers
 // ============================================================================
-
-function getStateForColumnStart(column: BoardColumn): JobState {
-    const mapping: Record<BoardColumn, JobState> = {
-        A_FAZER: 'READY',
-        ROTEIRO: 'SCRIPTING',
-        NARRACAO: 'TTS_RUNNING',
-        VIDEO: 'RENDER_RUNNING',
-        CONCLUIDO: 'DONE',
-    };
-    return mapping[column];
-}
 
 async function emitJobEvent(
     jobId: string,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
     DndContext,
     DragOverlay,
@@ -23,11 +23,20 @@ import {
     getJobsBoard,
     moveJobToColumn
 } from './actions';
-import { type BoardColumn as BoardColumnType } from '@/lib/engine/job-state-machine';
+import {
+    type BoardColumn as BoardColumnType,
+    canMoveToColumn,
+    isRunningState,
+} from '@/lib/engine/job-state-machine';
 import { useToast } from '@/components/ui/use-toast';
 
 const COLUMNS: BoardColumnType[] = ['A_FAZER', 'ROTEIRO', 'NARRACAO', 'VIDEO', 'CONCLUIDO'];
-const POLL_INTERVAL = 3000; // 3 seconds
+
+// Polling intervals conforme o plano
+const POLL_INTERVALS = {
+    idle: 5000,        // jobs parados
+    running: 1000,     // job executando
+};
 
 export default function BoardPage() {
     const [boardData, setBoardData] = useState<BoardData | null>(null);
@@ -35,7 +44,9 @@ export default function BoardPage() {
     const [activeJob, setActiveJob] = useState<BoardJob | null>(null);
     const [showNewVideoModal, setShowNewVideoModal] = useState(false);
     const [autoVideoEnabled, setAutoVideoEnabled] = useState(true);
+    const [movingJobId, setMovingJobId] = useState<string | null>(null);
     const { toast } = useToast();
+    const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -66,12 +77,42 @@ export default function BoardPage() {
         }
     }, [toast]);
 
-    // Initial load and polling
+    // Check if any job is running
+    const hasRunningJob = useCallback((): boolean => {
+        if (!boardData) return false;
+        for (const jobs of Object.values(boardData.columns)) {
+            if (jobs.some(j => isRunningState(j.state))) {
+                return true;
+            }
+        }
+        return false;
+    }, [boardData]);
+
+    // Adaptive polling based on state
     useEffect(() => {
         loadBoard();
-        const interval = setInterval(loadBoard, POLL_INTERVAL);
-        return () => clearInterval(interval);
-    }, [loadBoard]);
+
+        const scheduleNextPoll = () => {
+            if (pollIntervalRef.current) {
+                clearTimeout(pollIntervalRef.current);
+            }
+
+            const interval = hasRunningJob() ? POLL_INTERVALS.running : POLL_INTERVALS.idle;
+            pollIntervalRef.current = setTimeout(() => {
+                loadBoard().then(() => {
+                    scheduleNextPoll();
+                });
+            }, interval);
+        };
+
+        scheduleNextPoll();
+
+        return () => {
+            if (pollIntervalRef.current) {
+                clearTimeout(pollIntervalRef.current);
+            }
+        };
+    }, [loadBoard, hasRunningJob]);
 
     // Drag handlers
     const handleDragStart = (event: DragStartEvent) => {
@@ -89,43 +130,78 @@ export default function BoardPage() {
         const jobId = active.id as string;
         const targetColumn = over.id as BoardColumnType;
 
-        // Don't do anything if dropped in same column
-        const sourceColumn = findJobColumn(jobId);
-        if (sourceColumn === targetColumn) return;
-
-        // Optimistic update
+        // Find job and source column
         const job = findJobById(jobId);
         if (!job) return;
 
-        setBoardData(prev => {
-            if (!prev) return null;
-            const newColumns = { ...prev.columns };
+        const sourceColumn = findJobColumn(jobId);
 
-            // Remove from source
-            newColumns[sourceColumn] = newColumns[sourceColumn].filter(j => j.id !== jobId);
+        // Don't do anything if dropped in same column
+        if (sourceColumn === targetColumn) return;
 
-            // Add to target
-            newColumns[targetColumn] = [job, ...newColumns[targetColumn]];
+        // ============================================================
+        // VALIDAÇÃO DE DRAG (conforme state machine)
+        // ============================================================
 
-            return { ...prev, columns: newColumns };
-        });
+        // Validar usando a state machine
+        if (!canMoveToColumn(job.state, targetColumn)) {
+            let message = 'Movimento não permitido';
 
-        // Call server action
-        try {
-            const result = await moveJobToColumn(jobId, targetColumn);
+            // Mensagens específicas
+            if (targetColumn === 'CONCLUIDO') {
+                message = 'Não é possível mover diretamente para Concluído';
+            } else if (isRunningState(job.state)) {
+                message = 'Aguarde a execução terminar ou cancele o job';
+            } else {
+                // Verificar se está tentando pular ou voltar
+                const columnOrder = COLUMNS;
+                const sourceIdx = columnOrder.indexOf(sourceColumn);
+                const targetIdx = columnOrder.indexOf(targetColumn);
+
+                if (targetIdx < sourceIdx) {
+                    message = 'Não é possível voltar para colunas anteriores';
+                } else if (targetIdx > sourceIdx + 1) {
+                    message = 'Não é possível pular colunas';
+                }
+            }
+
             toast({
-                title: 'Card movido',
-                description: `Novo estado: ${result.newState}`,
+                title: 'Movimento bloqueado',
+                description: message,
+                variant: 'destructive',
             });
-            // Refresh to get actual state
-            await loadBoard();
+            return;
+        }
+
+        // ============================================================
+        // EXECUTAR VIA executeUntil (não update direto)
+        // ============================================================
+
+        // Mostrar loading no card
+        setMovingJobId(jobId);
+
+        try {
+            // Chama moveJobToColumn que internamente chama executeUntil
+            const result = await moveJobToColumn(jobId, targetColumn);
+
+            toast({
+                title: 'Execução iniciada',
+                description: `Job movido para ${result.newState}`,
+            });
+
+            // IMPORTANTE: Não fazer optimistic update!
+            // O board vai ser atualizado pelo polling que já está configurado
+            // para rodar a cada 1s quando tem job running
+
         } catch (error) {
             toast({
                 title: 'Erro ao mover card',
                 description: error instanceof Error ? error.message : 'Erro desconhecido',
                 variant: 'destructive',
             });
-            // Revert optimistic update
+        } finally {
+            setMovingJobId(null);
+            // Força refresh imediato para pegar o novo estado
             await loadBoard();
         }
     };
@@ -182,7 +258,11 @@ export default function BoardPage() {
                             <BoardColumn
                                 key={columnId}
                                 id={columnId}
-                                jobs={boardData?.columns[columnId] || []}
+                                jobs={(boardData?.columns[columnId] || []).map(job => ({
+                                    ...job,
+                                    // Adiciona indicador de loading se este job está sendo movido
+                                    isMoving: job.id === movingJobId,
+                                }))}
                                 onCardClick={handleCardClick}
                             />
                         ))}
