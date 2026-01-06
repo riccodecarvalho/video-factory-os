@@ -10,15 +10,15 @@ import {
     FileText,
     BookOpen,
     Server,
-    ShieldCheck,
     ChevronRight,
-    Settings2,
     Building2,
     Mic,
     Video,
     ChefHat,
     FolderOpen,
     Library,
+    Kanban,
+    Archive,
 } from "lucide-react";
 
 // Main navigation (top level)
@@ -29,13 +29,18 @@ const navigation = [
         icon: LayoutDashboard,
     },
     {
-        name: "Produção",
+        name: "Produção (Kanban)",
+        href: "/board",
+        icon: Kanban,
+    },
+    {
+        name: "Legacy",
         href: "/jobs",
-        icon: Play,
+        icon: Archive,
         children: [
-            { name: "Todos os Jobs", href: "/jobs" },
-            { name: "Produção (Automático)", href: "/jobs/new" },
-            { name: "Produção (Wizard)", href: "/wizard" },
+            { name: "Jobs (Lista)", href: "/jobs" },
+            { name: "Novo Job (Auto)", href: "/jobs/new" },
+            { name: "Wizard", href: "/wizard" },
         ],
     },
 ];
