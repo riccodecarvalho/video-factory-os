@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SectionCards,
@@ -101,11 +100,8 @@ export default function AdminKnowledgeBasePage() {
     }));
 
     return (
-        <div className="flex min-h-screen bg-background">
-            <SuspenseSidebar />
-
-            <div className="flex-1 flex flex-col">
-                <PageHeader
+        <>
+                                        <PageHeader
                     breadcrumb={[{ label: "Admin", href: "/admin" }, { label: "Knowledge Base" }]}
                     title="Knowledge Base"
                     description="Documentos de contexto para prompts"
@@ -277,7 +273,6 @@ export default function AdminKnowledgeBasePage() {
                         }
                     />
                 </div>
-            </div>
-        </div>
+    </>
     );
 }

@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SplitView,
@@ -119,11 +118,8 @@ export default function AdminVideoPresetsPage() {
     );
 
     return (
-        <div className="flex min-h-screen bg-background">
-            <SuspenseSidebar />
-
-            <div className="flex-1 flex flex-col">
-                <PageHeader
+        <>
+                                        <PageHeader
                     breadcrumb={[
                         { label: "Admin", href: "/admin" },
                         { label: "Presets" },
@@ -362,7 +358,6 @@ export default function AdminVideoPresetsPage() {
                         }
                     />
                 </div>
-            </div>
-        </div>
+    </>
     );
 }

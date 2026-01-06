@@ -14,7 +14,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SplitView,
@@ -25,7 +24,7 @@ import {
     EmptyState,
 } from "@/components/layout";
 import { ContextBanner } from "@/components/ui/ContextBanner";
-import { Plus, Save, Loader2, Building2, Power, Cpu, Mic, Video, ChefHat, HelpCircle, FileText } from "lucide-react";
+import { Plus, Save, Loader2, Building2, Power, Cpu, Mic, Video, ChefHat, HelpCircle, FileText, BookOpen } from "lucide-react";
 import {
     getProjects,
     updateProject,
@@ -37,6 +36,8 @@ import {
     getAvailablePresetsForProject,
     getAvailableRecipesForProject,
     getProjectPrompts,
+    getKnowledgeBase,
+    toggleProjectKbBinding,
     type ProjectBindingSlot,
     type ProjectBinding,
     type ProjectPrompt,
@@ -73,6 +74,7 @@ export default function AdminProjectsPage() {
     const [presets, setPresets] = useState<AvailablePresets>({ voice: [], video: [] });
     const [recipes, setRecipes] = useState<AvailableRecipe[]>([]);
     const [projectPrompts, setProjectPrompts] = useState<ProjectPrompt[]>([]);
+    const [allKbs, setAllKbs] = useState<Awaited<ReturnType<typeof getKnowledgeBase>>>([]);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -93,14 +95,16 @@ export default function AdminProjectsPage() {
 
     const loadAvailableOptions = async () => {
         try {
-            const [p, pr, r] = await Promise.all([
+            const [p, pr, r, k] = await Promise.all([
                 getAvailableProvidersForProject(),
                 getAvailablePresetsForProject(),
                 getAvailableRecipesForProject(),
+                getKnowledgeBase(),
             ]);
             setProviders(p);
             setPresets(pr);
             setRecipes(r);
+            setAllKbs(k);
         } catch (e) {
             console.error('Error loading options:', e);
         }
@@ -203,6 +207,7 @@ export default function AdminProjectsPage() {
 
     // Resumo das configurações atuais
     const ConfigSummary = () => {
+        // ... previous implementation ...
         const llm = bindings.find(b => b.slot === 'provider_llm');
         const tts = bindings.find(b => b.slot === 'provider_tts');
         const voice = bindings.find(b => b.slot === 'preset_voice');
@@ -234,299 +239,376 @@ export default function AdminProjectsPage() {
         );
     };
 
-    return (
-        <div className="flex min-h-screen bg-background">
-            <SuspenseSidebar />
+    const handleKbToggle = (kbId: string, isActive: boolean) => {
+        if (!selected) return;
+        startTransition(async () => {
+            await toggleProjectKbBinding(selected.id, kbId, isActive);
+            // Reload bindings
+            const newBindings = await getProjectBindings(selected.id);
+            setBindings(newBindings);
+        });
+    };
 
-            <div className="flex-1 flex flex-col">
-                <PageHeader
-                    breadcrumb={[{ label: "Admin", href: "/admin" }, { label: "Projects" }]}
-                    title="Projects"
-                    description="Hub central de configuração por projeto"
-                    actions={
-                        <Button size="sm" className="gap-2" onClick={handleCreate} disabled={isPending}>
-                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                            Novo Project
-                        </Button>
-                    }
+    const parseVoicePercent = (val: string | null | undefined): number => {
+        if (!val) return 0;
+        try {
+            return parseInt(val.replace('%', '')) || 0;
+        } catch { return 0; }
+    };
+
+    const formatVoicePercent = (val: number): string => {
+        if (val === 0) return "0%";
+        return (val > 0 ? "+" : "") + val + "%";
+    };
+
+    const isKbBound = (kbId: string) => {
+        return bindings.some(b => b.slot === 'kb' && b.targetId === kbId && b.isActive !== false);
+    };
+
+    return (
+        <>
+            <PageHeader
+                breadcrumb={[{ label: "Admin", href: "/admin" }, { label: "Projects" }]}
+                title="Projects"
+                description="Hub central de configuração por projeto"
+                actions={
+                    <Button size="sm" className="gap-2" onClick={handleCreate} disabled={isPending}>
+                        {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                        Novo Project
+                    </Button>
+                }
+            />
+
+            <div className="flex-1 p-6">
+                {error && (
+                    <div className="mb-4 p-4 bg-red-500/10 rounded-lg border border-red-500/20 text-red-500">
+                        <strong>Erro:</strong> {error}
+                    </div>
+                )}
+
+                <ContextBanner
+                    title="O que são Projects?"
+                    description="Projects são canais/projetos de conteúdo. Aqui você configura TUDO: qual IA usar, qual voz, qual preset de vídeo."
+                    tips={[
+                        "LLM: Qual Claude usar (4.5 Opus, 4.5 Sonnet, etc)",
+                        "TTS: Qual serviço de voz (Azure)",
+                        "Voice: Qual voz específica (Ximena, Jorge, etc)",
+                        "Video: Qual preset de renderização (720p, 1080p)",
+                        "Recipe: Qual pipeline seguir",
+                    ]}
+                    variant="info"
                 />
 
-                <div className="flex-1 p-6">
-                    {error && (
-                        <div className="mb-4 p-4 bg-red-500/10 rounded-lg border border-red-500/20 text-red-500">
-                            <strong>Erro:</strong> {error}
+                <FiltersBar
+                    searchValue={searchValue}
+                    onSearchChange={setSearchValue}
+                    searchPlaceholder="Buscar projects..."
+                    className="mb-4"
+                />
+
+                <SplitView
+                    isLoading={isPending && projects.length === 0}
+                    isEmpty={projects.length === 0}
+                    emptyState={
+                        <EmptyState variant="empty" title="Nenhum project" description="Execute o seed ou crie um novo" action={{ label: "Criar", onClick: handleCreate }} />
+                    }
+                    list={
+                        <div>
+                            {projects.map((item) => (
+                                <SplitViewListItem
+                                    key={item.id}
+                                    title={item.name}
+                                    subtitle={item.key}
+                                    meta={item.isActive ? "Ativo" : "Inativo"}
+                                    isActive={selected?.id === item.id}
+                                    onClick={() => handleSelect(item)}
+                                />
+                            ))}
                         </div>
-                    )}
-
-                    <ContextBanner
-                        title="O que são Projects?"
-                        description="Projects são canais/projetos de conteúdo. Aqui você configura TUDO: qual IA usar, qual voz, qual preset de vídeo."
-                        tips={[
-                            "LLM: Qual Claude usar (4.5 Opus, 4.5 Sonnet, etc)",
-                            "TTS: Qual serviço de voz (Azure)",
-                            "Voice: Qual voz específica (Ximena, Jorge, etc)",
-                            "Video: Qual preset de renderização (720p, 1080p)",
-                            "Recipe: Qual pipeline seguir",
-                        ]}
-                        variant="info"
-                    />
-
-                    <FiltersBar
-                        searchValue={searchValue}
-                        onSearchChange={setSearchValue}
-                        searchPlaceholder="Buscar projects..."
-                        className="mb-4"
-                    />
-
-                    <SplitView
-                        isLoading={isPending && projects.length === 0}
-                        isEmpty={projects.length === 0}
-                        emptyState={
-                            <EmptyState variant="empty" title="Nenhum project" description="Execute o seed ou crie um novo" action={{ label: "Criar", onClick: handleCreate }} />
-                        }
-                        list={
-                            <div>
-                                {projects.map((item) => (
-                                    <SplitViewListItem
-                                        key={item.id}
-                                        title={item.name}
-                                        subtitle={item.key}
-                                        meta={item.isActive ? "Ativo" : "Inativo"}
-                                        isActive={selected?.id === item.id}
-                                        onClick={() => handleSelect(item)}
-                                    />
-                                ))}
-                            </div>
-                        }
-                        detail={
-                            selected ? (
-                                <SplitViewDetail>
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div>
-                                            <h2 className="text-xl font-semibold">{selected.name}</h2>
-                                            <p className="text-sm text-muted-foreground">{selected.key}</p>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant={selected.isActive ? "secondary" : "default"}
-                                                onClick={handleToggleActive}
-                                                disabled={isPending}
-                                            >
-                                                <Power className="w-4 h-4 mr-1" />
-                                                {selected.isActive ? "Desativar" : "Ativar"}
-                                            </Button>
-                                            <Button size="sm" onClick={handleSave} disabled={isPending}>
-                                                {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                                Salvar
-                                            </Button>
-                                        </div>
+                    }
+                    detail={
+                        selected ? (
+                            <SplitViewDetail>
+                                <div className="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h2 className="text-xl font-semibold">{selected.name}</h2>
+                                        <p className="text-sm text-muted-foreground">{selected.key}</p>
                                     </div>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            size="sm"
+                                            variant={selected.isActive ? "secondary" : "default"}
+                                            onClick={handleToggleActive}
+                                            disabled={isPending}
+                                        >
+                                            <Power className="w-4 h-4 mr-1" />
+                                            {selected.isActive ? "Desativar" : "Ativar"}
+                                        </Button>
+                                        <Button size="sm" onClick={handleSave} disabled={isPending}>
+                                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                            Salvar
+                                        </Button>
+                                    </div>
+                                </div>
 
-                                    <ConfigSummary />
+                                <ConfigSummary />
 
-                                    <Tabs defaultValue="config" className="w-full">
-                                        <TabsList className="grid w-full grid-cols-5">
-                                            <TabsTrigger value="config">⚙️ Configuração</TabsTrigger>
-                                            <TabsTrigger value="prompts">📝 Prompts</TabsTrigger>
-                                            <TabsTrigger value="providers">🤖 Providers</TabsTrigger>
-                                            <TabsTrigger value="presets">🎛️ Presets</TabsTrigger>
-                                            <TabsTrigger value="geral">📋 Geral</TabsTrigger>
-                                        </TabsList>
+                                <Tabs defaultValue="geral" className="w-full">
+                                    <TabsList className="grid w-full grid-cols-7">
+                                        <TabsTrigger value="geral">📋 Geral</TabsTrigger>
+                                        <TabsTrigger value="pipeline">⚙️ Pipeline</TabsTrigger>
+                                        <TabsTrigger value="prompts">📝 Prompts</TabsTrigger>
+                                        <TabsTrigger value="kb">🧬 KB</TabsTrigger>
+                                        <TabsTrigger value="voz">🗣️ Voz</TabsTrigger>
+                                        <TabsTrigger value="video">🎬 Vídeo</TabsTrigger>
+                                        <TabsTrigger value="images">🖼️ Imagens</TabsTrigger>
+                                    </TabsList>
 
-                                        <TabsContent value="config" className="space-y-4 pt-4">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <FieldWithHelp label="Recipe (Pipeline)" help="Qual fluxo seguir">
-                                                    <Select
-                                                        value={getBindingValue('recipe')}
-                                                        onValueChange={(v) => handleBindingChange('recipe', v)}
-                                                    >
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Selecione a recipe" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {recipes.map((r) => (
-                                                                <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </FieldWithHelp>
+                                    <TabsContent value="geral" className="space-y-4 pt-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label>Nome</Label>
+                                                <Input value={edited.name || ""} onChange={(e) => setEdited({ ...edited, name: e.target.value })} />
                                             </div>
-
-                                            <div className="p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                                                <p className="text-sm">💡 Configure os <strong>Providers</strong> e <strong>Presets</strong> nas abas ao lado.</p>
+                                            <div className="space-y-2">
+                                                <Label>Key</Label>
+                                                <Input value={edited.key || ""} onChange={(e) => setEdited({ ...edited, key: e.target.value })} />
                                             </div>
-                                        </TabsContent>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Descrição</Label>
+                                            <Textarea
+                                                value={edited.description || ""}
+                                                onChange={(e) => setEdited({ ...edited, description: e.target.value })}
+                                                rows={3}
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-2 pt-4">
+                                            <Badge className={selected.isActive ? "bg-status-success/10 text-status-success" : "bg-muted"}>
+                                                {selected.isActive ? "ATIVO" : "INATIVO"}
+                                            </Badge>
+                                            <span className="text-xs text-muted-foreground">
+                                                Criado em {new Date(selected.createdAt).toLocaleDateString("pt-BR")}
+                                            </span>
+                                        </div>
+                                    </TabsContent>
 
-                                        <TabsContent value="prompts" className="space-y-4 pt-4">
-                                            <div className="text-sm text-muted-foreground mb-4">
-                                                Prompts vinculados via Recipe ({projectPrompts.length} total)
-                                            </div>
-                                            {projectPrompts.length === 0 ? (
-                                                <div className="text-center py-8 text-muted-foreground">
-                                                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                                    <p>Nenhum prompt vinculado</p>
-                                                    <p className="text-xs">Selecione uma Recipe primeiro</p>
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-2">
-                                                    {projectPrompts.map((prompt) => (
-                                                        <div
-                                                            key={prompt.promptId}
-                                                            className={`flex items-center justify-between p-3 rounded-lg border ${prompt.isActive ? 'bg-background' : 'bg-muted/30 opacity-60'
-                                                                }`}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <Badge variant="outline" className="font-mono text-xs">
-                                                                    {prompt.stepKey}
-                                                                </Badge>
-                                                                <div>
-                                                                    <div className="font-medium text-sm">{prompt.promptName}</div>
-                                                                    <div className="text-xs text-muted-foreground">{prompt.promptSlug}</div>
-                                                                </div>
-                                                            </div>
-                                                            <Badge className={prompt.isActive ? "bg-status-success/10 text-status-success" : "bg-muted"}>
-                                                                {prompt.isActive ? "ATIVO" : "INATIVO"}
-                                                            </Badge>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </TabsContent>
-
-                                        <TabsContent value="providers" className="space-y-4 pt-4">
-                                            <FieldWithHelp label="Provider LLM (Texto)" help="Claude para gerar roteiros">
+                                    <TabsContent value="pipeline" className="space-y-6 pt-4">
+                                        {/* Fluxo de Produção */}
+                                        <div className="space-y-3">
+                                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Fluxo de Produção</h3>
+                                            <FieldWithHelp label="Pipeline (Recipe)" help="Sequência de passos para produzir vídeo">
                                                 <Select
-                                                    value={getBindingValue('provider_llm')}
-                                                    onValueChange={(v) => handleBindingChange('provider_llm', v)}
+                                                    value={getBindingValue('recipe')}
+                                                    onValueChange={(v) => handleBindingChange('recipe', v)}
                                                 >
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Selecione o LLM" />
+                                                        <SelectValue placeholder="Selecione o fluxo" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {providers.llm.map((p) => (
-                                                            <SelectItem key={p.id} value={p.id}>
-                                                                {p.name} {p.model ? `(${p.model})` : ''}
-                                                            </SelectItem>
+                                                        {recipes.map((r) => (
+                                                            <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
                                             </FieldWithHelp>
+                                        </div>
 
+                                        {/* IA (Agrupado com Pipeline pois define a inteligência do fluxo) */}
+                                        <div className="space-y-3 pt-4 border-t">
+                                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">🤖 Inteligência Artificial (Override)</h3>
                                             <div className="grid grid-cols-2 gap-4">
-                                                <FieldWithHelp label="Temperatura" help="Criatividade (0-1)">
+                                                <FieldWithHelp label="Modelo LLM" help="Qual IA usar">
+                                                    <Select
+                                                        value={getBindingValue('provider_llm')}
+                                                        onValueChange={(v) => handleBindingChange('provider_llm', v)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Padrão Global" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {providers.llm.map((p) => (
+                                                                <SelectItem key={p.id} value={p.id}>
+                                                                    {p.name} {p.model ? `(${p.model})` : ''}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FieldWithHelp>
+                                                <FieldWithHelp label="Criatividade" help="Temperatura da IA">
                                                     <Select
                                                         value={String(edited.llmTemperature || 0.7)}
                                                         onValueChange={(v) => setEdited({ ...edited, llmTemperature: parseFloat(v) })}
                                                     >
                                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                                         <SelectContent>
-                                                            <SelectItem value="0">0.0 — Determinístico</SelectItem>
-                                                            <SelectItem value="0.3">0.3 — Preciso</SelectItem>
-                                                            <SelectItem value="0.5">0.5 — Equilibrado</SelectItem>
-                                                            <SelectItem value="0.7">0.7 — Criativo (recomendado)</SelectItem>
-                                                            <SelectItem value="0.9">0.9 — Muito criativo</SelectItem>
-                                                            <SelectItem value="1">1.0 — Máximo</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </FieldWithHelp>
-
-                                                <FieldWithHelp label="Max Tokens" help="Tamanho da resposta">
-                                                    <Select
-                                                        value={String(edited.llmMaxTokens || 4096)}
-                                                        onValueChange={(v) => setEdited({ ...edited, llmMaxTokens: parseInt(v) })}
-                                                    >
-                                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="2048">2.048</SelectItem>
-                                                            <SelectItem value="4096">4.096 (padrão)</SelectItem>
-                                                            <SelectItem value="8192">8.192</SelectItem>
-                                                            <SelectItem value="16000">16.000</SelectItem>
-                                                            <SelectItem value="32000">32.000</SelectItem>
+                                                            <SelectItem value="0.3">Preciso</SelectItem>
+                                                            <SelectItem value="0.5">Equilibrado</SelectItem>
+                                                            <SelectItem value="0.7">Criativo (recomendado)</SelectItem>
+                                                            <SelectItem value="0.9">Muito criativo</SelectItem>
                                                         </SelectContent>
                                                     </Select>
                                                 </FieldWithHelp>
                                             </div>
+                                        </div>
+                                    </TabsContent>
 
-                                            <FieldWithHelp label="Provider TTS (Áudio)" help="Azure Speech para gerar narração">
-                                                <Select
-                                                    value={getBindingValue('provider_tts')}
-                                                    onValueChange={(v) => handleBindingChange('provider_tts', v)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Selecione o TTS" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {providers.tts.map((p) => (
-                                                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </FieldWithHelp>
-                                        </TabsContent>
-
-                                        <TabsContent value="presets" className="space-y-4 pt-4">
-                                            <FieldWithHelp label="Preset de Voz" help="Qual voz e configurações usar">
-                                                <Select
-                                                    value={getBindingValue('preset_voice')}
-                                                    onValueChange={(v) => handleBindingChange('preset_voice', v)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Selecione a voz" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {presets.voice.map((p) => (
-                                                            <SelectItem key={p.id} value={p.id}>
-                                                                {p.name} ({p.voiceName})
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </FieldWithHelp>
-
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <FieldWithHelp label="Rate (Velocidade)" help="Velocidade da narração">
-                                                    <Select
-                                                        value={edited.voiceRate || "0%"}
-                                                        onValueChange={(v) => setEdited({ ...edited, voiceRate: v })}
-                                                    >
-                                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="-50%">-50% — Muito lento</SelectItem>
-                                                            <SelectItem value="-30%">-30% — Lento</SelectItem>
-                                                            <SelectItem value="-20%">-20% — Pouco lento</SelectItem>
-                                                            <SelectItem value="0%">0% — Normal</SelectItem>
-                                                            <SelectItem value="+20%">+20% — Rápido</SelectItem>
-                                                            <SelectItem value="+30%">+30% — Bem rápido</SelectItem>
-                                                            <SelectItem value="+50%">+50% — Muito rápido</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </FieldWithHelp>
-
-                                                <FieldWithHelp label="Pitch (Tom)" help="Tom da voz">
-                                                    <Select
-                                                        value={edited.voicePitch || "0%"}
-                                                        onValueChange={(v) => setEdited({ ...edited, voicePitch: v })}
-                                                    >
-                                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="-30%">-30% — Grave</SelectItem>
-                                                            <SelectItem value="-15%">-15% — Pouco grave</SelectItem>
-                                                            <SelectItem value="0%">0% — Normal</SelectItem>
-                                                            <SelectItem value="+15%">+15% — Agudo</SelectItem>
-                                                            <SelectItem value="+30%">+30% — Bem agudo</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </FieldWithHelp>
+                                    <TabsContent value="prompts" className="space-y-4 pt-4">
+                                        <div className="text-sm text-muted-foreground mb-4">
+                                            Prompts vinculados via Recipe ({projectPrompts.length} total)
+                                        </div>
+                                        {projectPrompts.length === 0 ? (
+                                            <div className="text-center py-8 text-muted-foreground">
+                                                <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                                <p>Nenhum prompt vinculado</p>
+                                                <p className="text-xs">Selecione uma Recipe primeiro</p>
                                             </div>
+                                        ) : (
+                                            <div className="space-y-2">
+                                                {projectPrompts.map((prompt) => (
+                                                    <div
+                                                        key={prompt.promptId}
+                                                        className={`flex items-center justify-between p-3 rounded-lg border ${prompt.isActive ? 'bg-background' : 'bg-muted/30 opacity-60'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <Badge variant="outline" className="font-mono text-xs">
+                                                                {prompt.stepKey}
+                                                            </Badge>
+                                                            <div>
+                                                                <div className="font-medium text-sm">{prompt.promptName}</div>
+                                                                <div className="text-xs text-muted-foreground">{prompt.promptSlug}</div>
+                                                            </div>
+                                                        </div>
+                                                        <Badge className={prompt.isActive ? "bg-status-success/10 text-status-success" : "bg-muted"}>
+                                                            {prompt.isActive ? "ATIVO" : "INATIVO"}
+                                                        </Badge>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </TabsContent>
 
-                                            <FieldWithHelp label="Preset de Vídeo" help="Resolução e encoder">
+                                    <TabsContent value="kb" className="space-y-4 pt-4">
+                                        <div className="text-sm text-muted-foreground mb-4">
+                                            Knowledge Base (DNA do projeto) - Personalidade, tom de voz e referências.
+                                        </div>
+
+                                        {!getBindingValue('recipe') ? (
+                                            <div className="p-4 border border-yellow-500/30 bg-yellow-500/5 rounded text-center">
+                                                <p className="text-yellow-600 mb-2">⚠️ Necessário selecionar um Pipeline (Recipe) primeiro.</p>
+                                                <p className="text-xs text-muted-foreground">O Knowledge Base é vinculado ao fluxo de trabalho.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-2 border rounded-md p-1 bg-muted/20 max-h-[400px] overflow-y-auto">
+                                                {allKbs.length === 0 ? (
+                                                    <div className="p-8 text-center text-muted-foreground">
+                                                        <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                                                        <p>Nenhum documento disponível na Knowledge Base global.</p>
+                                                    </div>
+                                                ) : (
+                                                    allKbs.map((kb) => {
+                                                        const isActive = isKbBound(kb.id);
+                                                        return (
+                                                            <div
+                                                                key={kb.id}
+                                                                className={`flex items-center p-3 rounded hover:bg-muted/50 transition-colors cursor-pointer ${isActive ? 'bg-primary/5 border border-primary/20' : ''}`}
+                                                                onClick={() => handleKbToggle(kb.id, !isActive)}
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isActive}
+                                                                    onChange={() => { }} // Handled by div click
+                                                                    className="mr-3 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                                                />
+                                                                <div className="flex-1">
+                                                                    <div className="font-medium text-sm flex items-center gap-2">
+                                                                        {kb.name}
+                                                                        <Badge variant="outline" className="text-[10px] h-5 px-1 py-0">{kb.tier}</Badge>
+                                                                    </div>
+                                                                    <div className="text-xs text-muted-foreground">{kb.category} • {kb.slug}</div>
+                                                                </div>
+                                                                {isActive && <Badge className="bg-primary/10 text-primary hover:bg-primary/20">Vinculado</Badge>}
+                                                            </div>
+                                                        );
+                                                    })
+                                                )}
+                                            </div>
+                                        )}
+                                    </TabsContent>
+
+                                    <TabsContent value="voz" className="space-y-4 pt-4">
+                                        <div className="space-y-3">
+                                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">🗣️ Voz do Projeto</h3>
+                                            <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 text-sm mb-4">
+                                                💡 Escolha a voz padrão para este projeto. Ela será usada em todos os vídeos gerados.
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <FieldWithHelp label="Voz (Preset)" help="Personagem narrador">
+                                                    <Select
+                                                        value={getBindingValue('preset_voice')}
+                                                        onValueChange={(v) => handleBindingChange('preset_voice', v)}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Selecione a voz" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {presets.voice.map((p) => (
+                                                                <SelectItem key={p.id} value={p.id}>
+                                                                    {p.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FieldWithHelp>
+
+                                                <div className="space-y-1">
+                                                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Velocidade (%)</Label>
+                                                    <div className="flex items-center gap-2">
+                                                        <Input
+                                                            type="number"
+                                                            className="font-mono text-right"
+                                                            value={parseVoicePercent(edited.voiceRate)}
+                                                            onChange={(e) => setEdited({ ...edited, voiceRate: formatVoicePercent(parseInt(e.target.value) || 0) })}
+                                                            step={5}
+                                                        />
+                                                        <span className="text-xs text-muted-foreground w-12 text-center text-nowrap">
+                                                            {edited.voiceRate || "0%"}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[10px] text-muted-foreground">Override de velocidade (-50 a +50)</p>
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tom (%)</Label>
+                                                    <div className="flex items-center gap-2">
+                                                        <Input
+                                                            type="number"
+                                                            className="font-mono text-right"
+                                                            value={parseVoicePercent(edited.voicePitch)}
+                                                            onChange={(e) => setEdited({ ...edited, voicePitch: formatVoicePercent(parseInt(e.target.value) || 0) })}
+                                                            step={5}
+                                                        />
+                                                        <span className="text-xs text-muted-foreground w-12 text-center text-nowrap">
+                                                            {edited.voicePitch || "0%"}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[10px] text-muted-foreground">Override de tom (-30 a +30)</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="video" className="space-y-4 pt-4">
+                                        <div className="space-y-3">
+                                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">🎬 Formato de Vídeo</h3>
+                                            <FieldWithHelp label="Resolução (Preset)" help="Qualidade e formato de saída">
                                                 <Select
                                                     value={getBindingValue('preset_video')}
                                                     onValueChange={(v) => handleBindingChange('preset_video', v)}
                                                 >
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Selecione o preset de vídeo" />
+                                                        <SelectValue placeholder="Selecione a resolução" />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         {presets.video.map((p) => (
@@ -537,45 +619,46 @@ export default function AdminProjectsPage() {
                                                     </SelectContent>
                                                 </Select>
                                             </FieldWithHelp>
-                                        </TabsContent>
+                                        </div>
+                                    </TabsContent>
 
-                                        <TabsContent value="geral" className="space-y-4 pt-4">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label>Nome</Label>
-                                                    <Input value={edited.name || ""} onChange={(e) => setEdited({ ...edited, name: e.target.value })} />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>Key</Label>
-                                                    <Input value={edited.key || ""} onChange={(e) => setEdited({ ...edited, key: e.target.value })} />
-                                                </div>
+                                    <TabsContent value="images" className="space-y-4 pt-4">
+                                        <div className="text-sm text-muted-foreground mb-4">
+                                            Configurações de estilo para geração de imagens (ImageFX)
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <Label>Prefixo de Estilo (Global)</Label>
+                                                <Textarea
+                                                    placeholder="Ex: Cinematic photo, 8k, highly detailed..."
+                                                    value={(edited as any).imageStylePrefix || ""}
+                                                    onChange={(e) => setEdited({ ...edited, imageStylePrefix: e.target.value } as any)}
+                                                    rows={4}
+                                                    className="font-sans"
+                                                />
+                                                <p className="text-[10px] text-muted-foreground">Texto adicionado automaticamente ao INÍCIO de todo prompt de imagem.</p>
                                             </div>
                                             <div className="space-y-2">
-                                                <Label>Descrição</Label>
+                                                <Label>Sufixo de Estilo (Global)</Label>
                                                 <Textarea
-                                                    value={edited.description || ""}
-                                                    onChange={(e) => setEdited({ ...edited, description: e.target.value })}
-                                                    rows={3}
+                                                    placeholder="Ex: --ar 16:9 --v 6.0"
+                                                    value={(edited as any).imageStyleSuffix || ""}
+                                                    onChange={(e) => setEdited({ ...edited, imageStyleSuffix: e.target.value } as any)}
+                                                    rows={4}
+                                                    className="font-sans"
                                                 />
+                                                <p className="text-[10px] text-muted-foreground">Texto adicionado automaticamente ao FINAL de todo prompt de imagem.</p>
                                             </div>
-                                            <div className="flex items-center gap-2 pt-4">
-                                                <Badge className={selected.isActive ? "bg-status-success/10 text-status-success" : "bg-muted"}>
-                                                    {selected.isActive ? "ATIVO" : "INATIVO"}
-                                                </Badge>
-                                                <span className="text-xs text-muted-foreground">
-                                                    Criado em {new Date(selected.createdAt).toLocaleDateString("pt-BR")}
-                                                </span>
-                                            </div>
-                                        </TabsContent>
-                                    </Tabs>
-                                </SplitViewDetail>
-                            ) : (
-                                <SplitViewDetailEmpty />
-                            )
-                        }
-                    />
-                </div>
+                                        </div>
+                                    </TabsContent>
+                                </Tabs>
+                            </SplitViewDetail>
+                        ) : (
+                            <SplitViewDetailEmpty />
+                        )
+                    }
+                />
             </div>
-        </div>
+        </>
     );
 }

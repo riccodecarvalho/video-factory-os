@@ -11,7 +11,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SplitView,
@@ -210,11 +209,8 @@ export default function ExecutionMapPage() {
     const filteredSlots = ALL_SLOTS.filter(s => allowedSlots.includes(s.slot));
 
     return (
-        <div className="flex min-h-screen bg-background">
-            <SuspenseSidebar />
-
-            <div className="flex-1 flex flex-col">
-                <PageHeader
+        <>
+                                        <PageHeader
                     breadcrumb={[{ label: "Admin", href: "/admin" }, { label: "Execution Map" }]}
                     title="Execution Map"
                     description="Governança de wiring: prompt → provider → preset por step"
@@ -388,7 +384,6 @@ export default function ExecutionMapPage() {
                         }
                     />
                 </div>
-            </div>
-        </div>
+    </>
     );
 }

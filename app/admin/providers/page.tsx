@@ -12,7 +12,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SectionCards,
@@ -352,11 +351,8 @@ export default function AdminProvidersPage() {
     };
 
     return (
-        <div className="flex min-h-screen bg-background">
-            <SuspenseSidebar />
-
-            <div className="flex-1 flex flex-col">
-                <PageHeader
+        <>
+                                        <PageHeader
                     breadcrumb={[{ label: "Admin", href: "/admin" }, { label: "Providers" }]}
                     title="Providers"
                     description="Serviços externos: LLM (Claude) e TTS (Azure)"
@@ -471,7 +467,6 @@ export default function AdminProvidersPage() {
                         }
                     />
                 </div>
-            </div>
-        </div>
+    </>
     );
 }

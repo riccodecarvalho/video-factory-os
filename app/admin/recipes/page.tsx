@@ -13,7 +13,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SplitView,
@@ -164,11 +163,8 @@ export default function AdminRecipesPage() {
     };
 
     return (
-        <div className="flex min-h-screen bg-background">
-            <SuspenseSidebar />
-
-            <div className="flex-1 flex flex-col">
-                <PageHeader
+        <>
+                                        <PageHeader
                     breadcrumb={[{ label: "Admin", href: "/admin" }, { label: "Recipes" }]}
                     title="Recipes"
                     description="Pipelines de produção de vídeo"
@@ -397,7 +393,6 @@ export default function AdminRecipesPage() {
                         }
                     />
                 </div>
-            </div>
-        </div>
+    </>
     );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SectionCards,
@@ -203,14 +203,26 @@ const VIDEO_FPS = [
 ];
 
 export default function AdminPresetsPage() {
+    const searchParams = useSearchParams();
+    const forcedType = searchParams.get("type"); // 'voice' ou 'video' vindo da URL
+
     const [presets, setPresets] = useState<Preset[]>([]);
     const [counts, setCounts] = useState<Record<string, number>>({});
-    const [selectedType, setSelectedType] = useState<string>("all");
+    // Se houver tipo forçado na URL, usa ele. Se não, usa o estado local (padrão 'all')
+    const [selectedType, setSelectedType] = useState<string>(forcedType || "all");
     const [selected, setSelected] = useState<Preset | null>(null);
     const [searchValue, setSearchValue] = useState("");
     const [isPending, startTransition] = useTransition();
     const [edited, setEdited] = useState<Record<string, unknown>>({});
     const [error, setError] = useState<string | null>(null);
+
+    // Atualiza o tipo selecionado se a URL mudar (navegação pelo menu)
+    useEffect(() => {
+        if (forcedType) {
+            setSelectedType(forcedType);
+            setSelected(null); // Limpa seleção ao mudar de tela
+        }
+    }, [forcedType]);
 
     useEffect(() => {
         loadData();
@@ -490,117 +502,123 @@ export default function AdminPresetsPage() {
         </div>
     );
 
-    return (
-        <div className="flex min-h-screen bg-background">
-            <SuspenseSidebar />
+    // Título dinâmico baseado no modo
+    const pageTitle = forcedType === "voice" ? "Vozes Disponíveis" :
+        forcedType === "video" ? "Resoluções" :
+            "Presets";
 
-            <div className="flex-1 flex flex-col">
-                <PageHeader
-                    breadcrumb={[{ label: "Admin", href: "/admin" }, { label: "Presets" }]}
-                    title="Presets"
-                    description="Configurações de voz e vídeo"
+    const pageDescription = forcedType === "voice" ? "Gerencie as vozes disponíveis para narração" :
+        forcedType === "video" ? "Gerencie as resoluções e formatos de vídeo" :
+            "Configurações gerais de voz e vídeo";
+
+    return (
+        <>
+            <PageHeader
+                breadcrumb={[{ label: "Admin", href: "/admin" }, { label: pageTitle }]}
+                title={pageTitle}
+                description={pageDescription}
+            />
+
+            <div className="flex-1 p-6">
+                {error && (
+                    <div className="mb-4 p-4 bg-red-500/10 rounded-lg border border-red-500/20 text-red-500">
+                        <strong>Erro:</strong> {error}
+                    </div>
+                )}
+
+                <ContextBanner
+                    title="O que são Presets?"
+                    description="Presets são configurações prontas para áudio (TTS) e vídeo (FFmpeg)."
+                    tips={[
+                        "Voice: Voz Azure, velocidade, tom, estilo",
+                        "Video: Resolução, encoder, bitrate, FPS",
+                    ]}
+                    variant="info"
                 />
 
-                <div className="flex-1 p-6">
-                    {error && (
-                        <div className="mb-4 p-4 bg-red-500/10 rounded-lg border border-red-500/20 text-red-500">
-                            <strong>Erro:</strong> {error}
+                {/* Só mostra tabs se NÃO tiver tipo forçado na URL */}
+                {!forcedType && typeCards.length > 0 && (
+                    <SectionCards cards={typeCards} activeId={selectedType} onSelect={setSelectedType} className="mb-6" />
+                )}
+
+                <FiltersBar searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Buscar..." className="mb-4" />
+
+                <SplitView
+                    isLoading={isPending && presets.length === 0}
+                    isEmpty={presets.length === 0}
+                    emptyState={<EmptyState variant="empty" title="Nenhum preset" description="Execute seed" />}
+                    list={
+                        <div>
+                            {presets.map((item) => (
+                                <SplitViewListItem
+                                    key={item.id}
+                                    title={item.name}
+                                    subtitle={item.slug}
+                                    meta={item.presetType}
+                                    isActive={selected?.id === item.id}
+                                    onClick={() => handleSelect(item)}
+                                />
+                            ))}
                         </div>
-                    )}
-
-                    <ContextBanner
-                        title="O que são Presets?"
-                        description="Presets são configurações prontas para áudio (TTS) e vídeo (FFmpeg)."
-                        tips={[
-                            "Voice: Voz Azure, velocidade, tom, estilo",
-                            "Video: Resolução, encoder, bitrate, FPS",
-                        ]}
-                        variant="info"
-                    />
-
-                    {typeCards.length > 0 && (
-                        <SectionCards cards={typeCards} activeId={selectedType} onSelect={setSelectedType} className="mb-6" />
-                    )}
-
-                    <FiltersBar searchValue={searchValue} onSearchChange={setSearchValue} searchPlaceholder="Buscar..." className="mb-4" />
-
-                    <SplitView
-                        isLoading={isPending && presets.length === 0}
-                        isEmpty={presets.length === 0}
-                        emptyState={<EmptyState variant="empty" title="Nenhum preset" description="Execute seed" />}
-                        list={
-                            <div>
-                                {presets.map((item) => (
-                                    <SplitViewListItem
-                                        key={item.id}
-                                        title={item.name}
-                                        subtitle={item.slug}
-                                        meta={item.presetType}
-                                        isActive={selected?.id === item.id}
-                                        onClick={() => handleSelect(item)}
-                                    />
-                                ))}
-                            </div>
-                        }
-                        detail={
-                            selected ? (
-                                <SplitViewDetail>
-                                    <div className="flex items-start justify-between mb-6">
-                                        <div>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h2 className="text-xl font-semibold">{selected.name}</h2>
-                                                <Badge variant="outline">{selected.presetType}</Badge>
-                                            </div>
-                                            <p className="text-sm text-muted-foreground">{selected.slug}</p>
+                    }
+                    detail={
+                        selected ? (
+                            <SplitViewDetail>
+                                <div className="flex items-start justify-between mb-6">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h2 className="text-xl font-semibold">{selected.name}</h2>
+                                            <Badge variant="outline">{selected.presetType}</Badge>
                                         </div>
-                                        <Button size="sm" onClick={handleSave} disabled={isPending}>
-                                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                            Salvar
-                                        </Button>
+                                        <p className="text-sm text-muted-foreground">{selected.slug}</p>
                                     </div>
+                                    <Button size="sm" onClick={handleSave} disabled={isPending}>
+                                        {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                        Salvar
+                                    </Button>
+                                </div>
 
-                                    <div className="space-y-6">
-                                        <FieldWithHelp label="Nome" help="Nome amigável">
-                                            <Input
-                                                value={String(edited.name || "")}
-                                                onChange={(e) => setEdited({ ...edited, name: e.target.value })}
-                                            />
-                                        </FieldWithHelp>
-
-                                        <div className="border-t pt-4">
-                                            <h3 className="font-medium mb-4">
-                                                {selected.presetType === "voice" ? "🎙️ Configurações de Voz" :
-                                                    selected.presetType === "video" ? "🎬 Configurações de Vídeo" :
-                                                        "⚙️ Configurações"}
-                                            </h3>
-
-                                            {selected.presetType === "voice" && renderVoiceForm()}
-                                            {selected.presetType === "video" && renderVideoForm()}
-                                            {selected.presetType !== "voice" && selected.presetType !== "video" && renderGenericForm()}
-                                        </div>
-
-                                        <div className="flex items-center gap-2 pt-4">
-                                            <Badge className={selected.isActive ? "bg-status-success/10 text-status-success" : "bg-muted"}>
-                                                {selected.isActive ? "ATIVO" : "INATIVO"}
-                                            </Badge>
-                                        </div>
-
-                                        {/* Used By Section */}
-                                        <UsedBySection
-                                            entityId={selected.id}
-                                            entityType="preset"
-                                            getUsedBy={getUsedBy}
-                                            className="mt-6"
+                                <div className="space-y-6">
+                                    <FieldWithHelp label="Nome" help="Nome amigável">
+                                        <Input
+                                            value={String(edited.name || "")}
+                                            onChange={(e) => setEdited({ ...edited, name: e.target.value })}
                                         />
+                                    </FieldWithHelp>
+
+                                    <div className="border-t pt-4">
+                                        <h3 className="font-medium mb-4">
+                                            {selected.presetType === "voice" ? "🎙️ Configurações de Voz" :
+                                                selected.presetType === "video" ? "🎬 Configurações de Vídeo" :
+                                                    "⚙️ Configurações"}
+                                        </h3>
+
+                                        {selected.presetType === "voice" && renderVoiceForm()}
+                                        {selected.presetType === "video" && renderVideoForm()}
+                                        {selected.presetType !== "voice" && selected.presetType !== "video" && renderGenericForm()}
                                     </div>
-                                </SplitViewDetail>
-                            ) : (
-                                <SplitViewDetailEmpty />
-                            )
-                        }
-                    />
-                </div>
+
+                                    <div className="flex items-center gap-2 pt-4">
+                                        <Badge className={selected.isActive ? "bg-status-success/10 text-status-success" : "bg-muted"}>
+                                            {selected.isActive ? "ATIVO" : "INATIVO"}
+                                        </Badge>
+                                    </div>
+
+                                    {/* Used By Section */}
+                                    <UsedBySection
+                                        entityId={selected.id}
+                                        entityType="preset"
+                                        getUsedBy={getUsedBy}
+                                        className="mt-6"
+                                    />
+                                </div>
+                            </SplitViewDetail>
+                        ) : (
+                            <SplitViewDetailEmpty />
+                        )
+                    }
+                />
             </div>
-        </div>
+        </>
     );
 }

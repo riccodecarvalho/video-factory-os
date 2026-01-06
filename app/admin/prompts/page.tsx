@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
 import {
     PageHeader,
     SectionCards,
@@ -145,11 +144,8 @@ export default function AdminPromptsPage() {
     };
 
     return (
-        <div className="flex min-h-screen bg-background">
-            <SuspenseSidebar />
-
-            <div className="flex-1 flex flex-col">
-                <PageHeader
+        <>
+                                        <PageHeader
                     breadcrumb={[
                         { label: "Admin", href: "/admin" },
                         { label: "Prompts" },
@@ -353,7 +349,6 @@ export default function AdminPromptsPage() {
                         }
                     />
                 </div>
-            </div>
-        </div>
+    </>
     );
 }
