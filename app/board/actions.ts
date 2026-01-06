@@ -1,7 +1,7 @@
 'use server';
 
 import { getDb } from '@/lib/db';
-import { jobs, jobEvents, jobTemplates, recipes } from '@/lib/db/schema';
+import { jobs, jobEvents, jobTemplates, recipes, artifacts } from '@/lib/db/schema';
 import { eq, desc, isNull } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type { JobState, BoardColumn } from '@/lib/engine/job-state-machine';
@@ -122,6 +122,25 @@ export async function getJobEvents(jobId: string, limit = 20) {
         .limit(limit);
 
     return events;
+}
+
+/**
+ * Obtém artifacts de um job filtrados por tipo
+ */
+export async function getJobArtifacts(jobId: string, type?: string) {
+    const query = db
+        .select()
+        .from(artifacts)
+        .where(eq(artifacts.jobId, jobId))
+        .orderBy(desc(artifacts.createdAt));
+
+    const allArtifacts = await query;
+
+    if (type) {
+        return allArtifacts.filter(a => a.type === type);
+    }
+
+    return allArtifacts;
 }
 
 // ============================================================================

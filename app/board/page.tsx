@@ -17,6 +17,7 @@ import { BoardColumn } from './components/BoardColumn';
 import { BoardCard } from './components/BoardCard';
 import { BoardTopbar } from './components/BoardTopbar';
 import { NewVideoModal } from './components/NewVideoModal';
+import { JobDetailsDrawer } from './components/JobDetailsDrawer';
 import {
     type BoardData,
     type BoardJob,
@@ -43,6 +44,7 @@ export default function BoardPage() {
     const [loading, setLoading] = useState(true);
     const [activeJob, setActiveJob] = useState<BoardJob | null>(null);
     const [showNewVideoModal, setShowNewVideoModal] = useState(false);
+    const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
     const [autoVideoEnabled, setAutoVideoEnabled] = useState(true);
     const [movingJobId, setMovingJobId] = useState<string | null>(null);
     const { toast } = useToast();
@@ -226,8 +228,7 @@ export default function BoardPage() {
     };
 
     const handleCardClick = (jobId: string) => {
-        // TODO: Open job details drawer
-        console.log('Open job details:', jobId);
+        setSelectedJobId(jobId);
     };
 
     if (loading) {
@@ -285,6 +286,14 @@ export default function BoardPage() {
                         setShowNewVideoModal(false);
                         loadBoard();
                     }}
+                />
+            )}
+
+            {selectedJobId && (
+                <JobDetailsDrawer
+                    jobId={selectedJobId}
+                    onClose={() => setSelectedJobId(null)}
+                    onJobUpdated={loadBoard}
                 />
             )}
         </div>
