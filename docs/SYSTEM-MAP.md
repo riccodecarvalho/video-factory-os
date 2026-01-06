@@ -1,7 +1,7 @@
 # 🗺️ Video Factory OS — System Map
 
 > **Documento de Referência Completa para Compartilhamento com IAs**  
-> **Versão:** 1.0 | **Data:** 2026-01-06 | **SHA:** `51e2ef9`
+> **Versão:** 1.1 | **Data:** 2026-01-06 | **SHA:** `24a3ffd`
 
 ---
 
@@ -29,7 +29,7 @@
 - **Checkpoint Idempotente**: Cada step pode ser retomado sem reprocessar anteriores.
 - **Local Render**: FFmpeg com VideoToolbox (Mac GPU) para render rápido.
 
-### 5 Módulos do Produto
+### 6 Módulos do Produto
 
 | Módulo | Descrição | Status |
 |--------|-----------|--------|
@@ -38,6 +38,7 @@
 | **Voice Lab** | Editor SSML, preview, TTS | ⏳ Não implementado |
 | **Video Factory** | Pipeline de jobs, render FFmpeg | ✅ Implementado |
 | **Dashboard** | Lista de jobs, logs, re-run | ✅ Implementado |
+| **Kanban Board** | Board visual de execução com drag-and-drop | ✅ **Novo** |
 
 ---
 
@@ -134,6 +135,13 @@
 |------|--------|
 | `/wizard` | Lista de jobs em modo wizard |
 | `/wizard/[jobId]` | Execução passo-a-passo do job |
+
+### Kanban Board (`/board`) ✨ Novo
+| Rota | Função |
+|------|--------|
+| `/board` | Board visual de execução com drag-and-drop |
+
+> **Documentação completa:** [`docs/video-factory-os-system-spec.md`](./video-factory-os-system-spec.md)
 
 ### Jobs (`/jobs/*`)
 | Rota | Função |
@@ -312,18 +320,19 @@ Sistema declarativo para composição de vídeo:
 
 | Métrica | Valor |
 |---------|-------|
-| Tabelas no DB | 15+ |
-| Páginas Admin | 11 |
-| Componentes VF | 31 |
-| Arquivos Engine | 27 |
+| Tabelas no DB | 18+ |
+| Páginas Admin/Board | 12 |
+| Componentes VF | 38 |
+| Arquivos Engine | 28 |
 | Executores | 6 |
 | Adapters | 1 |
-| Lines of Code (estimado) | ~15k |
+| Lines of Code (estimado) | ~18k |
 
 ---
 
 ## 🔗 Arquivos de Referência Importantes
 
+- **System Spec (Kanban + Engine)**: `docs/video-factory-os-system-spec.md` ⭐
 - **PRD**: `docs/04-produto/prd.md`
 - **Architecture**: `docs/04-produto/architecture.md`
 - **Troubleshooting**: `docs/00-regras/operacao/troubleshooting.md`
