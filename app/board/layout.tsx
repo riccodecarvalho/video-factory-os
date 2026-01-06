@@ -1,9 +1,14 @@
-import { Metadata } from 'next';
+"use client";
 
-export const metadata: Metadata = {
-    title: 'Board | Video Factory OS',
-    description: 'Kanban board para produção de vídeos',
-};
+/**
+ * Board Layout
+ * 
+ * Layout compartilhado para /board/*
+ * Inclui Sidebar + ToastProvider para consistência com o resto do app.
+ */
+
+import { SuspenseSidebar } from "@/components/layout/SuspenseSidebar";
+import { ToastProvider } from "@/components/ui/use-toast";
 
 export default function BoardLayout({
     children,
@@ -11,8 +16,13 @@ export default function BoardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-background">
-            {children}
-        </div>
+        <ToastProvider>
+            <div className="flex min-h-screen bg-background">
+                <SuspenseSidebar />
+                <div className="flex-1 flex flex-col">
+                    {children}
+                </div>
+            </div>
+        </ToastProvider>
     );
 }

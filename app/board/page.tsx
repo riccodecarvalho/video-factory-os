@@ -61,10 +61,12 @@ export default function BoardPage() {
         })
     );
 
-    // Load board data
+    // Load board data via API (não server action - evita POST /board spam)
     const loadBoard = useCallback(async () => {
         try {
-            const data = await getJobsBoard();
+            const response = await fetch('/api/board');
+            if (!response.ok) throw new Error('Failed to fetch board');
+            const data = await response.json();
             setBoardData(data);
             setAutoVideoEnabled(data.autoVideoEnabled);
         } catch (error) {
@@ -79,8 +81,8 @@ export default function BoardPage() {
         }
     }, [toast]);
 
-    // Check if any job is running
-    const hasRunningJob = useCallback((): boolean => {
+    // Check if any job is running (memoized without boardData dep to avoid loops)
+    const checkHasRunningJob = (): boolean => {
         if (!boardData) return false;
         for (const jobs of Object.values(boardData.columns)) {
             if (jobs.some(j => isRunningState(j.state))) {
@@ -88,10 +90,14 @@ export default function BoardPage() {
             }
         }
         return false;
-    }, [boardData]);
+    };
 
-    // Adaptive polling based on state
+    // Adaptive polling with Page Visibility API
     useEffect(() => {
+        let isMounted = true;
+        let isVisible = !document.hidden;
+
+        // Initial load
         loadBoard();
 
         const scheduleNextPoll = () => {
@@ -99,22 +105,45 @@ export default function BoardPage() {
                 clearTimeout(pollIntervalRef.current);
             }
 
-            const interval = hasRunningJob() ? POLL_INTERVALS.running : POLL_INTERVALS.idle;
+            // Don't poll if tab not visible
+            if (!isVisible || !isMounted) return;
+
+            const interval = checkHasRunningJob() ? POLL_INTERVALS.running : POLL_INTERVALS.idle;
             pollIntervalRef.current = setTimeout(() => {
-                loadBoard().then(() => {
-                    scheduleNextPoll();
-                });
+                if (isVisible && isMounted) {
+                    loadBoard().then(() => {
+                        scheduleNextPoll();
+                    });
+                }
             }, interval);
         };
 
+        // Handle visibility change
+        const handleVisibilityChange = () => {
+            isVisible = !document.hidden;
+            if (isVisible) {
+                // Tab became visible - reload and restart polling
+                loadBoard().then(scheduleNextPoll);
+            } else {
+                // Tab became hidden - stop polling
+                if (pollIntervalRef.current) {
+                    clearTimeout(pollIntervalRef.current);
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
         scheduleNextPoll();
 
         return () => {
+            isMounted = false;
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             if (pollIntervalRef.current) {
                 clearTimeout(pollIntervalRef.current);
             }
         };
-    }, [loadBoard, hasRunningJob]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [loadBoard]);
 
     // Drag handlers
     const handleDragStart = (event: DragStartEvent) => {
