@@ -239,15 +239,102 @@ export async function moveJobToColumn(jobId: string, targetColumn: BoardColumn) 
     };
 }
 
+// ============================================================================
+// Step Locking (anti-concurrency)
+// ============================================================================
+
+const LOCK_EXPIRATION_MS = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Adquire lock em um step específico.
+ * Se locked_at expirou (>5min), permite "steal lock".
+ * 
+ * @returns true se lock adquirido com sucesso
+ */
+async function acquireStepLock(
+    jobId: string,
+    stepKey: string,
+    lockerId: string
+): Promise<boolean> {
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const expirationThreshold = new Date(now.getTime() - LOCK_EXPIRATION_MS).toISOString();
+
+    // Busca step atual
+    const steps = await db
+        .select()
+        .from(jobSteps)
+        .where(eq(jobSteps.jobId, jobId));
+
+    const step = steps.find(s => s.stepKey === stepKey);
+    if (!step) {
+        // Step não existe ainda - será criado pelo runner, retorna true
+        return true;
+    }
+
+    // Se não está locked, adquire
+    if (!step.lockedAt) {
+        await db
+            .update(jobSteps)
+            .set({ lockedAt: nowIso, lockedBy: lockerId })
+            .where(eq(jobSteps.id, step.id));
+        return true;
+    }
+
+    // Se expirou (>5min), permite steal lock
+    if (step.lockedAt < expirationThreshold) {
+        await db
+            .update(jobSteps)
+            .set({ lockedAt: nowIso, lockedBy: lockerId })
+            .where(eq(jobSteps.id, step.id));
+
+        await emitJobEvent(jobId, 'lock_stolen', {
+            stepKey,
+            previousLocker: step.lockedBy,
+            newLocker: lockerId,
+            expiredAt: step.lockedAt,
+        });
+        return true;
+    }
+
+    // Já está locked por outro (e não expirou)
+    return false;
+}
+
+/**
+ * Libera lock de um step
+ */
+async function releaseStepLock(jobId: string, stepKey: string): Promise<void> {
+    const steps = await db
+        .select()
+        .from(jobSteps)
+        .where(eq(jobSteps.jobId, jobId));
+
+    const step = steps.find(s => s.stepKey === stepKey);
+    if (step) {
+        await db
+            .update(jobSteps)
+            .set({ lockedAt: null, lockedBy: null })
+            .where(eq(jobSteps.id, step.id));
+    }
+}
+
+// ============================================================================
+// Execute Until (Core Execution)
+// ============================================================================
+
 /**
  * executeUntil - Executa pipeline até o step especificado
  * 
  * Este é o coração do board. Quando o usuário arrasta um card:
- * 1. Adquire lock no job (via status check atômico)
- * 2. Verifica idempotência (steps já completos são skipados)
- * 3. Atualiza jobs.state para o estado da coluna
- * 4. Inicia execução via runJob (não-bloqueante)
- * 5. Retorna imediatamente (polling no frontend pega atualizações)
+ * 1. Valida estado do job
+ * 2. Adquire lock no step (via job_steps.locked_at/locked_by)
+ * 3. Verifica idempotência (steps já completos são skipados)
+ * 4. Atualiza jobs.state para o estado da coluna
+ * 5. Executa via runJob (SÍNCRONO - modo local-only)
+ * 
+ * ⚠️ MODO LOCAL-ONLY: A execução é síncrona nesta implementação.
+ * Para produção/serverless, deve ser substituída por fila/worker.
  * 
  * @see implementation_plan.md §35
  */
@@ -255,6 +342,8 @@ async function executeUntil(
     jobId: string,
     targetStepKey: string
 ): Promise<{ status: string; newState: JobState; lastStep?: string }> {
+    const lockerId = `board_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
     const [job] = await db
         .select()
         .from(jobs)
@@ -268,7 +357,7 @@ async function executeUntil(
     const currentStatus = job.status;
 
     // ================================================================
-    // 1. VALIDAÇÃO DE ESTADO (locking via status)
+    // 1. VALIDAÇÃO DE ESTADO
     // ================================================================
 
     if (currentStatus === 'running') {
@@ -282,87 +371,128 @@ async function executeUntil(
     }
 
     // ================================================================
-    // 2. VERIFICAR IDEMPOTÊNCIA (step já completo?)
+    // 2. ADQUIRIR LOCK NO STEP
     // ================================================================
 
-    const existingSteps = await db
-        .select()
-        .from(jobSteps)
-        .where(eq(jobSteps.jobId, jobId));
-
-    const targetStep = existingSteps.find(s => s.stepKey === targetStepKey);
-
-    if (targetStep?.status === 'success') {
-        const stepArtifacts = await db
-            .select()
-            .from(artifacts)
-            .where(eq(artifacts.jobId, jobId));
-
-        if (stepArtifacts.length > 0) {
-            await emitJobEvent(jobId, 'step_skipped', {
-                step: targetStepKey,
-                reason: 'already_completed',
-            });
-
-            const newState = getStateAfterStep(targetStepKey, job.autoVideoEnabled ?? true);
-            return { status: 'completed', newState, lastStep: targetStepKey };
-        }
+    const lockAcquired = await acquireStepLock(jobId, targetStepKey, lockerId);
+    if (!lockAcquired) {
+        throw new Error(`Step "${targetStepKey}" está locked por outro processo`);
     }
 
-    // ================================================================
-    // 3. ADQUIRIR LOCK (update atômico de status)
-    // ================================================================
+    try {
+        // ================================================================
+        // 3. VERIFICAR IDEMPOTÊNCIA (step já completo?)
+        // ================================================================
 
-    const now = new Date().toISOString();
-    const newState = getStateForColumnStart(getColumnForTargetStep(targetStepKey));
+        const existingSteps = await db
+            .select()
+            .from(jobSteps)
+            .where(eq(jobSteps.jobId, jobId));
 
-    await db
-        .update(jobs)
-        .set({
-            state: newState,
-            status: 'running' as const,
-            currentStep: targetStepKey,
-            updatedAt: now,
-            startedAt: job.startedAt || now,
-        })
-        .where(eq(jobs.id, jobId));
+        const targetStep = existingSteps.find(s => s.stepKey === targetStepKey);
 
-    // ================================================================
-    // 4. EMITIR EVENTOS
-    // ================================================================
+        if (targetStep?.status === 'success') {
+            const stepArtifacts = await db
+                .select()
+                .from(artifacts)
+                .where(eq(artifacts.jobId, jobId));
 
-    await emitJobEvent(jobId, 'auto_transition', {
-        fromState: currentState,
-        toState: newState,
-        targetStep: targetStepKey,
-        reason: 'executeUntil',
-    });
+            if (stepArtifacts.length > 0) {
+                await emitJobEvent(jobId, 'step_skipped', {
+                    step: targetStepKey,
+                    reason: 'already_completed',
+                });
 
-    await emitJobEvent(jobId, 'step_started', { step: targetStepKey });
+                const newState = getStateAfterStep(targetStepKey, job.autoVideoEnabled ?? true);
+                await releaseStepLock(jobId, targetStepKey);
+                return { status: 'completed', newState, lastStep: targetStepKey };
+            }
+        }
 
-    // ================================================================
-    // 5. INICIAR EXECUÇÃO (não-bloqueante via background)
-    // ================================================================
+        // ================================================================
+        // 4. ATUALIZAR ESTADO DO JOB
+        // ================================================================
 
-    const { runJob } = await import('@/lib/engine/runner');
+        const now = new Date().toISOString();
+        const newState = getStateForColumnStart(getColumnForTargetStep(targetStepKey));
 
-    runJob(jobId).then(async (result) => {
+        await db
+            .update(jobs)
+            .set({
+                state: newState,
+                status: 'running' as const,
+                currentStep: targetStepKey,
+                updatedAt: now,
+                startedAt: job.startedAt || now,
+            })
+            .where(eq(jobs.id, jobId));
+
+        // ================================================================
+        // 5. EMITIR EVENTOS
+        // ================================================================
+
+        await emitJobEvent(jobId, 'auto_transition', {
+            fromState: currentState,
+            toState: newState,
+            targetStep: targetStepKey,
+            reason: 'executeUntil',
+            lockerId,
+        });
+
+        await emitJobEvent(jobId, 'step_started', { step: targetStepKey });
+
+        // ================================================================
+        // 6. EXECUTAR RUNSJOB (SÍNCRONO - LOCAL ONLY)
+        // ⚠️ Para produção, substituir por enqueue para worker
+        // ================================================================
+
+        const { runJob } = await import('@/lib/engine/runner');
+
+        const result = await runJob(jobId);
+
         if (!result.success) {
             await emitJobEvent(jobId, 'step_failed', {
                 step: targetStepKey,
                 error: result.error,
             });
-        } else {
-            await emitJobEvent(jobId, 'job_completed', { lastStep: targetStepKey });
+
+            await releaseStepLock(jobId, targetStepKey);
+
+            // Atualiza estado para FAILED
+            const [updatedJob] = await db.select().from(jobs).where(eq(jobs.id, jobId));
+            return {
+                status: 'failed',
+                newState: (updatedJob?.state || 'FAILED') as JobState,
+                lastStep: targetStepKey
+            };
         }
-    }).catch(async (error) => {
+
+        await emitJobEvent(jobId, 'job_completed', { lastStep: targetStepKey });
+
+        // ================================================================
+        // 7. LIBERAR LOCK E RETORNAR
+        // ================================================================
+
+        await releaseStepLock(jobId, targetStepKey);
+
+        const [finalJob] = await db.select().from(jobs).where(eq(jobs.id, jobId));
+        return {
+            status: 'completed',
+            newState: (finalJob?.state || 'DONE') as JobState,
+            lastStep: targetStepKey
+        };
+
+    } catch (error) {
+        // Sempre libera lock em caso de erro
+        await releaseStepLock(jobId, targetStepKey);
+
         await emitJobEvent(jobId, 'step_failed', {
             step: targetStepKey,
             error: error instanceof Error ? error.message : 'Unknown error',
         });
-    });
 
-    return { status: 'running', newState, lastStep: targetStepKey };
+        throw error;
+    }
 }
 
 /**
