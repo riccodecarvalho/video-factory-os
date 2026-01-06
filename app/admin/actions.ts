@@ -482,6 +482,8 @@ export async function updateProject(id: string, data: Partial<{
     voicePitch: string;
     llmTemperature: number;
     llmMaxTokens: number;
+    imageStylePrefix: string;
+    imageStyleSuffix: string;
 }>) {
     const db = getDb();
 
@@ -513,13 +515,14 @@ export async function toggleProjectActive(id: string, isActive: boolean) {
 // PROJECT BINDINGS - Hub Central
 // ============================================
 
-export type ProjectBindingSlot = 'provider_llm' | 'provider_tts' | 'preset_voice' | 'preset_video' | 'recipe';
+export type ProjectBindingSlot = 'provider_llm' | 'provider_tts' | 'preset_voice' | 'preset_video' | 'recipe' | 'kb';
 
 export interface ProjectBinding {
     slot: ProjectBindingSlot;
     targetId: string;
     targetName: string;
     targetSlug: string;
+    isActive?: boolean;
 }
 
 export async function getProjectBindings(projectId: string): Promise<ProjectBinding[]> {
@@ -535,6 +538,7 @@ export async function getProjectBindings(projectId: string): Promise<ProjectBind
     const presetsVoice = await db.select().from(schema.presetsVoice);
     const presetsVideo = await db.select().from(schema.presetsVideo);
     const recipes = await db.select().from(schema.recipes);
+    const kbs = await db.select().from(schema.knowledgeBase);
 
     const result: ProjectBinding[] = [];
 
@@ -542,6 +546,7 @@ export async function getProjectBindings(projectId: string): Promise<ProjectBind
         let targetName = '';
         let targetSlug = '';
         let slot: ProjectBindingSlot | null = null;
+        let isActive = b.isActive; // Bindings podem estar inativos
 
         if (b.slot === 'provider') {
             const provider = providers.find(p => p.id === b.targetId);
@@ -564,10 +569,17 @@ export async function getProjectBindings(projectId: string): Promise<ProjectBind
                 targetSlug = preset.slug;
                 slot = 'preset_video';
             }
+        } else if (b.slot === 'kb') {
+            const kb = kbs.find(k => k.id === b.targetId);
+            if (kb) {
+                targetName = kb.name;
+                targetSlug = kb.slug;
+                slot = 'kb';
+            }
         }
 
         if (slot) {
-            result.push({ slot, targetId: b.targetId, targetName, targetSlug });
+            result.push({ slot, targetId: b.targetId, targetName, targetSlug, isActive });
         }
     }
 
@@ -634,6 +646,76 @@ export async function updateProjectBinding(projectId: string, slot: ProjectBindi
         });
     }
 
+    revalidatePath("/admin/projects");
+}
+
+export async function toggleProjectKbBinding(projectId: string, kbId: string, isActive: boolean) {
+    const db = getDb();
+    const now = new Date().toISOString();
+
+    // 1. Get Project to find active recipe (needed for binding requirement but we can use generic or find one)
+    // Actually bindings query execution, so we bind 'kb' to 'script' or '*' step.
+    const stepKey = '*'; // Global KB for project
+
+    if (isActive) {
+        // Create or Activation
+        // Check if exists
+        const existing = await db.select().from(schema.executionBindings).where(
+            and(
+                eq(schema.executionBindings.projectId, projectId),
+                eq(schema.executionBindings.slot, 'kb'),
+                eq(schema.executionBindings.targetId, kbId)
+            )
+        );
+
+        if (existing.length === 0) {
+            // Need a recipeId for the constraint?
+            // Schema executionBindings has recipeId NOT NULL.
+            // We need to fetch the active recipe for the project first.
+            const projectRecipe = await db.select().from(schema.executionBindings).where(
+                and(
+                    eq(schema.executionBindings.projectId, projectId),
+                    eq(schema.executionBindings.slot, 'recipe')
+                )
+            );
+
+            if (projectRecipe.length === 0) {
+                throw new Error("Project must have a Recipe selected before adding Knowledge Base documents.");
+            }
+
+            const recipeId = projectRecipe[0].targetId;
+
+            await db.insert(schema.executionBindings).values({
+                id: uuid(),
+                scope: 'project',
+                projectId,
+                recipeId,
+                stepKey,
+                slot: 'kb',
+                targetId: kbId,
+                priority: 0,
+                isActive: true,
+                createdAt: now,
+                updatedAt: now,
+            });
+        } else {
+            // Reactivate
+            await db.update(schema.executionBindings)
+                .set({ isActive: true, updatedAt: now })
+                .where(eq(schema.executionBindings.id, existing[0].id));
+        }
+    } else {
+        // Deactivation (Soft delete or set isActive false?) 
+        // Let's set isActive false to keep history, or delete if we want clean list. 
+        // User probably expects 'removed'.
+        await db.delete(schema.executionBindings).where(
+            and(
+                eq(schema.executionBindings.projectId, projectId),
+                eq(schema.executionBindings.slot, 'kb'),
+                eq(schema.executionBindings.targetId, kbId)
+            )
+        );
+    }
     revalidatePath("/admin/projects");
 }
 
