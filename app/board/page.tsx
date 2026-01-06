@@ -159,7 +159,19 @@ export default function BoardPage() {
         if (!over || !boardData) return;
 
         const jobId = active.id as string;
-        const targetColumn = over.id as BoardColumnType;
+        const overId = over.id as string;
+
+        // Derive targetColumn: over.id pode ser uma coluna ou um jobId
+        let targetColumn: BoardColumnType;
+        if (COLUMNS.includes(overId as BoardColumnType)) {
+            // Dropped directly on column
+            targetColumn = overId as BoardColumnType;
+        } else {
+            // Dropped on another card - find that card's column
+            const overJobColumn = findJobColumn(overId);
+            if (!overJobColumn) return; // Invalid drop target
+            targetColumn = overJobColumn;
+        }
 
         // Find job and source column
         const job = findJobById(jobId);
@@ -167,7 +179,10 @@ export default function BoardPage() {
 
         const sourceColumn = findJobColumn(jobId);
 
-        // Don't do anything if dropped in same column
+        // Debug log (temporary)
+        console.log('[DragEnd]', { jobId, from: sourceColumn, to: targetColumn, overId });
+
+        // Don't do anything if dropped in same column (silent no-op)
         if (sourceColumn === targetColumn) return;
 
         // ============================================================
