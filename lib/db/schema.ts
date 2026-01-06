@@ -279,15 +279,62 @@ export const jobs = sqliteTable('jobs', {
     // Manifest (snapshots de config usados)
     manifest: text('manifest'), // JSON completo
 
-    // Status
+    // Status (legacy - use 'state' for DarkFlow)
     status: text('status').notNull().default('pending'), // 'pending', 'running', 'completed', 'failed'
     executionMode: text('execution_mode').notNull().default('auto'), // 'auto' | 'wizard'
+
+    // ===========================================
+    // DarkFlow State Machine
+    // ===========================================
+    state: text('state').default('DRAFT'), // JobState from job-state-machine.ts
+    failedStep: text('failed_step'), // Step que falhou
+    errorMessage: text('error_message'), // Mensagem de erro detalhada
+    errorCode: text('error_code'), // Código de erro
+    retryCount: integer('retry_count').default(0),
+
+    // ===========================================
+    // DarkFlow Config Fields
+    // ===========================================
+    // Content details
+    language: text('language').default('pt-BR'), // 'pt-BR', 'es-ES', 'en-US'
+    durationPreset: text('duration_preset').default('medium'), // 'short', 'medium', 'long'
+    storyType: text('story_type').default('historia_geral'), // 'historia_geral', 'drama', 'misterio'
+
+    // Voice
+    voicePresetId: text('voice_preset_id'), // FK to presets_voice
+
+    // Visual mode
+    visualMode: text('visual_mode').default('automatic'), // 'manual_upload', 'manual_ai_single', 'manual_ai_batch', 'automatic'
+    imagesCount: integer('images_count').default(6), // 1-10 for automatic
+    imagesLoop: integer('images_loop', { mode: 'boolean' }).default(false),
+    imagesQuality: text('images_quality').default('1k'), // '1k', '2k', '4k'
+
+    // Finishing
+    captionsEnabled: integer('captions_enabled', { mode: 'boolean' }).default(true),
+    zoomEnabled: integer('zoom_enabled', { mode: 'boolean' }).default(true),
+    bgMusicArtifactId: text('bg_music_artifact_id'), // FK to artifacts
+
+    // Auto Video toggle (global override per job)
+    autoVideoEnabled: integer('auto_video_enabled', { mode: 'boolean' }).default(true),
+
+    // ===========================================
+    // Multi-tenant
+    // ===========================================
+    ownerUserId: text('owner_user_id'),
+    createdBy: text('created_by'),
+
+    // ===========================================
+    // QoS / Queue (prepared for future)
+    // ===========================================
+    priorityTier: text('priority_tier').default('standard'), // 'standard', 'priority', 'dedicated'
+    queuePosition: integer('queue_position'),
+    etaSeconds: integer('eta_seconds'),
 
     // Progress
     currentStep: text('current_step'),
     progress: integer('progress').default(0), // 0-100
 
-    // Error tracking
+    // Error tracking (legacy)
     lastError: text('last_error'),
 
     // Timestamps
@@ -328,6 +375,12 @@ export const jobSteps = sqliteTable('job_steps', {
     // Duration
     durationMs: integer('duration_ms'),
 
+    // ===========================================
+    // DarkFlow Locking (anti-concurrency)
+    // ===========================================
+    lockedAt: text('locked_at'),
+    lockedBy: text('locked_by'), // worker/session ID
+
     // Timestamps
     startedAt: text('started_at'),
     completedAt: text('completed_at'),
@@ -352,9 +405,11 @@ export const artifacts = sqliteTable('artifacts', {
 
     // Versioning (não sobrescreve)
     version: integer('version').notNull().default(1),
+    isLatest: integer('is_latest', { mode: 'boolean' }).notNull().default(true),
 
     // Metadata
     metadata: text('metadata'), // JSON: {format, duration, etc}
+    mimeType: text('mime_type'), // MIME type for serving
 
     createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
 });
@@ -497,4 +552,45 @@ export const sceneMarkers = sqliteTable('scene_markers', {
     color: text('color'), // For UI highlight
 
     createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
+});
+
+// ============================================
+// JOB_EVENTS - Telemetria de execução (DarkFlow)
+// ============================================
+export const jobEvents = sqliteTable('job_events', {
+    id: text('id').primaryKey(),
+    jobId: text('job_id').notNull(),
+
+    // Step context (optional for job-level events)
+    stepKey: text('step_key'),
+
+    // Event type
+    eventType: text('event_type').notNull(), // 'step_started', 'step_progress', 'artifact_written', 'step_completed', 'step_failed', 'job_completed', 'auto_transition'
+
+    // Payload (JSON)
+    payload: text('payload'), // JSON: {percent, message, fromState, toState, etc}
+
+    createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
+});
+
+// ============================================
+// JOB_TEMPLATES - Modelos salvos (DarkFlow)
+// ============================================
+export const jobTemplates = sqliteTable('job_templates', {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    description: text('description'),
+
+    // Recipe reference
+    recipeId: text('recipe_id').notNull(),
+
+    // Config snapshot (JSON)
+    configJson: text('config_json').notNull(), // JSON: {language, duration, storyType, voicePresetId, visualMode, etc}
+
+    // Owner
+    createdBy: text('created_by'),
+
+    // Timestamps
+    createdAt: text('created_at').notNull().default('CURRENT_TIMESTAMP'),
+    updatedAt: text('updated_at').notNull().default('CURRENT_TIMESTAMP'),
 });

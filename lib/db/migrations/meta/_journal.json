@@ -8,6 +8,13 @@
       "when": 1765650274595,
       "tag": "0000_red_turbo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1767695624071,
+      "tag": "0001_easy_madame_masque",
+      "breakpoints": true
     }
   ]
 }
