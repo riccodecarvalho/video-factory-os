@@ -1128,7 +1128,8 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
     // 1. Load job
     const [job] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, jobId));
     if (!job) return { success: false, error: "Job não encontrado" };
-    if (job.status === "running") return { success: false, error: "Job já está em execução" };
+    // Note: We allow 'running' status because executeUntil sets it before calling runJob
+    // The step-level locking in executeUntil prevents concurrent execution
     if (job.status === "completed") return { success: false, error: "Job já foi concluído" };
 
     // 2. Load recipe
@@ -1254,6 +1255,8 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
             progress,
             updatedAt: new Date().toISOString(),
         }).where(eq(schema.jobs.id, jobId));
+
+        console.log(`[Runner] Executing step ${stepDef.key} (${kind}) - progress: ${progress}%`);
 
         // Execute based on kind
         let stepManifest: StepManifest;
