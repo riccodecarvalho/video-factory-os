@@ -5,7 +5,7 @@
  * Evita nonsense como "voice_preset" em step de script.
  */
 
-export type StepKind = 'llm' | 'tts' | 'transform' | 'render' | 'export';
+export type StepKind = 'llm' | 'tts' | 'transform' | 'render' | 'export' | 'scene_prompts' | 'generate_images';
 
 export type SlotType =
     | 'prompt'
@@ -54,6 +54,17 @@ export const STEP_CAPABILITIES: Record<StepKind, StepCapability> = {
         requiredSlots: [],
         optionalSlots: [],
     },
+    scene_prompts: {
+        kind: 'scene_prompts',
+        requiredSlots: [],
+        optionalSlots: ['prompt', 'provider', 'kb'],
+        providerType: 'llm',
+    },
+    generate_images: {
+        kind: 'generate_images',
+        requiredSlots: [],
+        optionalSlots: [],
+    },
 };
 
 // Mapeamento step_key → kind (baseado no pipeline típico)
@@ -66,6 +77,11 @@ export const STEP_KIND_MAP: Record<string, StepKind> = {
     tts: 'tts',
     render: 'render',
     export: 'export',
+    // Novos kinds para pipeline de imagens
+    prompts_cenas: 'scene_prompts',
+    scene_prompts: 'scene_prompts',
+    gerar_imagens: 'generate_images',
+    generate_images: 'generate_images',
 };
 
 // Helpers
@@ -109,4 +125,7 @@ export const KIND_LABELS: Record<StepKind, string> = {
     transform: 'Transform',
     render: 'Render (Vídeo)',
     export: 'Export',
+    scene_prompts: 'Scene Prompts (Imagens)',
+    generate_images: 'Gerar Imagens',
 };
+

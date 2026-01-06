@@ -1,7 +1,7 @@
 export function normalizeScriptToSingleVoice(script: string): string {
     if (!script) return "";
 
-    let clean = script
+    const clean = script
         // Remove padrões [PAUSA], [CORTA], etc
         .replace(/\[PAUSA[^\]]*\]/gi, "")
         // Remove tags de voz (voz: NARRADROA), (voz: XIMENA) e espaços subsequentes

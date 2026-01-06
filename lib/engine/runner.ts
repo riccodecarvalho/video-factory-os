@@ -34,6 +34,8 @@ import { exportJob } from "./export";
 import { buildTimelineFromRecipe } from "./recipe-to-timeline";
 import { executeRenderPlan, getExecutionSummary } from "./timeline-executor";
 import { compileTimeline } from "@/lib/timeline";
+import { executeStepScenePrompts } from "./executors/scene-prompts";
+import { executeStepGenerateImages } from "./executors/generate-images";
 
 type JobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 type StepStatus = "pending" | "running" | "success" | "failed" | "skipped";
@@ -721,7 +723,7 @@ async function executeStepTransform(
     // =============================================
     // CLEAN SCRIPT (mirroring n8n Parse Guión logic)
     // =============================================
-    let cleanScript = rawScript
+    const cleanScript = rawScript
         // Remove voice tags: (voz: NARRADORA), (voz: ANTAGONISTA), (voz: OTRO), etc.
         .replace(/\(voz:\s*[^)]+\)/gi, "")
         // Remove pause markers: [PAUSA], [PAUSA CORTA], [PAUSA LARGA]
@@ -815,6 +817,9 @@ async function executeStepRender(
             };
         }
 
+        // Extract generated images output (if available)
+        const gerarImagensOutput = getPreviousOutputKey(previousOutputs, 'gerar_imagens') as { images?: Array<unknown>; images_dir?: string } | undefined;
+
         // Build Timeline from recipe context
         const timeline = buildTimelineFromRecipe({
             jobId,
@@ -829,6 +834,10 @@ async function executeStepRender(
                     audioPath: ttsOutput.audioPath,
                     durationSec: ttsOutput.durationSec,
                 },
+                gerar_imagens: gerarImagensOutput ? {
+                    images: gerarImagensOutput.images as Array<{ scene_number: number; image_path: string; timing: { start: string; end: string; duration_seconds: number }; success: boolean }>,
+                    images_dir: gerarImagensOutput.images_dir,
+                } : undefined,
             },
             input,
         });
@@ -1265,6 +1274,12 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
             case "export":
                 stepManifest = await executeStepExport(stepDef, stepConfig, input, previousOutputs, allLogs, jobId);
                 break;
+            case "scene_prompts":
+                stepManifest = await executeStepScenePrompts(stepDef, stepConfig, input, previousOutputs, allLogs, jobId);
+                break;
+            case "generate_images":
+                stepManifest = await executeStepGenerateImages(stepDef, stepConfig, input, previousOutputs, allLogs, jobId);
+                break;
             default:
                 stepManifest = await executeStepTransform(stepDef, stepConfig, input, previousOutputs, allLogs, jobId);
         }
@@ -1297,6 +1312,18 @@ export async function runJob(jobId: string): Promise<{ success: boolean; error?:
 
             // WIZARD MODE: Pause after each successful step
             if (currentJob?.executionMode === "wizard") {
+                // Verify step status was persisted
+                const [verificacaoStep] = await db.select().from(schema.jobSteps).where(eq(schema.jobSteps.id, step.id));
+                if (verificacaoStep.status !== "success") {
+                    console.error(`[Runner] CRITICAL: Step ${stepDef.key} status mismatch! forcing update...`);
+                    await db.update(schema.jobSteps).set({
+                        status: "success",
+                        completedAt: stepCompletedAt,
+                        durationMs,
+                        outputRefs: JSON.stringify(stepManifest.response?.output || {}),
+                    }).where(eq(schema.jobSteps.id, step.id));
+                }
+
                 // Update job to "pending" (waiting for user approval)
                 await db.update(schema.jobs).set({
                     status: "pending",

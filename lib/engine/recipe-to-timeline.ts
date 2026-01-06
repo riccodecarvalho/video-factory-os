@@ -38,6 +38,18 @@ export interface RecipeContext {
     avatarPath?: string;
 }
 
+/** Image generated for a scene */
+export interface GeneratedImage {
+    scene_number: number;
+    image_path: string;
+    timing: {
+        start: string;
+        end: string;
+        duration_seconds: number;
+    };
+    success: boolean;
+}
+
 export interface PreviousOutputs {
     /** TTS output with audio path */
     tts?: {
@@ -47,6 +59,11 @@ export interface PreviousOutputs {
     /** Subtitles path (SRT) */
     subtitles?: {
         srtPath?: string;
+    };
+    /** Generated images from gerar_imagens step */
+    gerar_imagens?: {
+        images?: GeneratedImage[];
+        images_dir?: string;
     };
 }
 
@@ -112,7 +129,36 @@ export function buildTimelineFromRecipe(options: BuildTimelineOptions): Timeline
         ));
     }
 
-    // 3. Subtitles (if available)
+    // 3. Generated Images (with timing from scene prompts)
+    const generatedImages = previousOutputs.gerar_imagens?.images || [];
+    const successfulImages = generatedImages.filter(img => img.success && img.image_path && existsSync(img.image_path));
+
+    if (successfulImages.length > 0) {
+        for (const img of successfulImages) {
+            // Parse timing (format "M:SS")
+            const parseTime = (timeStr: string): number => {
+                const parts = timeStr.split(':');
+                return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            };
+
+            const startSec = parseTime(img.timing.start);
+            const durationSec = img.timing.duration_seconds;
+
+            elements.push(createVideoElement(
+                `img-scene-${img.scene_number}`,
+                img.image_path,
+                durationSec,
+                {
+                    layer: layerIndex, // Same layer for all images (they replace each other)
+                    start: startSec,
+                    props: { scale: 1, opacity: 1 },
+                }
+            ));
+        }
+        layerIndex++;
+    }
+
+    // 4. Subtitles (if available)
     const srtPath = previousOutputs.subtitles?.srtPath || findSrtPath(jobId);
     if (srtPath && existsSync(srtPath)) {
         elements.push(createSubtitleElement(

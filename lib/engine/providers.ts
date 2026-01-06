@@ -189,6 +189,14 @@ export async function executeLLM(request: LLMRequest): Promise<LLMResponse> {
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         const errorStack = error instanceof Error ? error.stack?.slice(0, 500) : undefined;
+        // @ts-ignore - 'cause' property exists on Error in modern environments
+        const errorCause = error instanceof Error ? error.cause : undefined;
+
+        console.error("[Claude Provider] Network Error Details:", {
+            message: errorMessage,
+            cause: errorCause,
+            stack: errorStack
+        });
 
         return {
             success: false,
@@ -196,7 +204,7 @@ export async function executeLLM(request: LLMRequest): Promise<LLMResponse> {
             duration_ms: Date.now() - startTime,
             error: {
                 code: "NETWORK_ERROR",
-                message: errorMessage,
+                message: `${errorMessage} ${errorCause ? `(Cause: ${String(errorCause)})` : ''}`,
                 provider: request.provider.slug,
                 payloadSizeBytes,
                 stack: errorStack,
