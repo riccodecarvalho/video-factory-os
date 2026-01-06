@@ -1,7 +1,7 @@
 'use server';
 
 import { getDb } from '@/lib/db';
-import { jobs, jobEvents, jobTemplates, recipes, artifacts } from '@/lib/db/schema';
+import { jobs, jobEvents, jobTemplates, recipes, artifacts, jobSteps } from '@/lib/db/schema';
 import { eq, desc, isNull } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import type { JobState, BoardColumn } from '@/lib/engine/job-state-machine';
@@ -243,10 +243,11 @@ export async function moveJobToColumn(jobId: string, targetColumn: BoardColumn) 
  * executeUntil - Executa pipeline até o step especificado
  * 
  * Este é o coração do board. Quando o usuário arrasta um card:
- * 1. Resolve targetStep da coluna
- * 2. Inicia execução incremental
- * 3. Runner atualiza jobs.state conforme avança
- * 4. Board poll pega os novos estados
+ * 1. Adquire lock no job (via status check atômico)
+ * 2. Verifica idempotência (steps já completos são skipados)
+ * 3. Atualiza jobs.state para o estado da coluna
+ * 4. Inicia execução via runJob (não-bloqueante)
+ * 5. Retorna imediatamente (polling no frontend pega atualizações)
  * 
  * @see implementation_plan.md §35
  */
@@ -264,42 +265,72 @@ async function executeUntil(
     }
 
     const currentState = (job.state || 'DRAFT') as JobState;
+    const currentStatus = job.status;
 
-    // Validar estado
-    if (currentState.endsWith('_RUNNING') || currentState === 'SCRIPTING') {
+    // ================================================================
+    // 1. VALIDAÇÃO DE ESTADO (locking via status)
+    // ================================================================
+
+    if (currentStatus === 'running') {
         throw new Error('Job já em execução');
     }
     if (currentState === 'CANCELLED') {
-        throw new Error('Job cancelado. Use resume()');
+        throw new Error('Job cancelado. Use resumeJob() primeiro');
+    }
+    if (currentState === 'DONE') {
+        throw new Error('Job já concluído');
     }
 
     // ================================================================
-    // TODO: Integrar com o runner real
-    // Por enquanto, apenas atualiza o estado e emite eventos
-    // O runner real vai:
-    // 1. Percorrer recipe.pipeline em ordem
-    // 2. Verificar se step já completou (idempotência)
-    // 3. Adquirir lock antes de executar
-    // 4. Executar step e atualizar jobs.state
-    // 5. Emitir eventos de progresso
-    // 6. Parar ao atingir targetStepKey
+    // 2. VERIFICAR IDEMPOTÊNCIA (step já completo?)
     // ================================================================
 
-    const newState = getStateForColumnStart(getColumnForTargetStep(targetStepKey));
-    const now = new Date().toISOString();
+    const existingSteps = await db
+        .select()
+        .from(jobSteps)
+        .where(eq(jobSteps.jobId, jobId));
 
-    // Atualiza estado para iniciar execução
+    const targetStep = existingSteps.find(s => s.stepKey === targetStepKey);
+
+    if (targetStep?.status === 'success') {
+        const stepArtifacts = await db
+            .select()
+            .from(artifacts)
+            .where(eq(artifacts.jobId, jobId));
+
+        if (stepArtifacts.length > 0) {
+            await emitJobEvent(jobId, 'step_skipped', {
+                step: targetStepKey,
+                reason: 'already_completed',
+            });
+
+            const newState = getStateAfterStep(targetStepKey, job.autoVideoEnabled ?? true);
+            return { status: 'completed', newState, lastStep: targetStepKey };
+        }
+    }
+
+    // ================================================================
+    // 3. ADQUIRIR LOCK (update atômico de status)
+    // ================================================================
+
+    const now = new Date().toISOString();
+    const newState = getStateForColumnStart(getColumnForTargetStep(targetStepKey));
+
     await db
         .update(jobs)
         .set({
             state: newState,
+            status: 'running' as const,
             currentStep: targetStepKey,
             updatedAt: now,
             startedAt: job.startedAt || now,
         })
         .where(eq(jobs.id, jobId));
 
-    // Emite evento de transição
+    // ================================================================
+    // 4. EMITIR EVENTOS
+    // ================================================================
+
     await emitJobEvent(jobId, 'auto_transition', {
         fromState: currentState,
         toState: newState,
@@ -307,16 +338,52 @@ async function executeUntil(
         reason: 'executeUntil',
     });
 
-    // Emite evento de início do step
-    await emitJobEvent(jobId, 'step_started', {
-        step: targetStepKey,
+    await emitJobEvent(jobId, 'step_started', { step: targetStepKey });
+
+    // ================================================================
+    // 5. INICIAR EXECUÇÃO (não-bloqueante via background)
+    // ================================================================
+
+    const { runJob } = await import('@/lib/engine/runner');
+
+    runJob(jobId).then(async (result) => {
+        if (!result.success) {
+            await emitJobEvent(jobId, 'step_failed', {
+                step: targetStepKey,
+                error: result.error,
+            });
+        } else {
+            await emitJobEvent(jobId, 'job_completed', { lastStep: targetStepKey });
+        }
+    }).catch(async (error) => {
+        await emitJobEvent(jobId, 'step_failed', {
+            step: targetStepKey,
+            error: error instanceof Error ? error.message : 'Unknown error',
+        });
     });
 
-    return {
-        status: 'running',
-        newState,
-        lastStep: targetStepKey,
+    return { status: 'running', newState, lastStep: targetStepKey };
+}
+
+/**
+ * Deriva o estado após um step completar
+ */
+function getStateAfterStep(stepKey: string, autoVideoEnabled: boolean): JobState {
+    const mapping: Record<string, JobState> = {
+        'roteiro': 'SCRIPT_DONE',
+        'tts': 'TTS_DONE',
+        'export': 'DONE',
     };
+
+    const nextState = mapping[stepKey];
+    if (!nextState) return 'READY';
+
+    if (autoVideoEnabled) {
+        if (nextState === 'SCRIPT_DONE') return 'TTS_RUNNING';
+        if (nextState === 'TTS_DONE') return 'RENDER_RUNNING';
+    }
+
+    return nextState;
 }
 
 /**
@@ -387,19 +454,21 @@ export async function cancelJob(jobId: string) {
         .update(jobs)
         .set({
             state: 'CANCELLED',
+            status: 'cancelled' as const,
             updatedAt: new Date().toISOString(),
         })
         .where(eq(jobs.id, jobId));
 
     await emitJobEvent(jobId, 'step_failed', {
         reason: 'cancelled_by_user',
+        previousState: job.state,
     });
 
     return { success: true };
 }
 
 /**
- * Retoma um job cancelado
+ * Retoma um job cancelado ou falho
  */
 export async function resumeJob(jobId: string) {
     const [job] = await db
@@ -407,18 +476,34 @@ export async function resumeJob(jobId: string) {
         .from(jobs)
         .where(eq(jobs.id, jobId));
 
-    if (!job || job.state !== 'CANCELLED') {
-        throw new Error('Job não encontrado ou não está cancelado');
+    if (!job) {
+        throw new Error('Job não encontrado');
     }
 
-    // Volta para READY
+    const currentState = (job.state || 'DRAFT') as JobState;
+
+    if (currentState !== 'CANCELLED' && currentState !== 'FAILED') {
+        throw new Error('Job não está cancelado ou falho');
+    }
+
+    // Incrementa retryCount e volta para READY
     await db
         .update(jobs)
         .set({
             state: 'READY',
+            status: 'pending' as const,
+            retryCount: (job.retryCount ?? 0) + 1,
+            lastError: null,
             updatedAt: new Date().toISOString(),
         })
         .where(eq(jobs.id, jobId));
+
+    await emitJobEvent(jobId, 'auto_transition', {
+        fromState: currentState,
+        toState: 'READY',
+        reason: 'resume',
+        retryCount: (job.retryCount ?? 0) + 1,
+    });
 
     return { success: true };
 }
