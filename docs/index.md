@@ -10,6 +10,7 @@
 |-----|-----------|--------|
 | [prd.md](./04-produto/prd.md) | Product Requirements Document | ✅ Atualizado |
 | [architecture.md](./04-produto/architecture.md) | Arquitetura técnica e diagramas | ✅ Atualizado |
+| [SYSTEM-MAP.md](./SYSTEM-MAP.md) | **Mapa completo do sistema** | 🆕 Novo |
 | [milestones.md](./04-produto/milestones.md) | Checklist por fase | ✅ Atualizado |
 | [qa-acceptance.md](./04-produto/qa-acceptance.md) | Testes e Definition of Done | ✅ |
 | [backlog.md](./04-produto/backlog.md) | ⭐ Melhorias pendentes | 🆕 Novo |
