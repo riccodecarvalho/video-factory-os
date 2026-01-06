@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -202,7 +202,7 @@ const VIDEO_FPS = [
     { value: "60", label: "60 fps (Suave)" },
 ];
 
-export default function AdminPresetsPage() {
+function AdminPresetsContent() {
     const searchParams = useSearchParams();
     const forcedType = searchParams.get("type"); // 'voice' ou 'video' vindo da URL
 
@@ -620,5 +620,20 @@ export default function AdminPresetsPage() {
                 />
             </div>
         </>
+    );
+}
+
+export default function AdminPresetsPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex-1 p-6">
+                <div className="animate-pulse space-y-4">
+                    <div className="h-8 bg-muted rounded w-1/4" />
+                    <div className="h-64 bg-muted rounded" />
+                </div>
+            </div>
+        }>
+            <AdminPresetsContent />
+        </Suspense>
     );
 }
