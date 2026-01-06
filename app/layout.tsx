@@ -23,7 +23,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="pt-BR">
+        <html lang="pt-BR" suppressHydrationWarning>
             <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans`}>
                 <div className="min-h-screen bg-background text-foreground">
                     {children}

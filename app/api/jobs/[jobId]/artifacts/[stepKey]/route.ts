@@ -9,10 +9,22 @@ export async function GET(
 ) {
     const { jobId, stepKey } = await params;
 
-    // Path to the artifact output file
-    const artifactPath = join(process.cwd(), "artifacts", jobId, stepKey, "output.txt");
+    // List of possible artifact files to look for
+    const possibleFiles = ["output.txt", "scenes.json", "output.json"];
 
-    if (!existsSync(artifactPath)) {
+    let artifactPath = "";
+    let found = false;
+
+    for (const file of possibleFiles) {
+        const path = join(process.cwd(), "artifacts", jobId, stepKey, file);
+        if (existsSync(path)) {
+            artifactPath = path;
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
         return NextResponse.json(
             { error: "Artifact not found" },
             { status: 404 }

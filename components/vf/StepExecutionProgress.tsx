@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Loader2, XCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,8 @@ export function StepExecutionProgress({
 }: StepExecutionProgressProps) {
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
+    const router = useRouter();
+
     // Timer effect
     useEffect(() => {
         if (!isExecuting) {
@@ -48,8 +51,16 @@ export function StepExecutionProgress({
             setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
         }, 1000);
 
-        return () => clearInterval(interval);
-    }, [isExecuting]);
+        // Auto-refresh every 3s to keep UI in sync
+        const refreshInterval = setInterval(() => {
+            router.refresh();
+        }, 3000);
+
+        return () => {
+            clearInterval(interval);
+            clearInterval(refreshInterval);
+        };
+    }, [isExecuting, router]);
 
     // Calculate progress percentage (capped at 95% until complete)
     const progressPercent = Math.min(

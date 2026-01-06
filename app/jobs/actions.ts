@@ -344,3 +344,22 @@ export async function deleteJob(jobId: string) {
     revalidatePath("/jobs");
     return { success: true };
 }
+
+export async function updateJobInput(jobId: string, inputUpdates: Record<string, unknown>) {
+    const db = getDb();
+
+    const [job] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, jobId));
+    if (!job) throw new Error("Job not found");
+
+    const currentInput = JSON.parse(job.input || "{}");
+    const updatedInput = { ...currentInput, ...inputUpdates };
+
+    await db.update(schema.jobs).set({
+        input: JSON.stringify(updatedInput),
+        updatedAt: new Date().toISOString(),
+    }).where(eq(schema.jobs.id, jobId));
+
+    revalidatePath("/jobs");
+    revalidatePath(`/wizard/${jobId}`);
+    return { success: true };
+}

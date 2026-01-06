@@ -18,9 +18,19 @@ import {
     STEP_NAMES,
     parseAIOutputMetadata,
     extractMainContent,
+    StepConfigurator,
 } from "@/components/vf";
 import { ArrowLeft, Wand2, Play, RotateCcw, CheckCircle, RefreshCw, Home } from "lucide-react";
-import { getJobById, getJobSteps, getJobArtifacts, continueWizard, startJob, retryFromStep, retryWithInstruction } from "@/app/jobs/actions";
+import {
+    getJobById,
+    getJobSteps,
+    getJobArtifacts,
+    continueWizard,
+    startJob,
+    retryFromStep,
+    retryWithInstruction,
+    updateJobInput
+} from "@/app/jobs/actions";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -318,6 +328,19 @@ export default async function WizardFlowPage({ params }: { params: { jobId: stri
                                             <p className="text-sm text-muted-foreground">
                                                 Clique para executar este step e gerar o conteúdo.
                                             </p>
+
+                                            {/* Configuration UI for steps that need it */}
+                                            <div className="my-4">
+                                                <StepConfigurator
+                                                    stepKey={currentStep.stepKey}
+                                                    currentInput={input}
+                                                    onSave={async (newConfig) => {
+                                                        "use server";
+                                                        await updateJobInput(params.jobId, newConfig);
+                                                    }}
+                                                />
+                                            </div>
+
                                             <form action={handleContinue}>
                                                 <Button type="submit" className="w-full gap-2">
                                                     <Play className="h-4 w-4" />

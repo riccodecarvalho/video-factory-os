@@ -11,14 +11,17 @@ export { UsedBySection } from './UsedBySection';
 export { StepPreview } from './StepPreview';
 
 // Wizard Redesign Components (v2.0)
+export { StepConfigurator } from './StepConfigurator';
+export { WizardStepper } from './WizardStepper';
 export {
-    WizardStepper,
     DEFAULT_WIZARD_PHASES,
     getPhaseStatus,
     getCurrentPhase,
     type WizardPhase,
     type WizardStep,
-} from './WizardStepper';
+    STEP_NAMES,
+    extractStepSummary,
+} from './wizard-constants';
 export { StepExecutionProgress, StepExecutionToast } from './StepExecutionProgress';
 export {
     GeneratedResultCard,
@@ -28,11 +31,7 @@ export {
 export { IterateWithAI } from './IterateWithAI';
 export { WizardFooter } from './WizardFooter';
 export { WizardApprovalActions } from './WizardApprovalActions';
-export {
-    PreviousStepsContext,
-    extractStepSummary,
-    STEP_NAMES,
-} from './PreviousStepsContext';
+export { PreviousStepsContext } from './PreviousStepsContext';
 
 // Content Components (v2.0)
 export { TagChips } from './TagChips';

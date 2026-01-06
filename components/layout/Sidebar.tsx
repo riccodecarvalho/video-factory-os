@@ -34,28 +34,31 @@ const navigation = [
         icon: Play,
         children: [
             { name: "Todos os Jobs", href: "/jobs" },
-            { name: "Nova Produção", href: "/jobs/new" },
-            { name: "Wizard", href: "/wizard" },
+            { name: "Produção (Automático)", href: "/jobs/new" },
+            { name: "Produção (Wizard)", href: "/wizard" },
         ],
     },
 ];
 
-// Projects section - where you CONFIGURE per project
+// Projects section - Hub central de configuração por projeto (ADR-010)
 const projectsNavigation = [
     { name: "Projects", href: "/admin/projects", icon: Building2, description: "Hub de configuração" },
-    { name: "Execution Map", href: "/admin/execution-map", icon: Settings2, description: "Visualizar bindings" },
-    { name: "Timeline Test", href: "/admin/timeline-test", icon: Play, description: "Testar Timeline DSL" },
 ];
 
-// Library section - where you CREATE global items
-const libraryNavigation = [
-    { name: "Prompts", href: "/admin/prompts", icon: FileText, description: "Templates de IA" },
-    { name: "Vozes", href: "/admin/presets?type=voice", icon: Mic, description: "Presets de voz" },
-    { name: "Vídeo", href: "/admin/presets?type=video", icon: Video, description: "Presets de vídeo" },
-    { name: "Recipes", href: "/admin/recipes", icon: ChefHat, description: "Pipelines" },
-    { name: "Validators", href: "/admin/validators", icon: ShieldCheck, description: "Regras" },
+// Configurações Globais - itens comuns a todos os projetos
+// Configurações Globais - itens comuns a todos os projetos
+const configNavigation = [
+    { name: "Integrações", href: "/admin/providers", icon: Server, description: "IA e Voz" },
+    { name: "Vozes Disponíveis", href: "/admin/presets?type=voice", icon: Mic, description: "Presets de Voz" },
+    { name: "Resoluções", href: "/admin/presets?type=video", icon: Video, description: "Presets de Vídeo" },
+    { name: "ImageFX", href: "/admin/imagefx-config", icon: Settings, description: "Cookies Google" },
+];
+
+// Avançado - configuração de pipelines e templates
+const advancedNavigation = [
+    { name: "Fluxos de Produção", href: "/admin/recipes", icon: ChefHat, description: "Pipelines" },
+    { name: "Prompts Globais", href: "/admin/prompts", icon: FileText, description: "Templates de IA" },
     { name: "Knowledge Base", href: "/admin/knowledge-base", icon: BookOpen, description: "Documentos" },
-    { name: "Providers", href: "/admin/providers", icon: Server, description: "LLM e TTS" },
 ];
 
 interface SidebarProps {
@@ -177,27 +180,26 @@ export function Sidebar({ className }: SidebarProps) {
                     </div>
                 </div>
 
-                {/* Library Section - CADASTRO */}
+                {/* Configurações Globais */}
                 <div className="mt-6">
-                    <SectionHeader icon={Library} label="Biblioteca" />
+                    <SectionHeader icon={Settings} label="Configurações" />
                     <div className="space-y-1">
-                        {libraryNavigation.map((item) => (
+                        {configNavigation.map((item) => (
+                            <NavItem key={item.name} item={item} />
+                        ))}
+                    </div>
+                </div>
+
+                {/* Avançado */}
+                <div className="mt-6">
+                    <SectionHeader icon={Library} label="Avançado" />
+                    <div className="space-y-1">
+                        {advancedNavigation.map((item) => (
                             <NavItem key={item.name} item={item} />
                         ))}
                     </div>
                 </div>
             </nav>
-
-            {/* Footer */}
-            <div className="p-3 border-t">
-                <Link
-                    href="/settings"
-                    className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                >
-                    <Settings className="w-4 h-4" />
-                    Configurações
-                </Link>
-            </div>
         </aside>
     );
 }

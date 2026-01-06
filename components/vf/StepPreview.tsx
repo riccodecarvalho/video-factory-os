@@ -37,6 +37,7 @@ interface ArtifactContent {
     charCount: number;
     estimatedDuration: number; // in minutes
     isJson: boolean;
+    parsedJson?: any;
     summary?: Record<string, string>;
 }
 
@@ -78,11 +79,13 @@ function parseArtifactContent(text: string): ArtifactContent {
 
     let isJson = false;
     let summary: Record<string, string> | undefined;
+    let parsedJson: any = null;
 
     try {
         // Try to parse as JSON
         const parsed = JSON.parse(text);
         isJson = true;
+        parsedJson = parsed;
         summary = extractJsonSummary(parsed);
     } catch {
         // Not JSON, try to extract from markdown-style JSON blocks
@@ -91,6 +94,7 @@ function parseArtifactContent(text: string): ArtifactContent {
             try {
                 const parsed = JSON.parse(jsonMatch[1]);
                 isJson = true;
+                parsedJson = parsed;
                 summary = extractJsonSummary(parsed);
             } catch {
                 // Ignore
@@ -98,7 +102,7 @@ function parseArtifactContent(text: string): ArtifactContent {
         }
     }
 
-    return { text, wordCount, charCount, estimatedDuration, isJson, summary };
+    return { text, wordCount, charCount, estimatedDuration, isJson, summary, parsedJson };
 }
 
 export function StepPreview({ jobId, stepKey, status, className }: StepPreviewProps) {
@@ -110,25 +114,25 @@ export function StepPreview({ jobId, stepKey, status, className }: StepPreviewPr
 
     // Only load when expanded and status is success
     useEffect(() => {
+        async function loadArtifact() {
+            setLoading(true);
+            try {
+                const res = await fetch(`/api/jobs/${jobId}/artifacts/${stepKey}`);
+                if (res.ok) {
+                    const text = await res.text();
+                    setContent(parseArtifactContent(text));
+                }
+            } catch (e) {
+                console.error("Failed to load artifact:", e);
+            } finally {
+                setLoading(false);
+            }
+        }
+
         if (isExpanded && status === "success" && !content) {
             loadArtifact();
         }
-    }, [isExpanded, status]);
-
-    async function loadArtifact() {
-        setLoading(true);
-        try {
-            const res = await fetch(`/api/jobs/${jobId}/artifacts/${stepKey}`);
-            if (res.ok) {
-                const text = await res.text();
-                setContent(parseArtifactContent(text));
-            }
-        } catch (e) {
-            console.error("Failed to load artifact:", e);
-        } finally {
-            setLoading(false);
-        }
-    }
+    }, [isExpanded, status, content, jobId, stepKey]);
 
     async function handleCopy() {
         if (content?.text) {
@@ -175,10 +179,10 @@ export function StepPreview({ jobId, stepKey, status, className }: StepPreviewPr
                                 <div className="flex items-center justify-between px-2 py-1 border-b bg-muted/50">
                                     <TabsList className="h-7">
                                         <TabsTrigger value="preview" className="text-xs h-6">
-                                            Preview
+                                            Visual
                                         </TabsTrigger>
                                         <TabsTrigger value="raw" className="text-xs h-6">
-                                            Raw
+                                            Código (JSON)
                                         </TabsTrigger>
                                     </TabsList>
                                     <div className="flex items-center gap-1">
@@ -187,6 +191,7 @@ export function StepPreview({ jobId, stepKey, status, className }: StepPreviewPr
                                             size="sm"
                                             onClick={handleCopy}
                                             className="h-6 px-2"
+                                            title="Copiar conteúdo"
                                         >
                                             {copied ? (
                                                 <Check className="w-3 h-3 text-green-500" />
@@ -199,40 +204,28 @@ export function StepPreview({ jobId, stepKey, status, className }: StepPreviewPr
                                             size="sm"
                                             onClick={() => setIsFullscreen(true)}
                                             className="h-6 px-2"
+                                            title="Tela cheia"
                                         >
                                             <Maximize2 className="w-3 h-3" />
                                         </Button>
                                     </div>
                                 </div>
 
-                                <TabsContent value="preview" className="p-3 m-0">
-                                    {/* Summary from JSON */}
-                                    {content.summary && Object.keys(content.summary).length > 0 && (
-                                        <div className="space-y-1 mb-3">
-                                            {Object.entries(content.summary).map(([key, value]) => (
-                                                <div key={key} className="flex gap-2 text-xs">
-                                                    <span className="font-medium text-muted-foreground">
-                                                        {key}:
-                                                    </span>
-                                                    <span className="truncate">{value}</span>
-                                                </div>
-                                            ))}
+                                <TabsContent value="preview" className="p-0 m-0">
+                                    {content.isJson ? (
+                                        <SmartJsonPreview content={content.parsedJson} stepKey={stepKey} />
+                                    ) : (
+                                        <div className="p-4 text-sm whitespace-pre-wrap">
+                                            {content.text.substring(0, 1000)}
+                                            {content.text.length > 1000 && "..."}
                                         </div>
-                                    )}
-
-                                    {/* Text preview (first 500 chars) */}
-                                    {!content.summary && (
-                                        <p className="text-xs text-muted-foreground whitespace-pre-wrap line-clamp-6">
-                                            {content.text.substring(0, 500)}
-                                            {content.text.length > 500 && "..."}
-                                        </p>
                                     )}
                                 </TabsContent>
 
                                 <TabsContent value="raw" className="m-0 overflow-hidden">
-                                    <pre className="p-3 text-xs overflow-x-auto overflow-y-auto max-h-48 bg-background/50 break-all whitespace-pre-wrap">
-                                        {content.text.substring(0, 2000)}
-                                        {content.text.length > 2000 && "\n\n... (truncado)"}
+                                    <pre className="p-3 text-xs overflow-x-auto overflow-y-auto max-h-64 bg-background/50 break-all whitespace-pre-wrap font-mono">
+                                        {content.text.substring(0, 5000)}
+                                        {content.text.length > 5000 && "\n\n... (truncado)"}
                                     </pre>
                                 </TabsContent>
                             </Tabs>
@@ -250,11 +243,6 @@ export function StepPreview({ jobId, stepKey, status, className }: StepPreviewPr
                                 <Badge variant="outline" className="h-5 text-[10px]">
                                     {(content.charCount / 1024).toFixed(1)} KB
                                 </Badge>
-                                {content.isJson && (
-                                    <Badge variant="secondary" className="h-5 text-[10px]">
-                                        JSON
-                                    </Badge>
-                                )}
                             </div>
                         </>
                     ) : (
@@ -267,29 +255,182 @@ export function StepPreview({ jobId, stepKey, status, className }: StepPreviewPr
 
             {/* Fullscreen Dialog */}
             <Dialog open={isFullscreen} onOpenChange={setIsFullscreen}>
-                <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <FileText className="w-4 h-4" />
                             {stepKey} - Resultado Completo
                         </DialogTitle>
                     </DialogHeader>
-                    <div className="overflow-auto max-h-[60vh]">
-                        <pre className="text-xs whitespace-pre-wrap p-4 bg-muted rounded-lg">
-                            {content?.text}
-                        </pre>
+                    <div className="flex-1 overflow-auto bg-muted/30 p-4 rounded-lg">
+                        {content?.isJson ? (
+                            <SmartJsonPreview content={content.parsedJson} stepKey={stepKey} />
+                        ) : (
+                            <pre className="text-sm whitespace-pre-wrap font-mono">
+                                {content?.text}
+                            </pre>
+                        )}
                     </div>
-                    {content && (
-                        <div className="flex items-center gap-3 pt-2 border-t text-xs text-muted-foreground">
-                            <span>{content.wordCount.toLocaleString()} palavras</span>
-                            <span>•</span>
-                            <span>~{content.estimatedDuration} min de áudio</span>
-                            <span>•</span>
-                            <span>{(content.charCount / 1024).toFixed(1)} KB</span>
-                        </div>
-                    )}
                 </DialogContent>
             </Dialog>
+        </div>
+    );
+}
+
+function SmartJsonPreview({ content, stepKey }: { content: any; stepKey: string }) {
+    if (!content) return null;
+
+    // View: IDEACAO
+    if (content.ideacao_completa && content.ideias) {
+        return (
+            <div className="space-y-6 p-4">
+                <div className="bg-primary/5 border border-primary/10 rounded-lg p-4">
+                    <div className="text-xs font-bold text-primary mb-1 uppercase tracking-wider">Tema Original</div>
+                    <div className="font-medium text-lg">{content.ideacao_completa.tema_original}</div>
+                </div>
+
+                <div className="space-y-4">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                        <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs">
+                            {content.ideias.length}
+                        </span>
+                        Ideias Geradas
+                    </h3>
+                    <div className="grid gap-4 md:grid-cols-1">
+                        {content.ideias.map((idea: any, i: number) => (
+                            <div key={i} className="group border rounded-lg p-4 hover:border-primary/50 transition-colors bg-card hover:shadow-sm">
+                                <div className="flex justify-between items-start mb-2">
+                                    <h4 className="font-bold text-base">{idea.titulo}</h4>
+                                    <Badge variant="secondary" className="text-[10px]">{idea.estilo || "Geral"}</Badge>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="text-sm text-muted-foreground border-l-2 pl-3 italic">
+                                        &quot;{idea.hook}&quot;
+                                    </div>
+                                    <p className="text-sm leading-relaxed text-foreground/90">
+                                        {idea.sinopse || idea.resumo}
+                                    </p>
+
+                                    {idea.potencial_viral && (
+                                        <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded w-fit">
+                                            <span className="font-bold">Potencial Viral:</span> {idea.potencial_viral}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // View: ROTEIRO (Script)
+    if (content.roteiro || (Array.isArray(content) && content[0]?.cena)) {
+        const scenes = content.roteiro || content;
+        if (Array.isArray(scenes)) {
+            return (
+                <div className="space-y-6 p-4 font-mono text-sm">
+                    {scenes.map((scene: any, i: number) => (
+                        <div key={i} className="border-b pb-4 last:border-0">
+                            <div className="font-bold text-muted-foreground mb-2">CENA {scene.cena || i + 1}</div>
+                            <div className="space-y-2 pl-4">
+                                <div className="text-primary font-semibold uppercase">{scene.visual || scene.imagem}</div>
+                                <div className="text-foreground pl-4 border-l-2 border-primary/20 bg-muted/10 p-2 rounded">
+                                    <span className="font-bold text-xs uppercase text-muted-foreground block mb-1">Narração</span>
+                                    {scene.narracao || scene.texto}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+    }
+
+    // View: PROMPTS CENAS (Scene Prompts)
+    if (content.scenes && Array.isArray(content.scenes)) {
+        return (
+            <div className="space-y-6 p-4">
+                <div className="flex items-center justify-between mb-4">
+                    <Badge variant="outline">
+                        {content.scenes_count} Cenas
+                    </Badge>
+                    <Badge variant={content.prompts_generated === content.scenes_count ? "default" : "secondary"}>
+                        {content.prompts_generated} Prompts Gerados
+                    </Badge>
+                </div>
+
+                <div className="grid gap-6">
+                    {content.scenes.map((scene: any, i: number) => (
+                        <div key={i} className="border rounded-lg p-4 bg-card hover:border-primary/50 transition-colors">
+                            <div className="flex justify-between items-start mb-3 border-b pb-2">
+                                <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="h-5">Cena {scene.scene_number}</Badge>
+                                    <span className="text-xs text-muted-foreground font-mono">
+                                        {scene.timing?.start} - {scene.timing?.end} ({scene.timing?.duration_seconds}s)
+                                    </span>
+                                </div>
+                                <Badge variant="secondary" className="text-[10px] uppercase">
+                                    {scene.position}
+                                </Badge>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-4">
+                                {/* Texto Principal */}
+                                <div className="space-y-2">
+                                    <div className="text-xs font-bold text-muted-foreground uppercase">Texto</div>
+                                    <p className="text-sm bg-muted/20 p-2 rounded border-l-2 border-muted-foreground/30 italic">
+                                        &quot;{scene.main_text}&quot;
+                                    </p>
+                                </div>
+
+                                {/* Prompt de Imagem */}
+                                <div className="space-y-2">
+                                    <div className="text-xs font-bold text-primary uppercase flex items-center gap-1">
+                                        Prompt de Imagem
+                                        {scene.image_prompt ? <Check className="w-3 h-3 text-green-500" /> : null}
+                                    </div>
+                                    {scene.image_prompt ? (
+                                        <div className="text-sm bg-primary/5 p-2 rounded border-l-2 border-primary/50 font-medium">
+                                            {scene.image_prompt}
+                                        </div>
+                                    ) : (
+                                        <div className="text-sm text-muted-foreground italic bg-muted/10 p-2 rounded">
+                                            Aguardando geração...
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // Default: Pretty JSON
+    return (
+        <div className="p-4">
+            <div className="space-y-2">
+                {Object.entries(content).map(([key, value]) => {
+                    if (typeof value === 'object' && value !== null) {
+                        return (
+                            <div key={key} className="border rounded p-3">
+                                <div className="font-bold text-xs uppercase text-muted-foreground mb-2">{key}</div>
+                                <pre className="text-xs overflow-x-auto">{JSON.stringify(value, null, 2)}</pre>
+                            </div>
+                        );
+                    }
+                    return (
+                        <div key={key} className="flex flex-col gap-1 border-b py-2 last:border-0">
+                            <span className="font-bold text-xs text-muted-foreground uppercase">{key}</span>
+                            <span className="text-sm">{String(value)}</span>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 }
