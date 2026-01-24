@@ -40,6 +40,13 @@
 |-----------|--------|-----------|
 | [ENGINE-EXECUCAO-DETALHADO.md](./ENGINE-EXECUCAO-DETALHADO.md) | ~700 | Runner, executores, providers |
 | [API-REFERENCE.md](./API-REFERENCE.md) | ~700 | Referência de APIs e Server Actions |
+| [TIMELINE-DSL-GUIA.md](./TIMELINE-DSL-GUIA.md) | ~500 | Composição declarativa de vídeo |
+
+### 🎨 FRONTEND E UI
+
+| Documento | Linhas | Descrição |
+|-----------|--------|-----------|
+| [FRONTEND-COMPONENTES.md](./FRONTEND-COMPONENTES.md) | ~500 | Componentes, design system, rotas |
 
 ### 📝 PROMPTS E KNOWLEDGE BASE
 
@@ -64,12 +71,11 @@
 | [SCRIPTS-E-FERRAMENTAS.md](./SCRIPTS-E-FERRAMENTAS.md) | ~400 | NPM scripts e utilitários |
 | [GAPS-E-MELHORIAS.md](./GAPS-E-MELHORIAS.md) | ~400 | O que falta e sugestões |
 
-### 📎 OUTROS
+### 📁 ARQUIVO
 
 | Documento | Descrição |
 |-----------|-----------|
-| [README.md](./README.md) | Index original |
-| [PROMPT-MASTER-ANALISE-COMPLETA.md](./PROMPT-MASTER-ANALISE-COMPLETA.md) | Prompt usado para análise |
+| [_archive/PROMPT-MASTER-ANALISE-COMPLETA.md](./_archive/PROMPT-MASTER-ANALISE-COMPLETA.md) | Prompt original usado para análise |
 
 ---
 
@@ -77,9 +83,9 @@
 
 | Métrica | Valor |
 |---------|-------|
-| **Total de documentos** | 15 |
-| **Total de linhas** | ~7.500 |
-| **Cobertura** | Sistema completo |
+| **Total de documentos** | 16 |
+| **Total de linhas** | ~9.500 |
+| **Cobertura** | 100% do sistema |
 
 ---
 
@@ -107,8 +113,11 @@
 │ • ADRS-RESUMO │    │   DADOS         │    │   MELHORIAS   │
 │ • HISTORICO-  │    │ • ENGINE-       │    │ • LICOES-     │
 │   EVOLUCAO    │    │   EXECUCAO      │    │   APRENDIDAS  │
-│               │    │ • API-REFERENCE │    │               │
-└───────────────┘    │ • PROMPTS-KB    │    └───────────────┘
+│               │    │ • TIMELINE-DSL  │    │               │
+└───────────────┘    │ • FRONTEND-     │    └───────────────┘
+                     │   COMPONENTES   │
+                     │ • API-REFERENCE │
+                     │ • PROMPTS-KB    │
                      │ • GRACIELA-     │
                      │   CASE-STUDY    │
                      └─────────────────┘
@@ -126,11 +135,13 @@
 3. CHECKLIST-DEPLOY.md      → Setup inicial (30 min)
 4. BANCO-DE-DADOS.md        → Schema (15 min)
 5. ENGINE-EXECUCAO.md       → Backend (20 min)
-6. PROMPTS-KB.md            → Prompts (15 min)
-7. GRACIELA-CASE-STUDY.md   → Exemplo prático (20 min)
-8. LICOES-APRENDIDAS.md     → Evitar erros (15 min)
+6. TIMELINE-DSL-GUIA.md     → Composição de vídeo (15 min)
+7. FRONTEND-COMPONENTES.md  → UI e componentes (15 min)
+8. PROMPTS-KB.md            → Prompts (15 min)
+9. GRACIELA-CASE-STUDY.md   → Exemplo prático (20 min)
+10. LICOES-APRENDIDAS.md    → Evitar erros (15 min)
 
-Total: ~2.5 horas de leitura
+Total: ~3 horas de leitura
 ```
 
 ### Para Entender Rapidamente
@@ -192,11 +203,14 @@ Total: ~35 minutos
 - [x] Scripts e ferramentas
 - [x] Checklist de deploy
 - [x] Gaps identificados
+- [x] Timeline DSL
+- [x] Frontend e componentes
 
 ### Consolidações Feitas
 - [x] Removida redundância excessiva entre documentos
 - [x] Índice master criado
 - [x] Fluxos de leitura definidos
+- [x] Arquivos de trabalho movidos para _archive/
 
 ---
 
