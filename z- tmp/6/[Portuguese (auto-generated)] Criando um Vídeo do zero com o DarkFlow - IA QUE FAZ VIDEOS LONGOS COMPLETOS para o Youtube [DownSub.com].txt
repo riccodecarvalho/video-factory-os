@@ -1,0 +1,101 @@
+Então vamos criar um vídeo aqui eh do
+zero no Darkflow para vocês verem como
+que é rápido e bem prático, tá?
+Eh, então fez o login, vem aqui em novo
+vídeo. Vamos criar um vídeo sem modelo.
+Então, tô criando um canal de Fórmula 1.
+Então, vou colocar aqui
+um vídeo do Aton Sena, vamos colocar em
+português mesmo. Um vídeo curto só pra
+gente fazer um teste aqui.
+É, aí tem essas opções aqui
+degação, tá? É, vamos colocar a voz do
+Valentino.
+Vamos aqui em mídia e visual. Vamos
+colocar automático. Aqui em manual eu
+posso fazer o plug das minhas imagens ou
+eu posso vir aqui e gerar com meus
+prompts personalizados, tá? De geração
+de imagem. Aí nessa opção aqui, eu gero
+uma imagem por vez.
+Nessa opção aqui em lote, eu posso colar
+vários promps separados por uma ali em
+branco e ele vai identificar ali e
+quantos promps quantas imagens são e aí
+ele vai gerando automático, tá? Eh, eu
+gosto de escolher essa opção aqui porque
+ela já vai gerar em imagens em altíssima
+qualidade e de acordo com o roteio.
+Beleza? Então, vou colocar aqui seis
+imagens.
+Se eu marcar essa opção aqui de repetir
+imagens, eh, quando chegar na última
+imagem, ele vai ficar repetindo até o
+final. Eh, se eu não marcar, eh, as
+imagens vão ficar proporcionalmente ali
+no tamanho do vídeo. Então, o vídeo de
+12 minutos, seis imagens vão ficar por
+cerca de 2 minutos ali cada. E é o que é
+mais interessante para mim aqui agora.
+Então, vou deixar assim. Posso colocar
+uma música de fundo, tá? Só subir o
+arquivo MP3.
+Eh, posso ativar a legenda.
+e posso ativar o efeito de zoom. Vou
+colocar o efeito de zoom.
+Então, já vou aqui clicar em concluído,
+vou arrastar para gerar roteiro. E
+quando você arrasta aqui, ele já começa
+o processo automático, tá? E esse botão
+aqui, auto vídeo, se ele tiver marcado,
+quando o card chegar aqui, ele já vai
+gerar o vídeo automático e aí ele já vai
+vir aqui para concluída e é só apertar
+em download, tá? Se ele tiver
+desmarcado,
+o card vai parar aqui e você tem que
+apertar em gerar vídeo. Beleza?
+Vamos deixar aqui marcado. Ele já gerou
+o roteiro ali bem rápido e agora ele tá
+gerando a narração.
+Daqui a pouco já vai tá pronta a
+narração. Não vou fazer nenhum corte
+aqui, só para ficar bem transparente
+mesmo.
+Ó, já chegou a narração. O card já veio
+aqui para gerar vídeo
+e daqui a pouco ele vai começar a
+renderização
+automática. Aí,
+então, já tá renderizando o vídeo aqui.
+Quando ficar pronto, ele vai automático
+aqui para concluído.
+aqui.
+Beleza, então já foi.
+Aí quando você abre o card aqui, você
+pode ver as imagens que foram geradas.
+Caraca, velho.
+Muito bom.
+E apertar em download.
+Vai começar o download aqui.
+Já tá pronto aí, ó. 5 minutos.
+Jogou o vídeo.
+>> O ano era 1991,
+o grande prêmio do Brasil em Interlagos.
+Era a corrida que Atiron Sena tanto
+sonhava em vencer em casa.
+>> 12 minutos. Qualquer garoto apaixonado
+por carros. Aton, nascido em São Paulo,
+sempre teve a velocidade correndo nas
+veias. Kart quebrava, em que a sorte
+pare pilotar. Foram sobre construir o
+caráter de um ao redor do mundo. Além
+disso,
+>> então é isso. Eh, foi o exemplo aí. É o
+vídeo bem curto aqui, né? Assim,
+contando, teve a parte que eu tava
+mostrando ali como é que gera e tal. Eh,
+vocês viram que foi bem rápido aí entre
+gerar roteiro, gerar narração, gerar
+vídeo. São processos que estão muito
+rápidos aqui. E é isso.
