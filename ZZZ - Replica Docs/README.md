@@ -192,12 +192,18 @@ Se você criar documentação adicional, adicione aqui:
 
 ## 📊 Estatísticas da Documentação
 
-| Documento | Linhas | Seções | Diagramas |
+| Documento | Linhas | Seções | Descrição |
 |-----------|--------|--------|-----------|
-| REPLICATION-GUIDE.md | ~800 | 11 | 1 |
-| ARCHITECTURE-DIAGRAM.md | ~600 | 8 | 7 |
-| API-REFERENCE.md | ~700 | 6 | 0 |
-| **TOTAL** | **~2100** | **25** | **8** |
+| REPLICATION-GUIDE.md | ~800 | 11 | Guia master original |
+| ARCHITECTURE-DIAGRAM.md | ~600 | 8 | Diagramas visuais |
+| API-REFERENCE.md | ~700 | 6 | Referência de APIs |
+| **SISTEMA-COMPLETO.md** | ~700 | 10 | **Visão consolidada (2026-01-24)** |
+| **BANCO-DE-DADOS-DETALHADO.md** | ~600 | 6 | **Schema completo com exemplos** |
+| **ENGINE-EXECUCAO-DETALHADO.md** | ~700 | 6 | **Fluxos de execução** |
+| **CHECKLIST-DEPLOY.md** | ~350 | 5 | **Passo a passo para deploy** |
+| **SCRIPTS-E-FERRAMENTAS.md** | ~400 | 5 | **NPM scripts e utilitários** |
+| **GAPS-E-MELHORIAS.md** | ~400 | 5 | **O que falta e sugestões** |
+| **TOTAL** | **~5250** | **62** | - |
 
 ---
 
